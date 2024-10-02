@@ -1,0 +1,1 @@
+# Nie zapomnij wpisać sobie godzin ktore wyrobiłeś
