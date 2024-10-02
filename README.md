@@ -1,2 +1,4 @@
 # Kronikarz
-Project for 5semester
+Project for 5 semester of compiuter science 
+
+
