@@ -1,0 +1,23 @@
+.map-container {
+  flex: 1 1 0%;
+  overflow: auto;
+  background-color: orange;
+}
+
+.map {
+  background-color: white;
+  width: var(--map-width);
+  height: var(--map-height);
+  scale: var(--map-scale);
+  margin: calc(var(--map-height) * (var(--map-scale) - 1) / 2) calc(var(--map-width) * (var(--map-scale) - 1) / 2);
+  transform-origin: center;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: 40px 40px;
+  background-position: calc(50% - 20px) calc(50% - 20px);
+  background-image:
+    linear-gradient(to right, grey 1px, transparent 1px),
+    linear-gradient(to bottom, grey 1px, transparent 1px);
+}
