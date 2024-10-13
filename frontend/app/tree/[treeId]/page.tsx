@@ -20,6 +20,7 @@ export default function Tree({ params }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const scaleStep = 0.05;
   const scaleMin = 0.4;
+  const scaleMax = 1.5;
   // console.log('rerender')
   console.log(scale)
 
@@ -57,12 +58,25 @@ export default function Tree({ params }: Props) {
       // Increase size of map if needed
       const positionX = Math.abs(position.x);
       const positionY = Math.abs(position.y)
-      if (mapSize.width < positionX || mapSize.height < positionY) {
-        setMapSize({
-          width: Math.max(mapSize.width, positionX),
-          height: Math.max(mapSize.height, positionY)
-        })
+      if (mapSize.width > positionX && mapSize.height > positionY) {
+        return
       }
+
+      const newMapSize = {
+        width: Math.max(mapSize.width, positionX),
+        height: Math.max(mapSize.height, positionY)
+      };
+      
+      // Adjust scroll after container size has changed
+      const mapContainer = mapRef.current!.parentElement!;
+      const observer = new ResizeObserver(() => {
+        mapContainer.scrollTop += (newMapSize.height - mapSize.height) * scale;
+        mapContainer.scrollLeft += (newMapSize.width - mapSize.width) * scale;
+        observer.disconnect();
+      });
+      observer.observe(mapContainer);
+
+      setMapSize(newMapSize);
     }
 
     return (
