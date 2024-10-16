@@ -1,17 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@/components/ui/card";
+import { Position, TreePerson } from "@/lib/treeInterfaces";
 import { useRef, useState } from "react";
 import Draggable, { DraggableEventHandler } from "react-draggable";
-
-export interface Position {
-  x: number;
-  y: number
-}
 
 interface Props {
   scale: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  person: any;
+  person: TreePerson;
   onDrop: (p: Position) => void;
   onClick: () => void;
 }
@@ -43,9 +39,9 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
       bounds="parent"
     >
       <Card ref={cardRef} className="w-40 p-4 cursor-pointer absolute">
-        <img src={person.imageUrl} alt={person.names} className="m-auto aspect-square pointer-events-none"/>
+        <img src={person.imageUrl ?? "TODO"} alt={person.name ?? "Person image"} className="m-auto aspect-square pointer-events-none"/>
         <h4 className="text-base font-semibold tracking-tight">
-          {person.names} {person.surname}
+          {person.name} {person.surname}
         </h4>
         {(person.birthDate || person.deathDate) && <p className="leading-7">
           {person.birthDate ?? '?'} - {person.deathDate ?? '*'}

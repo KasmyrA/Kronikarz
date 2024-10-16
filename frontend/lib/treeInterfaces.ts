@@ -6,7 +6,7 @@ export interface Tree {
   name: string;
   people: TreePerson[];
   relationships: TreeRelationship[];
-  parenthood: Parenthood[];
+  parenthoods: Parenthood[];
 }
 
 export interface TreePerson {
@@ -16,10 +16,12 @@ export interface TreePerson {
   imageUrl: string | null;
   birthDate: string | null;
   deathDate: string | null;
-  position: {
-    x: number;
-    y: number;
-  };
+  position: Position;
+}
+
+export interface Position {
+  x: number;
+  y: number
 }
 
 export interface TreeRelationship {
