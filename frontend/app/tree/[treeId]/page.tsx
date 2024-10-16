@@ -5,6 +5,7 @@ import { PersonCard, Position } from './PersonCard';
 import { initialData } from './data';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
 import { PersonDataDrawer } from './PersonDataDrawer';
+import { TreePerson } from '@/lib/treeInterfaces';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -18,7 +19,7 @@ interface Props {
 
 export default function Tree({ params }: Props) {
   const [data, setData] = useState(initialData);
-  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
   const [mapSize, setMapSize] = useState({
     width: Math.max(...data.people.map(p => Math.abs(p.position.x))),
     height: Math.max(...data.people.map(p => Math.abs(p.position.y)))

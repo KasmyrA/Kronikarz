@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { TreePerson } from "@/lib/treeInterfaces";
 
 interface Props {
-  person: any;
+  person: TreePerson | null;
   closeDrawer: () => void;
 }
 
@@ -14,7 +15,7 @@ export function PersonDataDrawer({ person, closeDrawer }: Props) {
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>{person?.names} {person?.surname}</DrawerTitle>
+            <DrawerTitle>{person?.name} {person?.surname}</DrawerTitle>
             <DrawerDescription>
               {person?.birthDate ?? '?'} - {person?.deathDate ?? '*'}
             </DrawerDescription>
