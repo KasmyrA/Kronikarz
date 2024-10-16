@@ -46,8 +46,8 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
         <h4 className="text-base font-semibold tracking-tight">
           {person.names} {person.surname}
         </h4>
-        {person.birthDate && <p className="leading-7">
-          {person.birthDate} - {person.deathDate ?? '*'}
+        {(person.birthDate || person.deathDate) && <p className="leading-7">
+          {person.birthDate ?? '?'} - {person.deathDate ?? '*'}
         </p>}
       </Card>
     </Draggable>

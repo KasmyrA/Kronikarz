@@ -1,8 +1,13 @@
 "use client";
-import { CSSProperties, useEffect, useRef, useState } from 'react';
 import './page.css'
+import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard, Position } from './PersonCard';
 import { initialData } from './data';
+import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
+
+const scaleStep = 0.05;
+const scaleMin = 0.5;
+const scaleMax = 1.5;
 
 interface Props {
   params: {
@@ -12,42 +17,39 @@ interface Props {
 
 export default function Tree({ params }: Props) {
   const [data, setData] = useState(initialData);
-  const [scale, setScale] = useState(1);
   const [mapSize, setMapSize] = useState({
     width: Math.max(...data.people.map(p => Math.abs(p.position.x))),
     height: Math.max(...data.people.map(p => Math.abs(p.position.y)))
   });
+  const [scale, setScale] = useReducer((oldScale: number, getNewScale: (old: number) => number) => {
+    return limitValue(getNewScale(oldScale), scaleMin, scaleMax);
+  }, 1);
+  const oldScale = useRef(scale);
   const mapRef = useRef<HTMLDivElement>(null);
-  const scaleStep = 0.05;
-  const scaleMin = 0.4;
-  const scaleMax = 1.5;
-  // console.log('rerender')
-  console.log(scale)
 
-  const scrollToMiddle = (e: HTMLElement) => {
-    e.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-      inline: 'center'
-    });
-  }
-
+  // Runs after component has mounted
   useEffect(() => {
     scrollToMiddle(mapRef.current!);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleScroll = (e: any) => {
+    const mapContainer = mapRef.current!.parentElement!;
+    mapContainer.addEventListener('wheel', (e: any) => {
       e.preventDefault();
       setScale(scale => scale + scaleStep * Math.sign(e.wheelDeltaY))
-    }
-
-    const mapContainer = mapRef.current!.parentElement!;
-    mapContainer.addEventListener('wheel', handleScroll);
-
-    return () => {
-      mapContainer.removeEventListener('wheel', handleScroll);
-    }
+    });
   }, [])
+
+  // Runs when scale changes
+  useEffect(() => {
+    if (scale == oldScale.current) return;
+    const mapContainer = mapRef.current!.parentElement!;
+    onNextResize(mapContainer, () => {
+      mapContainer.scrollTop *= scale / oldScale.current;
+      mapContainer.scrollLeft *= scale / oldScale.current;
+      mapContainer.scrollTop += ((1 / oldScale.current) - (1 / scale)) * mapContainer.clientHeight * scale / 2;
+      mapContainer.scrollLeft += ((1 / oldScale.current) - (1 / scale)) * mapContainer.offsetWidth * scale / 2;
+      oldScale.current = scale;
+    });
+  }, [scale])
 
   const peopleCards = data.people.map((person) => {
     const handleClick = () => console.log('click');
@@ -69,12 +71,10 @@ export default function Tree({ params }: Props) {
       
       // Adjust scroll after container size has changed
       const mapContainer = mapRef.current!.parentElement!;
-      const observer = new ResizeObserver(() => {
+      onNextResize(mapContainer, () => {
         mapContainer.scrollTop += (newMapSize.height - mapSize.height) * scale;
         mapContainer.scrollLeft += (newMapSize.width - mapSize.width) * scale;
-        observer.disconnect();
       });
-      observer.observe(mapContainer);
 
       setMapSize(newMapSize);
     }
