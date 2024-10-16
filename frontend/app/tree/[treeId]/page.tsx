@@ -4,6 +4,7 @@ import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard, Position } from './PersonCard';
 import { initialData } from './data';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
+import { PersonDataDrawer } from './PersonDataDrawer';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -17,6 +18,7 @@ interface Props {
 
 export default function Tree({ params }: Props) {
   const [data, setData] = useState(initialData);
+  const [selectedPerson, setSelectedPerson] = useState<any>(null);
   const [mapSize, setMapSize] = useState({
     width: Math.max(...data.people.map(p => Math.abs(p.position.x))),
     height: Math.max(...data.people.map(p => Math.abs(p.position.y)))
@@ -52,7 +54,7 @@ export default function Tree({ params }: Props) {
   }, [scale])
 
   const peopleCards = data.people.map((person) => {
-    const handleClick = () => console.log('click');
+    const handleClick = () => setSelectedPerson(person);
     const handleDrop = (position: Position) => {
       person.position = position
       setData({...data})
@@ -97,10 +99,13 @@ export default function Tree({ params }: Props) {
   } as CSSProperties;
 
 	return (
-		<div className="map-container">
-			<div className="map" style={mapStyleVariables} ref={mapRef}>
-        {peopleCards}
+    <>
+      <div className="map-container">
+        <div className="map" style={mapStyleVariables} ref={mapRef}>
+          {peopleCards}
+        </div>
       </div>
-		</div>
+      <PersonDataDrawer closeDrawer={() => setSelectedPerson(null)} person={selectedPerson} />
+    </>
 	)
 }
