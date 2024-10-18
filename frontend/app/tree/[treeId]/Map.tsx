@@ -5,6 +5,9 @@ import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
 import { PersonDataDrawer } from './PersonDataDrawer';
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { createPerson } from '@/lib/personActions';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -46,7 +49,7 @@ export function Map({ tree, setTree }: Props) {
       mapContainer.scrollTop *= scale / oldScale.current;
       mapContainer.scrollLeft *= scale / oldScale.current;
       mapContainer.scrollTop += ((1 / oldScale.current) - (1 / scale)) * mapContainer.clientHeight * scale / 2;
-      mapContainer.scrollLeft += ((1 / oldScale.current) - (1 / scale)) * mapContainer.offsetWidth * scale / 2;
+      mapContainer.scrollLeft += ((1 / oldScale.current) - (1 / scale)) * mapContainer.clientWidth * scale / 2;
       oldScale.current = scale;
     });
   }, [scale])
@@ -90,6 +93,18 @@ export function Map({ tree, setTree }: Props) {
     )
   })
 
+  const addPerson = async () => {
+    const map = mapRef.current!;
+    const mapContainer = map.parentElement!;
+    const mapSize = map.getBoundingClientRect();
+    const newPerson = await createPerson({
+      x: (mapContainer.scrollLeft - (mapSize.width + mapContainer.clientWidth) / 2) / scale,
+      y: (mapContainer.scrollTop - (mapSize.height + mapContainer.clientHeight) / 2) / scale,
+    });
+    tree.people.push(newPerson);
+    setTree({...tree});
+  }
+
   const mapStyleVariables = {
     '--map-width': `calc(${mapSize.width * 2}px + 300vw)`,
     '--map-height': `calc(${mapSize.height * 2}px + 300vh)`,
@@ -102,6 +117,9 @@ export function Map({ tree, setTree }: Props) {
         <div className="map" style={mapStyleVariables} ref={mapRef}>
           {peopleCards}
         </div>
+        <Button onClick={addPerson} size="icon" className='absolute right-8 bottom-8'>
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
       <PersonDataDrawer closeDrawer={() => setSelectedPerson(null)} person={selectedPerson} />
     </>
