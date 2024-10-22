@@ -13,6 +13,7 @@ export interface TreePerson {
   id: number;
   name: string | null;
   surname: string | null;
+  sex: "F" | "M" | null;
   imageUrl: string | null;
   birthDate: string | null;
   deathDate: string | null;

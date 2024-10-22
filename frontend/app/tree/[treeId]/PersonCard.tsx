@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@/components/ui/card";
 import { Position, TreePerson } from "@/lib/treeInterfaces";
+import { User } from "lucide-react";
 import { useRef, useState } from "react";
 import Draggable, { DraggableEventHandler } from "react-draggable";
 
@@ -29,6 +30,21 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
     setIsDragged(false);
   }
 
+  const personImage = person.imageUrl ? 
+    <img src={person.imageUrl} alt="Person image" className="w-full h-full"/> :
+    <User className="w-full h-full" />;
+
+  const nameSurname = (person.name || person.surname) ? 
+    `${person.name ?? ''} ${person.surname ?? ''}` :
+    person.sex === 'F' ? 
+    'Nieznana' :
+    'Nieznany';
+
+  const birthDeathDate = (person.birthDate || person.deathDate) &&
+    <p className="leading-7 text-center">
+      {person.birthDate ?? '?'} - {person.deathDate ?? '*'}
+    </p>;
+  
   return (
     <Draggable
       onDrag={handleDrag}
@@ -38,14 +54,14 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
       scale={scale}
       bounds="parent"
     >
-      <Card ref={cardRef} className="w-40 p-4 cursor-pointer absolute">
-        <img src={person.imageUrl ?? "TODO"} alt={person.name ?? "Person image"} className="m-auto aspect-square pointer-events-none"/>
-        <h4 className="text-base font-semibold tracking-tight">
-          {person.name} {person.surname}
+      <Card ref={cardRef} className="w-60 p-4 cursor-pointer absolute">
+        <div className="w-48 h-48 m-auto pointer-events-none">
+          { personImage }
+        </div>
+        <h4 className="text-base font-semibold tracking-tight text-center">
+          { nameSurname }
         </h4>
-        {(person.birthDate || person.deathDate) && <p className="leading-7">
-          {person.birthDate ?? '?'} - {person.deathDate ?? '*'}
-        </p>}
+        { birthDeathDate }
       </Card>
     </Draggable>
   )
