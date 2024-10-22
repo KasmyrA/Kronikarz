@@ -98,8 +98,8 @@ export function Map({ tree, setTree }: Props) {
     const mapContainer = map.parentElement!;
     const mapSize = map.getBoundingClientRect();
     const newPerson = await createPerson({
-      x: (mapContainer.scrollLeft - (mapSize.width + mapContainer.clientWidth) / 2) / scale,
-      y: (mapContainer.scrollTop - (mapSize.height + mapContainer.clientHeight) / 2) / scale,
+      x: (mapContainer.scrollLeft + (mapContainer.clientWidth - mapSize.width) / 2) / scale,
+      y: (mapContainer.scrollTop + (mapContainer.clientHeight - mapSize.height) / 2) / scale,
     });
     tree.people.push(newPerson);
     setTree({...tree});
