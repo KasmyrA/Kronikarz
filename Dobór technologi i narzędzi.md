@@ -28,7 +28,7 @@ Do wyglądu aplikacji wybieramy Reakta
 
 # Testy przydatności
 
-Aplikacja którą tworzymy nie wymaga wysokiej wydajności. Wystarczy przeciętna, na którą pozwalają języki skryptowe. 
+Co najmiej jedna osoba, która nigdy nie tworzyła aplikacji. 
 
 # Wybór i przygotowanie środowiska pracy, w tym systemów wspomagajacych zarządzanie zespołem:
 
@@ -39,8 +39,7 @@ Zainicjowaliśmy środowisko na Github-ie i tam stworzyliśmy kolejno foldery ba
 + repozytorium plików
 	https://github.com/KasmyrA/Kronikarz
 + harmonogramowania
-	Nie potrzeba harmonogramu, gdy każdy pracuje maksymalnie według własnej siły. Jeśli się nie wyrobimy to znaczy tylko że wybraliśmy złe technologie. A powinniśmy skończyć dużo przed czasem
-
+	Nie potrzeba harmonogramu, gdy każdy pracuje maksymalnie według własnej siły i możliwości
 
 
 
