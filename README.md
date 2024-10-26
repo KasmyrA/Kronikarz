@@ -1,11 +1,11 @@
 # Kronikarz
-Project for 5 semester of compiuter science 
+Project for the 5th semester of Computer Science. 
 
-This project aims to create best experience with describing people and realations bettween them. To make familly tree, describe events and write biography in one app.
+The goal of this project is to create an application that will give our users the best experience in describing people and the relationships between them. The app will allow users to create family trees, describe events, and write biographies."
 
 # Polski
 
 Projekt na 5 semestr Informatyki
 
-Chcemy stworzyć najlepszą aplikace pozwalającą na oposywanie ludzi i ralcji między nimi. 
+Chcemy stworzyć najlepszą aplikacje pozwalającą na opisywanie ludzi oraz rodzinnych relacji między nimi. 
 
