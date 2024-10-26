@@ -1,1 +1,1 @@
-# Projekt na zaliczenie przedmiotu Inżynieria oprogramowania
+# Projekt na zaliczenie przedmiotu Inżynieria Oprogramowania
