@@ -27,10 +27,6 @@ export default function Tree({ params }: Props) {
   const oldScale = useRef(scale);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const startPosition = useRef({ x: 0, y: 0 });
-  const scrollPosition = useRef({ left: 0, top: 0 });
-
   // Runs after component has mounted
   useEffect(() => {
     scrollToMiddle(mapRef.current!);
@@ -54,23 +50,6 @@ export default function Tree({ params }: Props) {
       oldScale.current = scale;
     });
   }, [scale])
-
-  // Dragging map by mause
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    startPosition.current = { x:e.clientX, y:e.clientY };
-    const mapContainer = mapRef.current!.parentElement!;
-    scrollPosition.current = { left: mapContainer.scrollLeft, top: mapContainer.scrollTop };
-  };
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const mapContainer = mapRef.current!.parentElement!;
-    mapContainer.scrollLeft = scrollPosition.current.left - e.clientX + startPosition.current.x;
-    mapContainer.scrollTop = scrollPosition.current.top - e.clientY + startPosition.current.y;
-  };
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
 
   const peopleCards = data.people.map((person) => {
     const handleClick = () => console.log('click');
@@ -119,15 +98,7 @@ export default function Tree({ params }: Props) {
 
 	return (
 		<div className="map-container">
-			<div 
-      className="map" 
-      style={mapStyleVariables}
-      ref={mapRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => setIsDragging(false)}
-      >
+			<div className="map" style={mapStyleVariables} ref={mapRef}>
         {peopleCards}
       </div>
 		</div>
