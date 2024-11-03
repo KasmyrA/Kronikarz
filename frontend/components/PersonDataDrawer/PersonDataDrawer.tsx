@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { NamesTable } from "./NamesTable";
 import { SurnamesTable } from "./SurnamesTable";
 import { SexPicker } from "./SexPicker";
+import { BirthDeathPicker } from "./BirthDeathPicker";
 
 interface Props {
   person: TreePerson | null;
@@ -58,12 +59,17 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
   const [names, addName, updateName, deleteName] = useKeyedState(person.names);
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
   const [sex, setSex] = useState(person.sex)
+  const [birth, setBirth] = useState(person.birth)
+  const [death, setDeath] = useState(person.death)
 
   const handleSave = async () => {
     await updatePerson({
       ...person,
       names: names.map((n) => n.value),
-      surnames: surnames.map((s) => s.value)
+      surnames: surnames.map((s) => s.value),
+      sex,
+      birth,
+      death
     });
     closeDrawer();
   }
@@ -75,6 +81,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
           <SexPicker {...{sex, setSex}} />
+          <BirthDeathPicker {...{birth, death, setBirth, setDeath}} />
         </div>
       </ScrollArea>
 

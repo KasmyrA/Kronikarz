@@ -25,15 +25,15 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
       updateSurname(surname.key, { ...surname.value, surname: e.target.value });
     }
 
-    const handleUntillDateChange = (untill: string | null) => {
+    const handleUntillDateChange = (untill: string) => {
       updateSurname(surname.key, { ...surname.value, untill });
     }
 
     const handleDelete = () => deleteSurname(surname.key);
 
     const isFirst = i === 0;
-    if (isFirst && surname.value.untill !== null) {
-      handleUntillDateChange(null);
+    if (isFirst && surname.value.untill !== "") {
+      handleUntillDateChange("");
     }
 
     return (
@@ -81,7 +81,7 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
     )
   })
 
-  const handleAddNewSurname = () => addSurname({ surname: "", untill: null });
+  const handleAddNewSurname = () => addSurname({ surname: "", untill: "" });
 
   return (
     <>

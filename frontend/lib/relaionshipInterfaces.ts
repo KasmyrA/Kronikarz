@@ -7,7 +7,7 @@ export interface Relationship {
 
 export interface RelationshipStage {
   kind: RelationshipKind;
-  date: string | null;
+  date: string;
 }
 
 export type RelationshipKind = "unformal" | "engagement" | "marriage" | "separation" | "divorce";

@@ -1,5 +1,5 @@
-export function parseDate(date: string | null) {
-  const dateParts = date?.split(".") ?? [];
+export function parseDate(date: string) {
+  const dateParts = date.split(".") ?? [];
   return [
     dateParts[0] ?? "",
     dateParts[1] ?? "",
@@ -20,6 +20,5 @@ export function createDate(year: string, month: string, day: string) {
     }
   }
 
-  if (parts.length === 0) return null;
   return parts.join(".");
 }

@@ -13,8 +13,8 @@ export async function createPerson(position: Position): Promise<TreePerson> {
     image: null,
     description: "",
     sex: null,
-    birth: null,
-    death: null,
+    birth: { date: "", place: "" },
+    death: { date: "", place: "" },
     surnames: [],
     jobs: [],
     files: [],
@@ -68,8 +68,8 @@ export function personToTreePerson(p: PersonWithPosition): TreePerson {
     surname: p.surnames[0]?.surname ?? null,
     sex: p.sex,
     imageUrl: p.files[p.image ?? -1]?.url ?? null,
-    birthDate: p.birth?.day ?? null,
-    deathDate: p.death?.day ?? null,
+    birthDate: p.birth.date,
+    deathDate: p.death.date,
     position: p.position
   }
 }

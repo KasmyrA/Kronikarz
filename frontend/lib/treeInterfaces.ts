@@ -15,8 +15,8 @@ export interface TreePerson {
   surname: string | null;
   sex: "F" | "M" | null;
   imageUrl: string | null;
-  birthDate: string | null;
-  deathDate: string | null;
+  birthDate: string;
+  deathDate: string;
   position: Position;
 }
 

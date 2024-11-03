@@ -22,17 +22,17 @@ export function SexPicker({ sex, setSex }: Props) {
       <Table>
         <TableBody>
           <TableRow>
-          <TableCell>
-            <Button onClick={handleGenderButtonClick("F")} variant={sex === "F" ? "default" : "outline"} className="w-full">
-              ♀
-            </Button>
-          </TableCell>
-          <TableCell>
-            <Button onClick={handleGenderButtonClick("M")} variant={sex === "M" ? "default" : "outline"} className="w-full">
-              ♂
-            </Button>
-          </TableCell>
-        </TableRow>
+            <TableCell>
+              <Button onClick={handleGenderButtonClick("F")} variant={sex === "F" ? "default" : "outline"} className="w-full">
+                ♀
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button onClick={handleGenderButtonClick("M")} variant={sex === "M" ? "default" : "outline"} className="w-full">
+                ♂
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </>

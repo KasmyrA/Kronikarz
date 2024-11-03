@@ -4,28 +4,28 @@ export interface Person {
   image: number | null; // Index of an image in "files"
   description: string;
   sex: "F" | "M" | null;
-  birth: EventInLife | null;
-  death: EventInLife | null;
+  birth: EventInLife;
+  death: EventInLife;
   surnames: Surname[];
   jobs: Job[];
   files: FileInfo[]; // Additional files of any kind
 }
 
 export interface EventInLife {
-  day: string | null;
-  place: string | null;
+  date: string;
+  place: string;
 }
 
 export interface Surname {
   surname: string;
-  untill: string | null;
+  untill: string;
 }
 
 export interface Job {
   name: string;
-  place: string | null;
-  from: string | null;
-  untill: string | null;
+  place: string;
+  from: string;
+  untill: string;
 }
 
 export interface FileInfo {
