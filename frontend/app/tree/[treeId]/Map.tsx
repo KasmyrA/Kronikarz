@@ -3,11 +3,11 @@ import './Map.css'
 import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
-import { PersonDataDrawer } from './PersonDataDrawer';
+import { PersonDataDrawer } from '../../../components/PersonDataDrawer/PersonDataDrawer';
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { createPerson } from '@/lib/personActions';
+import { createPerson, getTreePerson } from '@/lib/personActions';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -105,6 +105,14 @@ export function Map({ tree, setTree }: Props) {
     setTree({...tree});
   }
 
+  const closePersonDrawer = async () => {
+    const { id } = selectedPerson!;
+    setSelectedPerson(null);
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
+    tree.people[updatedPersonIndex] = (await getTreePerson(id))!;
+    setTree({...tree});
+  }
+
   const mapStyleVariables = {
     '--map-width': `calc(${mapSize.width * 2}px + 300vw)`,
     '--map-height': `calc(${mapSize.height * 2}px + 300vh)`,
@@ -121,7 +129,7 @@ export function Map({ tree, setTree }: Props) {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      <PersonDataDrawer closeDrawer={() => setSelectedPerson(null)} person={selectedPerson} />
+      <PersonDataDrawer closeDrawer={closePersonDrawer} person={selectedPerson} />
     </>
 	)
 }
