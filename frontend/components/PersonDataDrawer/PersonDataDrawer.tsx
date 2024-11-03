@@ -10,6 +10,7 @@ import { useKeyedState } from "@/lib/useKeyedState";
 import { useEffect, useState } from "react";
 import { NamesTable } from "./NamesTable";
 import { SurnamesTable } from "./SurnamesTable";
+import { SexPicker } from "./SexPicker";
 
 interface Props {
   person: TreePerson | null;
@@ -56,6 +57,7 @@ interface OpenedDrawerProps {
 function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
   const [names, addName, updateName, deleteName] = useKeyedState(person.names);
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
+  const [sex, setSex] = useState(person.sex)
 
   const handleSave = async () => {
     await updatePerson({
@@ -72,6 +74,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
         <div className="mx-auto w-full max-w-lg">
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
+          <SexPicker {...{sex, setSex}} />
         </div>
       </ScrollArea>
 
