@@ -13,6 +13,7 @@ import { SurnamesTable } from "./SurnamesTable";
 import { SexPicker } from "./SexPicker";
 import { BirthDeathPicker } from "./BirthDeathPicker";
 import { JobsTable } from "./JobsTable";
+import { PersonDescription } from "./PersonDescription";
 
 interface Props {
   person: TreePerson | null;
@@ -63,6 +64,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
   const [sex, setSex] = useState(person.sex)
   const [birth, setBirth] = useState(person.birth)
   const [death, setDeath] = useState(person.death)
+  const [description, setDescription] = useState(person.description)
 
   const handleSave = async () => {
     await updatePerson({
@@ -73,6 +75,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
       sex,
       birth,
       death,
+      description
     });
     closeDrawer();
   }
@@ -86,6 +89,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
           <SexPicker {...{sex, setSex}} />
           <BirthDeathPicker {...{birth, death, setBirth, setDeath}} />
           <JobsTable {...{jobs, addJob, updateJob, deleteJob}} />
+          <PersonDescription {...{description, setDescription}} />
         </div>
       </ScrollArea>
 
