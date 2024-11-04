@@ -28,9 +28,10 @@ function createDate(year: string, month: string, day: string) {
 interface Props {
   date: string;
   onDateChange: (date: string) => void;
+  disabled?: boolean;
 }
 
-export function DateInput({ date, onDateChange }: Props) {
+export function DateInput({ date, onDateChange, disabled }: Props) {
   const currentYear = new Date().getFullYear();
   const [year, month, day] = parseDate(date);
   const daysInMonth = month ? new Date(+year, +month, 0).getDate() : 0;
@@ -46,6 +47,7 @@ export function DateInput({ date, onDateChange }: Props) {
         placeholder="Rok"
         min={1}
         max={currentYear}
+        disabled={disabled}
         value={year}
         onChange={(e) => handleDateChange(e.target.value, month, day)}
       />

@@ -69,9 +69,10 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
       ...person,
       names: names.map((n) => n.value),
       surnames: surnames.map((s) => s.value),
+      jobs: jobs.map((j) => j.value),
       sex,
       birth,
-      death
+      death,
     });
     closeDrawer();
   }

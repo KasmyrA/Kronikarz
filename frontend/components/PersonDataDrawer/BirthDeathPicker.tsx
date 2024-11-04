@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { EventInLife } from "@/lib/personInterfaces";
 import { Input } from "../ui/input";
 import { DateInput } from "./DateInput";
+import { Label } from "../ui/label";
 
 interface Props {
   birth: EventInLife;
@@ -33,12 +34,14 @@ export function BirthDeathPicker({ birth, death, setBirth, setDeath }: Props) {
             </div>
             </TableCell>
             <TableCell>
+              <Label>Data narodzin</Label>
               <DateInput date={birth.date} onDateChange={handleBirthDateChange} />
             </TableCell>
             <TableCell>
+              <Label>Miejsce narodzin</Label>
               <Input
                 type="text"
-                placeholder="Miejsce"
+                placeholder="Miejsce narodzin"
                 value={birth.place}
                 onChange={(e) => handleBirthPlaceChange(e.target.value)}
               />
@@ -52,12 +55,14 @@ export function BirthDeathPicker({ birth, death, setBirth, setDeath }: Props) {
               </div>
             </TableCell>
             <TableCell>
+              <Label>Data śmierci</Label>
               <DateInput date={death.date} onDateChange={handleDeathDateChange} />
             </TableCell>
             <TableCell>
+              <Label>Miejsce śmierci</Label>
               <Input
                 type="text"
-                placeholder="Miejsce"
+                placeholder="Miejsce śmierci"
                 value={death.place}
                 onChange={(e) => handleDeathPlaceChange(e.target.value)}
               />

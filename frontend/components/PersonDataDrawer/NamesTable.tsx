@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { KeyedState } from "@/lib/useKeyedState";
 import { ChangeEventHandler } from "react";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface Props {
   names: KeyedState<string>[];
@@ -23,6 +24,7 @@ export function NamesTable({ names, addName, updateName, deleteName }: Props) {
     return (
       <TableRow key={name.key}>
         <TableCell>
+          <Label>Imie</Label>
           <Input type="text" placeholder="Imie" value={name.value} onChange={handleChange}/>
         </TableCell>
         <TableCell className="w-10">

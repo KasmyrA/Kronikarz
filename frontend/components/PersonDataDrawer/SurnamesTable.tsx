@@ -6,6 +6,7 @@ import { ChangeEvent } from "react";
 import { Input } from "../ui/input";
 import { Surname } from "@/lib/personInterfaces";
 import { DateInput } from "./DateInput";
+import { Label } from "../ui/label";
 
 interface Props {
   surnames: KeyedState<Surname>[];
@@ -28,10 +29,12 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
     return (
       <TableRow key={surname.key}>
         <TableCell>
+          <Label>Nazwisko</Label>
           <Input type="text" placeholder="Nazwisko" value={surname.value.surname} onChange={handleTextChange}/>
         </TableCell>
         <TableCell>
-          <DateInput date={surname.value.untill} onDateChange={handleUntillDateChange} />
+          <Label>Do kiedy używano nazwiska</Label>
+          <DateInput date={surname.value.untill} onDateChange={handleUntillDateChange} disabled={isFirst} />
         </TableCell>
         <TableCell className="w-10">
           <Button size="icon" onClick={handleDelete}>
@@ -50,7 +53,7 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
         Nazwiska
       </h3>
       <p className="leading-7 text-center text-muted-foreground">
-        Nazwiska w kolejności od aktualnego oraz daty do kiedy dane nazwisko było używane
+        Nazwiska w kolejności od aktualnego do najdawniejszego
       </p>
       <Table>
         <TableBody>
