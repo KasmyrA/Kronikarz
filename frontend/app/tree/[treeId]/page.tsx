@@ -4,6 +4,7 @@ import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard, Position } from './PersonCard';
 import { initialData } from './data';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -26,13 +27,13 @@ export default function Tree({ params }: Props) {
   }, 1);
   const oldScale = useRef(scale);
   const mapRef = useRef<HTMLDivElement>(null);
+  const getMapContainer = () => mapRef.current!.parentElement!.parentElement!;
 
   // Runs after component has mounted
   useEffect(() => {
     scrollToMiddle(mapRef.current!);
 
-    const mapContainer = mapRef.current!.parentElement!;
-    mapContainer.addEventListener('wheel', (e: any) => {
+    getMapContainer().addEventListener('wheel', (e: any) => {
       e.preventDefault();
       setScale(scale => scale + scaleStep * Math.sign(e.wheelDeltaY))
     });
@@ -41,7 +42,7 @@ export default function Tree({ params }: Props) {
   // Runs when scale changes
   useEffect(() => {
     if (scale == oldScale.current) return;
-    const mapContainer = mapRef.current!.parentElement!;
+    const mapContainer = getMapContainer();
     onNextResize(mapContainer, () => {
       mapContainer.scrollTop *= scale / oldScale.current;
       mapContainer.scrollLeft *= scale / oldScale.current;
@@ -63,13 +64,13 @@ export default function Tree({ params }: Props) {
 
     setIsDragging(true);
     startPosition.current = { x: e.clientX, y: e.clientY };
-    const mapContainer = mapRef.current!.parentElement!;
+    const mapContainer = getMapContainer();
     scrollPosition.current = { left: mapContainer.scrollLeft, top: mapContainer.scrollTop };
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const mapContainer = mapRef.current!.parentElement!;
+    const mapContainer = getMapContainer();
     mapContainer.scrollLeft = scrollPosition.current.left - (e.clientX - startPosition.current.x);
     mapContainer.scrollTop = scrollPosition.current.top - (e.clientY - startPosition.current.y);
   }
@@ -96,7 +97,7 @@ export default function Tree({ params }: Props) {
       };
       
       // Adjust scroll after container size has changed
-      const mapContainer = mapRef.current!.parentElement!;
+      const mapContainer = getMapContainer();
       onNextResize(mapContainer, () => {
         mapContainer.scrollTop += (newMapSize.height - mapSize.height) * scale;
         mapContainer.scrollLeft += (newMapSize.width - mapSize.width) * scale;
@@ -123,12 +124,20 @@ export default function Tree({ params }: Props) {
   } as CSSProperties;
 
 	return (
-		<div className="map-container">
-			<div className="map" style={mapStyleVariables} ref={mapRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMauseUp} onMouseLeave={()=>setIsDragging(false)}
-        
-        >
+		<ScrollArea className="map-container" type="always">
+			<div
+        className="map"
+        style={mapStyleVariables}
+        ref={mapRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMauseUp}
+        onMouseLeave={()=>setIsDragging(false)}
+      >
         {peopleCards}
       </div>
-		</div>
+      <ScrollBar orientation="vertical" className="map-scrollbar" />
+      <ScrollBar orientation="horizontal" className="map-scrollbar" />
+		</ScrollArea>
 	)
 }
