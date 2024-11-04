@@ -2,10 +2,10 @@ import { Plus, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { KeyedState } from "@/lib/useKeyedState";
-import { ChangeEventHandler } from "react";
+import { ChangeEvent } from "react";
 import { Input } from "../ui/input";
 import { Surname } from "@/lib/personInterfaces";
-import { createDate, parseDate } from "@/lib/dateUtils";
+import { DateInput } from "./DateInput";
 
 interface Props {
   surnames: KeyedState<Surname>[];
@@ -15,20 +15,9 @@ interface Props {
 }
 
 export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurname }: Props) {
-  const currentYear = new Date().getFullYear();
-
-  const namesInputs = surnames.map((surname, i) => {
-    const [untillYear, untillMonth, untillDay] = parseDate(surname.value.untill);
-    const daysInMonth = untillMonth ? new Date(+untillYear, +untillMonth, 0).getDate() : 0
-
-    const handleTextChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-      updateSurname(surname.key, { ...surname.value, surname: e.target.value });
-    }
-
-    const handleUntillDateChange = (untill: string) => {
-      updateSurname(surname.key, { ...surname.value, untill });
-    }
-
+  const surnamesInputs = surnames.map((surname, i) => {
+    const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => updateSurname(surname.key, { ...surname.value, surname: e.target.value });
+    const handleUntillDateChange = (untill: string) => updateSurname(surname.key, { ...surname.value, untill });
     const handleDelete = () => deleteSurname(surname.key);
 
     const isFirst = i === 0;
@@ -41,36 +30,8 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
         <TableCell>
           <Input type="text" placeholder="Nazwisko" value={surname.value.surname} onChange={handleTextChange}/>
         </TableCell>
-        <TableCell className="flex items-end">
-          <Input
-            type="number"
-            placeholder="Rok"
-            min={1}
-            max={currentYear}
-            disabled={isFirst}
-            value={untillYear}
-            onChange={(e) => handleUntillDateChange(createDate(e.target.value, untillMonth, untillDay))}
-          />
-          <b>.</b>
-          <Input
-            type="number"
-            placeholder="Miesiąc"
-            min={1}
-            max={12}
-            disabled={!untillYear}
-            value={untillMonth}
-            onChange={(e) => handleUntillDateChange(createDate(untillYear, e.target.value, untillDay))}
-          />
-          <b>.</b>
-          <Input
-            type="number"
-            placeholder="Dzień"
-            min={1}
-            max={daysInMonth}
-            disabled={!untillMonth}
-            value={untillDay}
-            onChange={(e) => handleUntillDateChange(createDate(untillYear, untillMonth, e.target.value))}
-          />
+        <TableCell>
+          <DateInput date={surname.value.untill} onDateChange={handleUntillDateChange} />
         </TableCell>
         <TableCell className="w-10">
           <Button size="icon" onClick={handleDelete}>
@@ -93,7 +54,7 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
       </p>
       <Table>
         <TableBody>
-          {namesInputs}
+          {surnamesInputs}
           <TableRow>
             <TableCell colSpan={3}>
               <Button onClick={handleAddNewSurname} className="w-full">

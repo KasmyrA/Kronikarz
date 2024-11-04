@@ -12,6 +12,7 @@ import { NamesTable } from "./NamesTable";
 import { SurnamesTable } from "./SurnamesTable";
 import { SexPicker } from "./SexPicker";
 import { BirthDeathPicker } from "./BirthDeathPicker";
+import { JobsTable } from "./JobsTable";
 
 interface Props {
   person: TreePerson | null;
@@ -58,6 +59,7 @@ interface OpenedDrawerProps {
 function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
   const [names, addName, updateName, deleteName] = useKeyedState(person.names);
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
+  const [jobs, addJob, updateJob, deleteJob] = useKeyedState(person.jobs);
   const [sex, setSex] = useState(person.sex)
   const [birth, setBirth] = useState(person.birth)
   const [death, setDeath] = useState(person.death)
@@ -77,15 +79,16 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
   return (
     <>
       <ScrollArea className="flex-1">
-        <div className="mx-auto w-full max-w-lg">
+        <div className="mx-auto w-full max-w-xl">
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
           <SexPicker {...{sex, setSex}} />
           <BirthDeathPicker {...{birth, death, setBirth, setDeath}} />
+          <JobsTable {...{jobs, addJob, updateJob, deleteJob}} />
         </div>
       </ScrollArea>
 
-      <DrawerFooter className="mx-auto w-full max-w-lg">
+      <DrawerFooter className="mx-auto w-full max-w-xl">
         <Button onClick={handleSave}>Zapisz</Button>
         <Button onClick={closeDrawer} variant="outline">Zamknij</Button>
       </DrawerFooter>

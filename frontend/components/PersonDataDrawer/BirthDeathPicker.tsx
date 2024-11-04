@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { EventInLife } from "@/lib/personInterfaces";
 import { Input } from "../ui/input";
-import { createDate, parseDate } from "@/lib/dateUtils";
+import { DateInput } from "./DateInput";
 
 interface Props {
   birth: EventInLife;
@@ -11,29 +11,10 @@ interface Props {
 }
 
 export function BirthDeathPicker({ birth, death, setBirth, setDeath }: Props) {
-  const currentYear = new Date().getFullYear();
-
-  const [birthYear, birthMonth, birthDay] = parseDate(birth.date);
-  const daysInBirthMonth = birthMonth ? new Date(+birthYear, +birthMonth, 0).getDate() : 0;
-
-  const [deathYear, deathMonth, deathDay] = parseDate(death.date);
-  const daysInDeathMonth = deathMonth ? new Date(+deathYear, +deathMonth, 0).getDate() : 0;
-
-  const handleBirthDateChange = (year: string, month: string, day: string) => {
-    setBirth({ ...birth, date: createDate(year, month, day) });
-  }
-
-  const handleBirthPlaceChange = (place: string) => {
-    setBirth({ ...birth, place });
-  }
-
-  const handleDeathDateChange = (year: string, month: string, day: string) => {
-    setDeath({ ...death, date: createDate(year, month, day) });
-  }
-
-  const handleDeathPlaceChange = (place: string) => {
-    setDeath({ ...death, place });
-  }
+  const handleBirthDateChange = (date: string) => setBirth({ ...birth, date });
+  const handleBirthPlaceChange = (place: string) => setBirth({ ...birth, place });
+  const handleDeathDateChange = (date: string) => setDeath({ ...death, date });
+  const handleDeathPlaceChange = (place: string) => setDeath({ ...death, place });
 
   return (
     <>
@@ -51,35 +32,8 @@ export function BirthDeathPicker({ birth, death, setBirth, setDeath }: Props) {
               ☆
             </div>
             </TableCell>
-            <TableCell className="flex items-end">
-              <Input
-                type="number"
-                placeholder="Rok"
-                min={1}
-                max={currentYear}
-                value={birthYear}
-                onChange={(e) => handleBirthDateChange(e.target.value, birthMonth, birthDay)}
-              />
-              <b>.</b>
-              <Input
-                type="number"
-                placeholder="Miesiąc"
-                min={1}
-                max={12}
-                disabled={!birthYear}
-                value={birthMonth}
-                onChange={(e) => handleBirthDateChange(birthYear, e.target.value, birthDay)}
-              />
-              <b>.</b>
-              <Input
-                type="number"
-                placeholder="Dzień"
-                min={1}
-                max={daysInBirthMonth}
-                disabled={!birthMonth}
-                value={birthDay}
-                onChange={(e) => handleBirthDateChange(birthYear, birthMonth, e.target.value)}
-              />
+            <TableCell>
+              <DateInput date={birth.date} onDateChange={handleBirthDateChange} />
             </TableCell>
             <TableCell>
               <Input
@@ -97,35 +51,8 @@ export function BirthDeathPicker({ birth, death, setBirth, setDeath }: Props) {
                 ✞
               </div>
             </TableCell>
-            <TableCell className="flex items-end">
-              <Input
-                type="number"
-                placeholder="Rok"
-                min={1}
-                max={currentYear}
-                value={deathYear}
-                onChange={(e) => handleDeathDateChange(e.target.value, deathMonth, deathDay)}
-              />
-              <b>.</b>
-              <Input
-                type="number"
-                placeholder="Miesiąc"
-                min={1}
-                max={12}
-                disabled={!deathYear}
-                value={deathMonth}
-                onChange={(e) => handleDeathDateChange(deathYear, e.target.value, deathDay)}
-              />
-              <b>.</b>
-              <Input
-                type="number"
-                placeholder="Dzień"
-                min={1}
-                max={daysInDeathMonth}
-                disabled={!deathMonth}
-                value={deathDay}
-                onChange={(e) => handleDeathDateChange(deathYear, deathMonth, e.target.value)}
-              />
+            <TableCell>
+              <DateInput date={death.date} onDateChange={handleDeathDateChange} />
             </TableCell>
             <TableCell>
               <Input
