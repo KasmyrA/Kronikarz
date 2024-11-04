@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getPerson, updatePerson } from "@/lib/personActions";
 import { Person } from "@/lib/personInterfaces";
 import { TreePerson } from "@/lib/treeInterfaces";
@@ -82,7 +82,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
 
   return (
     <>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" type="auto">
         <div className="mx-auto w-full max-w-xl">
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
@@ -91,6 +91,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
           <JobsTable {...{jobs, addJob, updateJob, deleteJob}} />
           <PersonDescription {...{description, setDescription}} />
         </div>
+        <ScrollBar orientation="vertical" />
       </ScrollArea>
 
       <DrawerFooter className="mx-auto w-full max-w-xl">

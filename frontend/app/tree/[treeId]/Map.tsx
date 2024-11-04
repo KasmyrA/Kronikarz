@@ -8,6 +8,7 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { createPerson, getTreePerson } from '@/lib/personActions';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -29,13 +30,16 @@ export function Map({ tree, setTree }: Props) {
   }, 1);
   const oldScale = useRef(scale);
   const mapRef = useRef<HTMLDivElement>(null);
+  const getMapContainer = () => mapRef.current!.parentElement!.parentElement!;
+  const [isDragging, setIsDragging] = useState(false);
+  const startPosition = useRef({ x: 0, y: 0 });
+  const scrollPosition = useRef({ left: 0, top: 0 });
 
   // Runs after component has mounted
   useEffect(() => {
     scrollToMiddle(mapRef.current!);
 
-    const mapContainer = mapRef.current!.parentElement!;
-    mapContainer.addEventListener('wheel', (e: any) => {
+    getMapContainer().addEventListener('wheel', (e: any) => {
       e.preventDefault();
       setScale(scale => scale + scaleStep * Math.sign(e.wheelDeltaY))
     });
@@ -44,7 +48,7 @@ export function Map({ tree, setTree }: Props) {
   // Runs when scale changes
   useEffect(() => {
     if (scale == oldScale.current) return;
-    const mapContainer = mapRef.current!.parentElement!;
+    const mapContainer = getMapContainer();
     onNextResize(mapContainer, () => {
       mapContainer.scrollTop *= scale / oldScale.current;
       mapContainer.scrollLeft *= scale / oldScale.current;
@@ -53,6 +57,26 @@ export function Map({ tree, setTree }: Props) {
       oldScale.current = scale;
     });
   }, [scale])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Prevent dragging when clicking on person card
+    if(e.target !== e.currentTarget) return;
+    setIsDragging(true);
+    startPosition.current = { x: e.clientX, y: e.clientY };
+    const mapContainer = getMapContainer();
+    scrollPosition.current = { left: mapContainer.scrollLeft, top: mapContainer.scrollTop };
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const mapContainer = getMapContainer();
+    mapContainer.scrollLeft = scrollPosition.current.left - (e.clientX - startPosition.current.x);
+    mapContainer.scrollTop = scrollPosition.current.top - (e.clientY - startPosition.current.y);
+  }
+  
+  const handleMauseUp = () => {
+    setIsDragging(false);
+  }
 
   const peopleCards = tree.people.map((person) => {
     const handleClick = () => setSelectedPerson(person);
@@ -73,7 +97,7 @@ export function Map({ tree, setTree }: Props) {
       };
       
       // Adjust scroll after container size has changed
-      const mapContainer = mapRef.current!.parentElement!;
+      const mapContainer = getMapContainer();
       onNextResize(mapContainer, () => {
         mapContainer.scrollTop += (newMapSize.height - mapSize.height) * scale;
         mapContainer.scrollLeft += (newMapSize.width - mapSize.width) * scale;
@@ -95,7 +119,7 @@ export function Map({ tree, setTree }: Props) {
 
   const addPerson = async () => {
     const map = mapRef.current!;
-    const mapContainer = map.parentElement!;
+    const mapContainer = getMapContainer();
     const mapSize = map.getBoundingClientRect();
     const newPerson = await createPerson({
       x: (mapContainer.scrollLeft + (mapContainer.clientWidth - mapSize.width) / 2) / scale,
@@ -121,14 +145,24 @@ export function Map({ tree, setTree }: Props) {
 
 	return (
     <>
-      <div className="map-container">
-        <div className="map" style={mapStyleVariables} ref={mapRef}>
+      <ScrollArea className="map-container" type="always">
+        <div
+          className="map"
+          style={mapStyleVariables}
+          ref={mapRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMauseUp}
+          onMouseLeave={()=>setIsDragging(false)}
+        >
           {peopleCards}
         </div>
         <Button onClick={addPerson} size="icon" className='absolute right-8 bottom-8'>
           <Plus className="h-4 w-4" />
         </Button>
-      </div>
+        <ScrollBar orientation="vertical" />
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
       <PersonDataDrawer closeDrawer={closePersonDrawer} person={selectedPerson} />
     </>
 	)
