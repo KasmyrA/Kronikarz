@@ -5,59 +5,86 @@ interface PersonWithPosition extends Person {
   position: Position
 }
 
-export async function createPerson(position: Position): Promise<TreePerson> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  const newPerson: PersonWithPosition = {
-    id: people.length,
-    names: [],
-    image: null,
-    description: "",
-    sex: null,
-    birth: { date: "", place: "" },
-    death: { date: "", place: "" },
-    surnames: [],
-    jobs: [],
-    files: [],
-    position
-  };
-  people.push(newPerson)
-  localStorage.setItem('people', JSON.stringify(people));
-  return personToTreePerson(newPerson);
+export function createPerson(position: Position): Promise<TreePerson> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const newPerson: PersonWithPosition = {
+        id: people.length,
+        names: [],
+        image: null,
+        description: "",
+        sex: null,
+        birth: { date: "", place: "" },
+        death: { date: "", place: "" },
+        surnames: [],
+        jobs: [],
+        files: [],
+        position
+      };
+      people.push(newPerson)
+      localStorage.setItem('people', JSON.stringify(people));
+      resolve(personToTreePerson(newPerson));
+    }, 1000);
+  });
 }
 
-export async function getPerson(id: number): Promise<Person | undefined> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  return people.find(p => p.id === id);
+export function getPerson(id: number): Promise<Person | undefined> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      resolve(people.find(p => p.id === id));
+    }, 1000);
+  });
 }
 
-export async function getTreePerson(id: number): Promise<TreePerson | undefined> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  const person = people.find(p => p.id === id);
-  return person && personToTreePerson(person)
+export function getTreePerson(id: number): Promise<TreePerson | undefined> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const person = people.find(p => p.id === id);
+      resolve(person && personToTreePerson(person));
+    }, 1000);
+  });
 }
 
-export async function updatePerson(person: Person): Promise<void> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  const i = people.findIndex(p => p.id === person.id);
-  people[i] = {
-    ...people[i],
-    ...person
-  }
-  localStorage.setItem('people', JSON.stringify(people));
+export function updatePerson(person: Person): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const i = people.findIndex(p => p.id === person.id);
+      people[i] = {
+        ...people[i],
+        ...person
+      }
+      localStorage.setItem('people', JSON.stringify(people));
+      resolve();
+    }, 1000);
+  });
 }
 
-export async function updatePersonPosition(id: number, position: Position): Promise<void> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  const i = people.findIndex(p => p.id === id);
-  people[i].position = position;
-  localStorage.setItem('people', JSON.stringify(people));
+export function updatePersonPosition(id: number, position: Position): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const i = people.findIndex(p => p.id === id);
+      people[i].position = position;
+      localStorage.setItem('people', JSON.stringify(people));
+      resolve();
+    }, 1000);
+  });
 }
 
-export async function deletePerson(id: number): Promise<void> {
-  const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-  const i = people.findIndex(p => p.id === id);
-  delete people[i];
-  localStorage.setItem('people', JSON.stringify(people));
+export function deletePerson(id: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const i = people.findIndex(p => p.id === id);
+      delete people[i];
+      localStorage.setItem('people', JSON.stringify(people));
+      resolve();
+    }, 1000);
+  });
 }
 
 // Remove after adding API integration

@@ -25,10 +25,7 @@ export function PersonDataDrawer({ person, closeDrawer }: Props) {
 
   useEffect(() => {
     if (person) {
-      setTimeout(() => {
-        getPerson(person.id)
-          .then((p) => setPers(p!));
-      }, 1000);
+      getPerson(person.id).then((p) => setPers(p!));
     }
     else {
       setPers(null);
