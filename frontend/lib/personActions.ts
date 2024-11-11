@@ -1,8 +1,16 @@
-import { Person } from "./personInterfaces";
+import { FileInfo, Person } from "./personInterfaces";
 import { Position, TreePerson } from "./treeInterfaces";
 
 interface PersonWithPosition extends Person {
   position: Position
+}
+
+function getUniqueId<T extends { id: number }>(arr: T[]) {
+  let id: number;
+  do {
+    id = Math.round(Math.random() * 1000000);
+  } while (arr.some(t => t.id === id));
+  return id;
 }
 
 export function createPerson(position: Position): Promise<TreePerson> {
@@ -10,7 +18,7 @@ export function createPerson(position: Position): Promise<TreePerson> {
     setTimeout(() => {
       const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
       const newPerson: PersonWithPosition = {
-        id: people.length,
+        id: getUniqueId(people),
         names: [],
         image: null,
         description: "",
@@ -48,7 +56,7 @@ export function getTreePerson(id: number): Promise<TreePerson | undefined> {
   });
 }
 
-export function updatePerson(person: Person): Promise<void> {
+export function updatePerson(person: Omit<Person, "files">): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
@@ -80,7 +88,7 @@ export function deletePerson(id: number): Promise<void> {
     setTimeout(() => {
       const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
       const i = people.findIndex(p => p.id === id);
-      delete people[i];
+      people.splice(i, 1);
       localStorage.setItem('people', JSON.stringify(people));
       resolve();
     }, 1000);
@@ -99,4 +107,44 @@ export function personToTreePerson(p: PersonWithPosition): TreePerson {
     deathDate: p.death.date,
     position: p.position
   }
+}
+
+const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result as string);
+  reader.onerror = reject;
+});
+
+export function addFileToPerson(id: number, file: File): Promise<FileInfo> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      toBase64(file)
+        .then((fileUrl) => {
+          const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+          const i = people.findIndex(p => p.id === id);
+          const newFile: FileInfo = {
+            id: getUniqueId(people),
+            name: file.name,
+            url: fileUrl
+          };
+          people[i].files.push(newFile);
+          localStorage.setItem('people', JSON.stringify(people));
+          resolve(newFile);
+        });
+    }, 1000);
+  });
+}
+
+export function deleteFileFromPerson(id: number, fileId: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
+      const personIndex = people.findIndex(p => p.id === id);
+      const fileIndex = people[personIndex]?.files.findIndex(f => f.id === fileId);
+      people[personIndex]?.files.splice(fileIndex, 1);
+      localStorage.setItem('people', JSON.stringify(people));
+      resolve();
+    }, 1000);
+  });
 }
