@@ -7,7 +7,7 @@ import { PersonDataDrawer } from '../../../components/PersonDataDrawer/PersonDat
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { createPerson, getTreePerson } from '@/lib/personActions';
+import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const scaleStep = 0.05;
@@ -83,6 +83,7 @@ export function Map({ tree, setTree }: Props) {
     const handleDrop = (position: Position) => {
       person.position = position
       setTree({...tree})
+      updatePersonPosition(person.id, position);
 
       // Increase size of map if needed
       const positionX = Math.abs(position.x);
