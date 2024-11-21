@@ -15,6 +15,7 @@ import { BirthDeathPicker } from "./BirthDeathPicker";
 import { JobsTable } from "./JobsTable";
 import { PersonDescription } from "./PersonDescription";
 import { PersonFilesList } from "./PersonFilesList";
+import { PersonImagePicker } from "./PersonImagePicker";
 
 interface Props {
   person: TreePerson | null;
@@ -85,6 +86,7 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
     <>
       <ScrollArea className="flex-1 pb-1" type="auto">
         <div className="mx-auto w-full max-w-xl">
+          <PersonImagePicker {...{image, setImage, files, setFiles, personId: person.id}} />
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
           <SexPicker {...{sex, setSex}} />

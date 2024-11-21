@@ -31,7 +31,7 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
   }
 
   const personImage = person.imageUrl ? 
-    <img src={person.imageUrl} alt="Person image" className="w-full h-full"/> :
+    <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
     <User className="w-full h-full" />;
 
   const nameSurname = (person.name || person.surname) ? 

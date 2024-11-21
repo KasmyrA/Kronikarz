@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { ChangeEventHandler, useRef } from "react";
 import { addFileToPerson, deleteFileFromPerson } from "@/lib/personActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { isImageFile } from "@/lib/utils";
 
 interface Props {
   files: FileInfo[];
@@ -84,9 +85,4 @@ export function PersonFilesList({ files, setFiles, image, setImage, personId }: 
       </Card>
     </>
   )
-}
-
-function isImageFile(fileName: string) {
-  const fileExtension = fileName.split(".").at(-1)!;
-  return ["jpg", "jpeg", "png"].includes(fileExtension);
 }

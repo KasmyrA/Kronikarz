@@ -102,7 +102,7 @@ export function personToTreePerson(p: PersonWithPosition): TreePerson {
     name: p.names[0] ?? null,
     surname: p.surnames[0]?.surname ?? null,
     sex: p.sex,
-    imageUrl: p.files[p.image ?? -1]?.url ?? null,
+    imageUrl: p.files.find(f => f.id === p.image)?.url ?? null,
     birthDate: p.birth.date,
     deathDate: p.death.date,
     position: p.position
@@ -141,8 +141,12 @@ export function deleteFileFromPerson(id: number, fileId: number): Promise<void> 
     setTimeout(() => {
       const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
       const personIndex = people.findIndex(p => p.id === id);
-      const fileIndex = people[personIndex]?.files.findIndex(f => f.id === fileId);
-      people[personIndex]?.files.splice(fileIndex, 1);
+      if (personIndex === -1) return;
+      const fileIndex = people[personIndex].files.findIndex(f => f.id === fileId);
+      people[personIndex].files.splice(fileIndex, 1);
+      if (people[personIndex].image === fileId) {
+        people[personIndex].image = null;
+      }
       localStorage.setItem('people', JSON.stringify(people));
       resolve();
     }, 1000);
