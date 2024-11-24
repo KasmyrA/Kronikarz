@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { getPerson, updatePerson } from "@/lib/personActions";
+import { deletePerson, getPerson, updatePerson } from "@/lib/personActions";
 import { Person } from "@/lib/personInterfaces";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { useKeyedState } from "@/lib/useKeyedState";
@@ -82,6 +82,11 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
     closeDrawer();
   }
 
+  const handleDelete = async () => {
+    await deletePerson(person.id);
+    closeDrawer();
+  }
+
   return (
     <>
       <ScrollArea className="flex-1 pb-1" type="auto">
@@ -99,8 +104,17 @@ function OpenedDrawer({ person, closeDrawer }: OpenedDrawerProps) {
       </ScrollArea>
 
       <DrawerFooter className="mx-auto w-full max-w-xl">
-        <Button onClick={handleSave}>Zapisz</Button>
-        <Button onClick={closeDrawer} variant="outline">Zamknij</Button>
+        <div className="flex gap-4">
+          <Button onClick={closeDrawer} variant="outline" className="flex-1">
+            Nie zapisuj
+          </Button>
+          <Button onClick={handleSave} className="flex-1">
+            Zapisz
+          </Button>
+          <Button onClick={handleDelete} variant="destructive" className="flex-1">
+            Usuń
+          </Button>
+        </div>
       </DrawerFooter>
     </>
   )

@@ -134,7 +134,14 @@ export function Map({ tree, setTree }: Props) {
     const { id } = selectedPerson!;
     setSelectedPerson(null);
     const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    tree.people[updatedPersonIndex] = (await getTreePerson(id))!;
+    const newPersonData = await getTreePerson(id);
+
+    if (newPersonData) {
+      tree.people[updatedPersonIndex] = newPersonData;
+    } else {
+      tree.people.splice(updatedPersonIndex, 1);
+    }
+    
     setTree({...tree});
   }
 
