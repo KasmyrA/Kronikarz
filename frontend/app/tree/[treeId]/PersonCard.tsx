@@ -42,7 +42,7 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
 
   const birthDeathDate = (person.birthDate || person.deathDate) &&
     <p className="leading-7 text-center">
-      {person.birthDate ?? '?'} - {person.deathDate ?? '*'}
+      {person.birthDate === "" ? '?' : person.birthDate} - {person.deathDate === "" ? '*' : person.deathDate}
     </p>;
   
   return (
