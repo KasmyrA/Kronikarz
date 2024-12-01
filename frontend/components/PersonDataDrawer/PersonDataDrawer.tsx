@@ -7,6 +7,7 @@ import { TreePerson } from "@/lib/treeInterfaces";
 import { useEffect, useState } from "react";
 import { EditingDrawer } from "./EditingDrawer";
 import { ReadingDrawer } from "./ReadingDrawer";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   person: TreePerson | null;
@@ -27,7 +28,7 @@ export function PersonDataDrawer({ person, closeDrawer }: Props) {
 
   const content = pers ? 
     <OpenedDrawer closeDrawer={closeDrawer} person={pers} /> :
-    's';
+    <div className='flex-1 flex items-center justify-center'><Loader2 className="h-16 w-16 animate-spin" /></div>;
 
   return (
     <Drawer open={!!person} dismissible={false}>
