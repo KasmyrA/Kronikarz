@@ -32,3 +32,8 @@ export function onNextResize(element: HTMLElement, callback: () => void) {
   });
   observer.observe(element);
 }
+
+export function isImageFile(fileName: string) {
+  const fileExtension = fileName.split(".").at(-1)!;
+  return ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
+}

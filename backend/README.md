@@ -5,3 +5,4 @@
 - Install dependencies:
   ```bash
   npm install  # or pip install -r requirements.txt for Python
+  ```
