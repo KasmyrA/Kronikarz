@@ -4,12 +4,13 @@ import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
 import { PersonDataSheet } from '../../../components/PersonDataSheet/PersonDataSheet';
-import { Position, Tree, TreePerson, TreeRelationship } from '@/lib/treeInterfaces';
+import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
 import { Heart, Plus } from 'lucide-react';
 import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { RelationshipsSheet } from '../../../components/RelationshipsSheet/RelationshipsSheet';
+import { Relationship } from '@/lib/relaionshipInterfaces';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -181,7 +182,7 @@ export function Map({ tree, setTree }: Props) {
         isOpened={isRelationsSheetOpened}
         closeSheet={() => setRelationsSheetOpened(false)}
         relationships={tree.relationships}
-        setRelationships={(r: TreeRelationship[]) => setTree({...tree, relationships: r})}
+        setRelationships={(r: Relationship[]) => setTree({...tree, relationships: r})}
         people={tree.people}
       />
     </>

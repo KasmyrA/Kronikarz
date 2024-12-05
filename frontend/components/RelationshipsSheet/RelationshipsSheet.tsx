@@ -1,15 +1,16 @@
 "use client"
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { TreePerson, TreeRelationship } from "@/lib/treeInterfaces";
+import { TreePerson } from "@/lib/treeInterfaces";
 import { useState } from "react";
 import { RelationshipsList } from "./RelationshipsList";
 import { RelationshipEditor } from "./RelationshipEditor";
 import { getRelationship } from "@/lib/relationshipActions";
+import { Relationship } from "@/lib/relaionshipInterfaces";
 
 interface Props {
   people: TreePerson[];
-  relationships: TreeRelationship[];
-  setRelationships: (r: TreeRelationship[]) => void;
+  relationships: Relationship[];
+  setRelationships: (r: Relationship[]) => void;
   isOpened: boolean;
   closeSheet: () => void;
 }

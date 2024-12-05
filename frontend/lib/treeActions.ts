@@ -1,5 +1,4 @@
 import { personToTreePerson } from "./personActions";
-import { relationshipToTreeRelationship } from "./relationshipActions";
 import { Tree } from "./treeInterfaces";
 
 export function getTree(id: number): Promise<Tree> {
@@ -9,7 +8,7 @@ export function getTree(id: number): Promise<Tree> {
         id,
         name: "Test tree",
         people: JSON.parse(localStorage.getItem('people') ?? "[]").map(personToTreePerson),
-        relationships: JSON.parse(localStorage.getItem('relations') ?? "[]").map(relationshipToTreeRelationship),
+        relationships: JSON.parse(localStorage.getItem('relations') ?? "[]"),
         parenthoods: JSON.parse(localStorage.getItem('people') ?? "[]")
       });
     }, 1000);

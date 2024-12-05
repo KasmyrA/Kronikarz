@@ -1,14 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
 import { SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { TreePerson, TreeRelationship } from "@/lib/treeInterfaces";
+import { TreePerson } from "@/lib/treeInterfaces";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { relationshipKindToString } from "@/lib/utils";
 import { Plus, User } from "lucide-react";
+import { Relationship } from "@/lib/relaionshipInterfaces";
 
 interface Props {
-  relationships: TreeRelationship[];
+  relationships: Relationship[];
   people: TreePerson[];
   goToRelationEditor: (r: number | "new") => void;
   closeSheet: () => void;

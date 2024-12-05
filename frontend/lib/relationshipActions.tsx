@@ -1,5 +1,4 @@
 import { Relationship } from "./relaionshipInterfaces";
-import { TreeRelationship } from "./treeInterfaces";
 
 function getUniqueId<T extends { id: number }>(arr: T[]) {
   let id: number;
@@ -9,16 +8,7 @@ function getUniqueId<T extends { id: number }>(arr: T[]) {
   return id;
 }
 
-export function relationshipToTreeRelationship(r: Relationship): TreeRelationship {
-  return {
-    id: r.id,
-    kind: r.stages.at(-1)!.kind,
-    partner1: r.partner1,
-    partner2: r.partner2
-  };
-}
-
-export function createRelationship(relationship: Omit<Relationship, "id">): Promise<TreeRelationship> {
+export function createRelationship(relationship: Omit<Relationship, "id">): Promise<Relationship> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const relations: Relationship[] = JSON.parse(localStorage.getItem('relations') ?? "[]");
@@ -28,7 +18,7 @@ export function createRelationship(relationship: Omit<Relationship, "id">): Prom
       };
       relations.push(newRelation)
       localStorage.setItem('relations', JSON.stringify(relations));
-      resolve(relationshipToTreeRelationship(newRelation));
+      resolve(newRelation);
     }, 1000);
   });
 }
