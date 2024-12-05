@@ -4,12 +4,12 @@ import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
 import { PersonDataSheet } from '../../../components/PersonDataSheet/PersonDataSheet';
-import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
+import { Position, Tree, TreePerson, TreeRelationship } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { RelationshipsSheet } from './RelationshipsSheet';
+import { RelationshipsSheet } from '../../../components/RelationshipsSheet/RelationshipsSheet';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -22,6 +22,7 @@ interface Props {
 
 export function Map({ tree, setTree }: Props) {
   const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
+  const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [mapSize, setMapSize] = useState({
     width: Math.max(...tree.people.map(p => Math.abs(p.position.x)), 0),
     height: Math.max(...tree.people.map(p => Math.abs(p.position.y)), 0)
@@ -166,6 +167,9 @@ export function Map({ tree, setTree }: Props) {
         >
           {peopleCards}
         </div>
+        <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
+          <Heart className="h-4 w-4" />
+        </Button>
         <Button onClick={addPerson} size="icon" className='absolute right-8 bottom-8'>
           <Plus className="h-4 w-4" />
         </Button>
@@ -173,6 +177,13 @@ export function Map({ tree, setTree }: Props) {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       <PersonDataSheet closeSheet={closePersonSheet} person={selectedPerson} />
+      <RelationshipsSheet
+        isOpened={isRelationsSheetOpened}
+        closeSheet={() => setRelationsSheetOpened(false)}
+        relationships={tree.relationships}
+        setRelationships={(r: TreeRelationship[]) => setTree({...tree, relationships: r})}
+        people={tree.people}
+      />
     </>
 	)
 }

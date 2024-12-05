@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { RelationshipKind } from "./relaionshipInterfaces";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -36,4 +37,12 @@ export function onNextResize(element: HTMLElement, callback: () => void) {
 export function isImageFile(fileName: string) {
   const fileExtension = fileName.split(".").at(-1)!;
   return ["jpg", "jpeg", "png", "gif"].includes(fileExtension);
+}
+
+export const relationshipKindToString: { [rk in RelationshipKind]: string } = {
+  "divorce": "Rozwiedzeni",
+  "engagement": "Zaręczeni",
+  "marriage": "W małżeństwie",
+  "separation": "W separacji",
+  "unformal": "W związku nieformalnym"
 }

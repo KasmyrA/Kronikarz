@@ -27,7 +27,7 @@ export interface Position {
 
 export interface TreeRelationship {
   id: number;
-  parrner1: number;
+  partner1: number;
   partner2: number;
   kind: RelationshipKind;
 }
