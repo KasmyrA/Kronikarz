@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
-import { DrawerFooter } from "@/components/ui/drawer";
+import { SheetFooter } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { EventInLife, Job, Person, Surname } from "@/lib/personInterfaces";
 import { User } from "lucide-react";
@@ -9,13 +9,13 @@ import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { PersonFilesList } from "./PersonFilesList";
 import { useState } from "react";
 
-interface ReadingDrawerProps {
+interface ReadingSheetProps {
   person: Person;
-  closeDrawer: () => void;
-  goToEditingDrawer: () => void;
+  closeSheet: () => void;
+  goToEditingSheet: () => void;
 } 
 
-export function ReadingDrawer({ person: { files: personFiles, image: personImage, names, surnames, sex, birth, death, description, jobs, id: personId }, closeDrawer, goToEditingDrawer }: ReadingDrawerProps) {
+export function ReadingSheet({ person: { files: personFiles, image: personImage, names, surnames, sex, birth, death, description, jobs, id: personId }, closeSheet, goToEditingSheet }: ReadingSheetProps) {
   const [files, setFiles] = useState(personFiles);
   const [image, setImage] = useState(personImage);
 
@@ -70,16 +70,14 @@ export function ReadingDrawer({ person: { files: personFiles, image: personImage
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
-      <DrawerFooter className="mx-auto w-full max-w-xl">
-        <div className="flex gap-4">
-          <Button onClick={closeDrawer} variant="outline" className="flex-1">
-            Zamknij
-          </Button>
-          <Button onClick={goToEditingDrawer} className="flex-1">
-            Edytuj
-          </Button>
-        </div>
-      </DrawerFooter>
+      <SheetFooter className="mx-auto w-full max-w-xl gap-4">
+        <Button onClick={closeSheet} variant="outline" className="flex-1">
+          Zamknij
+        </Button>
+        <Button onClick={goToEditingSheet} className="flex-1">
+          Edytuj
+        </Button>
+      </SheetFooter>
     </>
   )
 }

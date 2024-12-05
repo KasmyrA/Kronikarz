@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { DrawerFooter } from "@/components/ui/drawer";
+import { SheetFooter } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { deletePerson, updatePerson } from "@/lib/personActions";
 import { Person } from "@/lib/personInterfaces";
@@ -16,10 +16,10 @@ import { PersonImagePicker } from "./PersonImagePicker";
 
 interface Props {
   person: Person;
-  closeDrawer: () => void;
+  closeSheet: () => void;
 }
 
-export function EditingDrawer({ person, closeDrawer }: Props) {
+export function EditingSheet({ person, closeSheet }: Props) {
   const [names, addName, updateName, deleteName] = useKeyedState(person.names);
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
   const [jobs, addJob, updateJob, deleteJob] = useKeyedState(person.jobs);
@@ -42,17 +42,17 @@ export function EditingDrawer({ person, closeDrawer }: Props) {
       description,
       image
     });
-    closeDrawer();
+    closeSheet();
   }
 
   const handleDelete = async () => {
     await deletePerson(person.id);
-    closeDrawer();
+    closeSheet();
   }
 
   return (
     <>
-      <ScrollArea className="flex-1 pb-1" type="auto">
+      <ScrollArea className="flex-1 pb-1 overflow-auto" type="auto">
         <div className="mx-auto w-full max-w-xl">
           <PersonImagePicker {...{image, setImage, files, setFiles, personId: person.id}} />
           <NamesTable {...{names, addName, updateName, deleteName}} />
@@ -66,9 +66,9 @@ export function EditingDrawer({ person, closeDrawer }: Props) {
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
-      <DrawerFooter className="mx-auto w-full max-w-xl">
+      <SheetFooter className="mx-auto w-full max-w-xl">
         <div className="flex gap-4">
-          <Button onClick={closeDrawer} variant="outline" className="flex-1">
+          <Button onClick={closeSheet} variant="outline" className="flex-1">
             Nie zapisuj
           </Button>
           <Button onClick={handleSave} className="flex-1">
@@ -78,7 +78,7 @@ export function EditingDrawer({ person, closeDrawer }: Props) {
             Usuń
           </Button>
         </div>
-      </DrawerFooter>
+      </SheetFooter>
     </>
   )
 }

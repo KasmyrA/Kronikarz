@@ -3,12 +3,13 @@ import './Map.css'
 import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
-import { PersonDataDrawer } from '../../../components/PersonDataDrawer/PersonDataDrawer';
+import { PersonDataSheet } from '../../../components/PersonDataSheet/PersonDataSheet';
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { RelationshipsSheet } from './RelationshipsSheet';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -130,7 +131,7 @@ export function Map({ tree, setTree }: Props) {
     setTree({...tree});
   }
 
-  const closePersonDrawer = async () => {
+  const closePersonSheet = async () => {
     const { id } = selectedPerson!;
     setSelectedPerson(null);
     const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
@@ -171,7 +172,7 @@ export function Map({ tree, setTree }: Props) {
         <ScrollBar orientation="vertical" />
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      <PersonDataDrawer closeDrawer={closePersonDrawer} person={selectedPerson} />
+      <PersonDataSheet closeSheet={closePersonSheet} person={selectedPerson} />
     </>
 	)
 }
