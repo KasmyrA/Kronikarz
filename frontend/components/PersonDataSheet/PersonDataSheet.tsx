@@ -11,10 +11,10 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 
 interface Props {
   person: TreePerson | null;
-  closeSheet: () => void;
+  onClose: () => void;
 }
 
-export function PersonDataSheet({ person, closeSheet }: Props) {
+export function PersonDataSheet({ person, onClose }: Props) {
   const [pers, setPers] = useState<Person | null>(null)
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function PersonDataSheet({ person, closeSheet }: Props) {
   }, [person]);
 
   const content = pers ? 
-    <OpenedSheet closeSheet={closeSheet} person={pers} /> :
+    <OpenedSheet closeSheet={onClose} person={pers} /> :
     <div className='size-full flex items-center justify-center'><Loader2 className="h-16 w-16 animate-spin" /></div>;
 
   return (

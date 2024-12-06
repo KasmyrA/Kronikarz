@@ -1,9 +1,16 @@
 "use client";
-import { Tree } from '@/lib/treeInterfaces';
+import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
-import { Map } from './Map';
-import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Map, MapHandle } from './Map';
+import { useEffect, useRef, useState } from 'react';
+import { Heart, Loader2, Plus } from 'lucide-react';
+import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
+import { Button } from '@/components/ui/button';
+import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
+import { Relationship } from '@/lib/relaionshipInterfaces';
+import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
+import { RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
+import { createRelationship, deleteRelationship } from '@/lib/relationshipActions';
 
 interface Props {
   params: {
@@ -20,8 +27,111 @@ export default function Page({ params: { treeId } }: Props) {
   }, [treeId])
 
   if (tree) {
-    return <Map tree={tree} setTree={setTree} />
+    return <LoadedPage tree={tree} setTree={setTree} />
   } else {
     return <div className='flex-1 flex items-center justify-center'><Loader2 className="h-16 w-16 animate-spin" /></div>
   }
+}
+
+interface LoadedPageProps {
+  tree: Tree;
+  setTree: (t: Tree) => void;
+}
+
+function LoadedPage({ tree, setTree }: LoadedPageProps) {
+  const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
+  const [selectedRelation, setSelectedRelation] = useState<number | "new" | null>(null);
+  const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
+  const mapRef = useRef<MapHandle | null>(null);
+
+  const handleAddPerson = async () => {
+    const newPersonPosition = mapRef.current!.getViewMiddlePosition();
+    const newPerson = await createPerson(newPersonPosition);
+    tree.people.push(newPerson);
+    setTree({...tree});
+  }
+
+  const handlePersonDataSheetClose = async () => {
+    const { id } = selectedPerson!;
+    setSelectedPerson(null);
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
+    const newPersonData = await getTreePerson(id);
+
+    if (newPersonData) {
+      tree.people[updatedPersonIndex] = newPersonData;
+    } else {
+      tree.people.splice(updatedPersonIndex, 1);
+    }
+    
+    setTree({...tree});
+  }
+
+  const handlePersonClick = setSelectedPerson;
+
+  const handlePersonDrop = (position: Position, person: TreePerson) => {
+    person.position = position;
+    setTree({...tree});
+    updatePersonPosition(person.id, position);
+  }
+
+  const handleRelationshipEditorClose = () => {
+    setSelectedRelation(null);
+  }
+
+  const handleRelationshipEditorSave = async (rel: Relationship) => {
+    if (selectedRelation === "new") {
+      const newRelationData = await createRelationship(rel);
+      tree.relationships.push(newRelationData);
+    } else {
+      const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
+      tree.relationships[updatedRelationIndex] = rel;
+    }
+    setTree({ ...tree });
+  };
+
+  const handleRelationshipEditorDelete = async () => {
+    await deleteRelationship(selectedRelation as number);
+    const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
+    tree.relationships.splice(updatedRelationIndex, 1);
+    setTree({ ...tree });
+  };
+
+  return (
+    <>
+      <Map
+        ref={mapRef}
+        people={tree.people}
+        relationships={tree.relationships}
+        parenthoods={tree.parenthoods}
+        onPersonClick={handlePersonClick}
+        onPersonDrop={handlePersonDrop}
+      />
+
+      <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
+        <Heart className="h-4 w-4" />
+      </Button>
+      <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
+        <Plus className="h-4 w-4" />
+      </Button>
+
+      <PersonDataSheet
+        onClose={handlePersonDataSheetClose}
+        person={selectedPerson}
+      />
+
+      <RelationshipsList
+        isOpened={isRelationsSheetOpened}
+        relationships={tree.relationships}
+        people={tree.people}
+        onRelationshipClick={setSelectedRelation}
+        onClose={() => setRelationsSheetOpened(false)}
+      />
+      <RelationshipEditor
+        relationshipId={selectedRelation}
+        onClose={handleRelationshipEditorClose}
+        onSave={handleRelationshipEditorSave}
+        onDelete={handleRelationshipEditorDelete}
+      />
+    </>
+  )
 }

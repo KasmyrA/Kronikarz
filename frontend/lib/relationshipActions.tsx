@@ -44,11 +44,11 @@ export function updateRelationship(relationship: Relationship): Promise<void> {
   });
 }
 
-export function deleteRelationship(relationship: Relationship): Promise<void> {
+export function deleteRelationship(relationshipId: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const relations: Relationship[] = JSON.parse(localStorage.getItem('relations') ?? "[]");
-      const i = relations.findIndex(r => r.id === relationship.id);
+      const i = relations.findIndex(r => r.id === relationshipId);
       relations.splice(i, 1);
       localStorage.setItem('relations', JSON.stringify(relations));
       resolve();

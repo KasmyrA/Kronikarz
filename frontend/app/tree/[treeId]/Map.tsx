@@ -1,32 +1,33 @@
 "use client";
 import './Map.css'
-import { CSSProperties, useEffect, useReducer, useRef, useState } from 'react';
+import { CSSProperties, forwardRef, useEffect, useImperativeHandle, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
-import { PersonDataSheet } from '../../../components/PersonDataSheet/PersonDataSheet';
-import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
-import { Button } from '@/components/ui/button';
-import { Heart, Plus } from 'lucide-react';
-import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
+import { Position, TreePerson } from '@/lib/treeInterfaces';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { RelationshipsSheet } from '../../../components/RelationshipsSheet/RelationshipsSheet';
 import { Relationship } from '@/lib/relaionshipInterfaces';
+import { Parenthood } from '@/lib/parenthoodInterfaces';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
 const scaleMax = 1.5;
 
 interface Props {
-  tree: Tree;
-  setTree: (t: Tree) => void;
+  people: TreePerson[];
+  relationships: Relationship[];
+  parenthoods: Parenthood[];
+  onPersonClick: (p: TreePerson) => void;
+  onPersonDrop: (pos: Position, pers: TreePerson) => void;
 }
 
-export function Map({ tree, setTree }: Props) {
-  const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
-  const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
+export interface MapHandle {
+  getViewMiddlePosition: () => Position;
+}
+
+export const Map = forwardRef<MapHandle, Props>(function Map ({ people, onPersonClick, onPersonDrop }, ref) {
   const [mapSize, setMapSize] = useState({
-    width: Math.max(...tree.people.map(p => Math.abs(p.position.x)), 0),
-    height: Math.max(...tree.people.map(p => Math.abs(p.position.y)), 0)
+    width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
+    height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
   });
   const [scale, setScale] = useReducer((oldScale: number, getNewScale: (old: number) => number) => {
     return limitValue(getNewScale(oldScale), scaleMin, scaleMax);
@@ -61,6 +62,20 @@ export function Map({ tree, setTree }: Props) {
     });
   }, [scale])
 
+  useImperativeHandle(ref, () => {
+    return {
+      getViewMiddlePosition: (): Position => {
+        const map = mapRef.current!;
+        const mapContainer = getMapContainer();
+        const mapSize = map.getBoundingClientRect();
+        return {
+          x: (mapContainer.scrollLeft + (mapContainer.clientWidth - mapSize.width) / 2) / scale,
+          y: (mapContainer.scrollTop + (mapContainer.clientHeight - mapSize.height) / 2) / scale,
+        };
+      }
+    }
+  })
+
   const handleMouseDown = (e: React.MouseEvent) => {
     // Prevent dragging when clicking on person card
     if(e.target !== e.currentTarget) return;
@@ -81,12 +96,10 @@ export function Map({ tree, setTree }: Props) {
     setIsDragging(false);
   }
 
-  const peopleCards = tree.people.map((person) => {
-    const handleClick = () => setSelectedPerson(person);
+  const peopleCards = people.map((person) => {
+    const handleClick = () => onPersonClick(person);
     const handleDrop = (position: Position) => {
-      person.position = position
-      setTree({...tree})
-      updatePersonPosition(person.id, position);
+      onPersonDrop(position, person);
 
       // Increase size of map if needed
       const positionX = Math.abs(position.x);
@@ -121,33 +134,6 @@ export function Map({ tree, setTree }: Props) {
     )
   })
 
-  const addPerson = async () => {
-    const map = mapRef.current!;
-    const mapContainer = getMapContainer();
-    const mapSize = map.getBoundingClientRect();
-    const newPerson = await createPerson({
-      x: (mapContainer.scrollLeft + (mapContainer.clientWidth - mapSize.width) / 2) / scale,
-      y: (mapContainer.scrollTop + (mapContainer.clientHeight - mapSize.height) / 2) / scale,
-    });
-    tree.people.push(newPerson);
-    setTree({...tree});
-  }
-
-  const closePersonSheet = async () => {
-    const { id } = selectedPerson!;
-    setSelectedPerson(null);
-    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    const newPersonData = await getTreePerson(id);
-
-    if (newPersonData) {
-      tree.people[updatedPersonIndex] = newPersonData;
-    } else {
-      tree.people.splice(updatedPersonIndex, 1);
-    }
-    
-    setTree({...tree});
-  }
-
   const mapStyleVariables = {
     '--map-width': `calc(${mapSize.width * 2}px + 300vw)`,
     '--map-height': `calc(${mapSize.height * 2}px + 300vh)`,
@@ -155,36 +141,20 @@ export function Map({ tree, setTree }: Props) {
   } as CSSProperties;
 
 	return (
-    <>
-      <ScrollArea className="map-container" type="always">
-        <div
-          className="map"
-          style={mapStyleVariables}
-          ref={mapRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMauseUp}
-          onMouseLeave={()=>setIsDragging(false)}
-        >
-          {peopleCards}
-        </div>
-        <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
-          <Heart className="h-4 w-4" />
-        </Button>
-        <Button onClick={addPerson} size="icon" className='absolute right-8 bottom-8'>
-          <Plus className="h-4 w-4" />
-        </Button>
-        <ScrollBar orientation="vertical" />
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-      <PersonDataSheet closeSheet={closePersonSheet} person={selectedPerson} />
-      <RelationshipsSheet
-        isOpened={isRelationsSheetOpened}
-        closeSheet={() => setRelationsSheetOpened(false)}
-        relationships={tree.relationships}
-        setRelationships={(r: Relationship[]) => setTree({...tree, relationships: r})}
-        people={tree.people}
-      />
-    </>
+    <ScrollArea className="map-container" type="always">
+      <div
+        className="map"
+        style={mapStyleVariables}
+        ref={mapRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMauseUp}
+        onMouseLeave={()=>setIsDragging(false)}
+      >
+        {peopleCards}
+      </div>
+      <ScrollBar orientation="vertical" />
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
 	)
-}
+});
