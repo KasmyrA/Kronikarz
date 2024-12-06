@@ -5,4 +5,10 @@ export interface Relationship {
   kind: RelationshipKind;
 }
 
-export type RelationshipKind = "unformal" | "engagement" | "marriage" | "separation" | "divorce";
+export enum RelationshipKind {
+  UNFORMAL = "unformal",
+  ENGAGEMENT = "engagement",
+  MARRIAGE = "marriage",
+  SEPARATION = "separation",
+  DIVORCE = "divorce",
+};

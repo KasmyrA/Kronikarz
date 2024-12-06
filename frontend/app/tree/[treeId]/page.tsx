@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
-import { RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
+import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
 import { createRelationship, deleteRelationship } from '@/lib/relationshipActions';
 
 interface Props {
@@ -42,6 +42,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
   const [selectedRelation, setSelectedRelation] = useState<number | "new" | null>(null);
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
+  const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
   const handleAddPerson = async () => {
@@ -66,7 +67,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({...tree});
   }
 
-  const handlePersonClick = setSelectedPerson;
+  const handlePersonClick = (person: TreePerson) => {
+    if (!selectedRelation && !isRelationsSheetOpened) {
+      setSelectedPerson(person);
+    } else if (partnerPicker && !partnerPicker.forbiddenPartnerIds.includes(person.id)) {
+      partnerPicker.pickPartner(person.id)
+    }
+  };
 
   const handlePersonDrop = (position: Position, person: TreePerson) => {
     person.position = position;
@@ -87,6 +94,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       tree.relationships[updatedRelationIndex] = rel;
     }
     setTree({ ...tree });
+    setSelectedRelation(null);
   };
 
   const handleRelationshipEditorDelete = async () => {
@@ -94,6 +102,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
     tree.relationships.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
+    setSelectedRelation(null);
   };
 
   return (
@@ -128,6 +137,9 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       />
       <RelationshipEditor
         relationshipId={selectedRelation}
+        people={tree.people}
+        partnerPicker={partnerPicker}
+        setPartnerPicker={setPartnerPicker}
         onClose={handleRelationshipEditorClose}
         onSave={handleRelationshipEditorSave}
         onDelete={handleRelationshipEditorDelete}
