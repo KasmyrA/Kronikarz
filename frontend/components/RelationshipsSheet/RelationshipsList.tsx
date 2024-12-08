@@ -4,9 +4,10 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { TreePerson } from "@/lib/treeInterfaces";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { relationshipKindToString } from "@/lib/utils";
+import { getNameSurname, relationshipKindToString } from "@/lib/utils";
 import { Plus, User } from "lucide-react";
 import { Relationship } from "@/lib/relaionshipInterfaces";
+import { Card } from "../ui/card";
 
 interface Props {
   isOpened: boolean;
@@ -22,13 +23,17 @@ export function RelationshipsList({ isOpened, relationships, people, onRelations
     const partner2 = people.find((p) => p.id === rel.partner2)!;
 
     return (
-      <Button key={rel.id} onClick={() => onRelationshipClick(rel.id)} variant="outline" className="w-full p-4 flex-col justify-between">
-        <PartnerImage person={partner1} />
-        <PartnerImage person={partner2} />
-        <h4 className="text-sm text-muted-foreground text-center w-full">
-          {partner1.name} {partner1.surname} i {partner2.name} {partner2.surname}
+      <Button key={rel.id} onClick={() => onRelationshipClick(rel.id)} variant="outline" className="w-full h-auto p-4 block mt-4">
+        <div className="flex justify-around">
+          <PartnerImage person={partner1} />
+          <PartnerImage person={partner2} />
+        </div>
+        <h4 className="mt-4 text-xl font-semibold tracking-tight w-full">
+          {getNameSurname(partner1)} i {getNameSurname(partner2)}
         </h4>
-        <p>{relationshipKindToString[rel.kind]}</p>
+        <h4 className="text-sm text-muted-foreground text-center w-full">
+          {relationshipKindToString[rel.kind]}
+        </h4>
       </Button>
     )
   })
@@ -70,8 +75,8 @@ function PartnerImage({ person }: PartnerImage) {
     <User className="size-full" />;
 
   return (
-    <div className="w-full aspect-square overflow-hidden flex items-center justify-center">
-      { image }
-    </div>
+    <Card className="size-32 overflow-hidden">
+      {image}
+    </Card>
   )
 }

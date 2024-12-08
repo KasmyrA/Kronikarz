@@ -9,7 +9,7 @@ import { Loader2, User } from "lucide-react";
 import { Card } from "../ui/card";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { relationshipKindToString } from "@/lib/utils";
+import { getNameSurname, relationshipKindToString } from "@/lib/utils";
 
 export interface PartnerPicker {
   pickPartner: (personId: number) => void;
@@ -49,6 +49,11 @@ export function RelationshipEditor({ relationshipId, people, partnerPicker, setP
   return (
     <Sheet open={!!relationshipId} modal={false}>
       <SheetContent className="flex flex-col px-0 w-96" side="left">
+        <SheetHeader className="mx-6">
+          <SheetTitle>Edytuj związek</SheetTitle>
+          <SheetDescription>Uzupełnij informacje o związku</SheetDescription>
+        </SheetHeader>
+
         {content}
       </SheetContent>
     </Sheet>
@@ -88,11 +93,6 @@ function LoadedRelationship({ relationship, people, partnerPicker, setPartnerPic
 
   return (
     <>
-      <SheetHeader className="mx-6">
-        <SheetTitle>Edytuj związek</SheetTitle>
-        <SheetDescription>Uzupełnij informacje o związku</SheetDescription>
-      </SheetHeader>
-
       <ScrollArea className="flex-1 p-6" type="auto">
         <PartnerPickerComponent 
           title="Pierwszy partner"
@@ -154,13 +154,7 @@ function PartnerPickerComponent({ title, person, isPicking, startPicking, cancel
     <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
-  const nameSurname = !person ? 
-    "Wybierz osobę" :
-    (person.name || person.surname) ? 
-    `${person.name ?? ''} ${person.surname ?? ''}` :
-    person.sex === 'F' ? 
-    'Nieznana' :
-    'Nieznany';
+  const nameSurname = !person ? "Wybierz osobę" : getNameSurname(person);
 
   const [buttonText, variant, onClick] = isPicking ?
     ["Anuluj wybieranie", "outline", cancelPicking] as const :

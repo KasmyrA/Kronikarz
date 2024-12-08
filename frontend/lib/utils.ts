@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { RelationshipKind } from "./relaionshipInterfaces";
+import { TreePerson } from "./treeInterfaces";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -45,4 +46,12 @@ export const relationshipKindToString: { [rk in RelationshipKind]: string } = {
   "marriage": "W małżeństwie",
   "separation": "W separacji",
   "unformal": "W związku nieformalnym"
+}
+
+export function getNameSurname(person: TreePerson) {
+  return (person.name || person.surname) ?
+    `${person.name ?? ''} ${person.surname ?? ''}` :
+    person.sex === 'F' ?
+      'Nieznana' :
+      'Nieznany';
 }

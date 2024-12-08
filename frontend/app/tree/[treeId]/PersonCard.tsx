@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@/components/ui/card";
 import { Position, TreePerson } from "@/lib/treeInterfaces";
+import { getNameSurname } from "@/lib/utils";
 import { User } from "lucide-react";
 import { useRef, useState } from "react";
 import Draggable, { DraggableEventHandler } from "react-draggable";
@@ -34,12 +35,6 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
     <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
     <User className="w-full h-full" />;
 
-  const nameSurname = (person.name || person.surname) ? 
-    `${person.name ?? ''} ${person.surname ?? ''}` :
-    person.sex === 'F' ? 
-    'Nieznana' :
-    'Nieznany';
-
   const birthDeathDate = (person.birthDate || person.deathDate) &&
     <p className="leading-7 text-center">
       {person.birthDate === "" ? '?' : person.birthDate} - {person.deathDate === "" ? '*' : person.deathDate}
@@ -59,7 +54,7 @@ export function PersonCard({ scale, person, onDrop, onClick }: Props) {
           { personImage }
         </div>
         <h4 className="text-base font-semibold tracking-tight text-center">
-          { nameSurname }
+          { getNameSurname(person) }
         </h4>
         { birthDeathDate }
       </Card>

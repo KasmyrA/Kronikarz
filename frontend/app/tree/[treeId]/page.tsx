@@ -10,7 +10,7 @@ import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personA
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
-import { createRelationship, deleteRelationship } from '@/lib/relationshipActions';
+import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
 
 interface Props {
   params: {
@@ -90,6 +90,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       const newRelationData = await createRelationship(rel);
       tree.relationships.push(newRelationData);
     } else {
+      await updateRelationship(rel);
       const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
       tree.relationships[updatedRelationIndex] = rel;
     }
