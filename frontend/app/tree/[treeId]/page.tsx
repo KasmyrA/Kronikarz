@@ -1,7 +1,7 @@
 "use client";
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
-import { Map, MapHandle } from './Map';
+import { HighlightData, Map, MapHandle } from './Map';
 import { useEffect, useRef, useState } from 'react';
 import { Heart, Loader2, Plus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
@@ -44,6 +44,17 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
+
+  const peopleHighlights = !partnerPicker ?
+    {} : 
+    tree.people.reduce((acc: HighlightData, p) => {
+      if (partnerPicker.forbiddenPartnerIds.includes(p.id)) {
+        acc[p.id] = "hsl(var(--destructive))";
+      } else {
+        acc[p.id] = "#44adef";
+      }
+      return acc;
+    }, {})
 
   const handleAddPerson = async () => {
     const newPersonPosition = mapRef.current!.getViewMiddlePosition();
@@ -113,6 +124,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         people={tree.people}
         relationships={tree.relationships}
         parenthoods={tree.parenthoods}
+        peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
         onPersonDrop={handlePersonDrop}
       />

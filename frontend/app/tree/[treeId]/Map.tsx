@@ -12,10 +12,13 @@ const scaleStep = 0.05;
 const scaleMin = 0.5;
 const scaleMax = 1.5;
 
+export type HighlightData = { [personId: number]: string };
+
 interface Props {
   people: TreePerson[];
   relationships: Relationship[];
   parenthoods: Parenthood[];
+  peopleHighlights: HighlightData;
   onPersonClick: (p: TreePerson) => void;
   onPersonDrop: (pos: Position, pers: TreePerson) => void;
 }
@@ -24,7 +27,7 @@ export interface MapHandle {
   getViewMiddlePosition: () => Position;
 }
 
-export const Map = forwardRef<MapHandle, Props>(function Map ({ people, onPersonClick, onPersonDrop }, ref) {
+export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, onPersonClick, onPersonDrop }, ref) {
   const [mapSize, setMapSize] = useState({
     width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
     height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
@@ -126,6 +129,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, onPerson
     return (
       <PersonCard
         person={person}
+        highlight={peopleHighlights[person.id]}
         onClick={handleClick}
         onDrop={handleDrop}
         key={person.id}

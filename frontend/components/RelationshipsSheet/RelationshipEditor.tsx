@@ -86,7 +86,6 @@ function LoadedRelationship({ relationship, people, partnerPicker, setPartnerPic
   // Cleanup on component destroy
   useEffect(() => {
     return () => {
-      console.log("cleanup");
       setPartnerPicker(null);
     };
   }, [setPartnerPicker])
