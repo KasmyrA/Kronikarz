@@ -13,7 +13,7 @@ interface Tree {
 export default function TreeList() {
     const [trees, setTrees] = useState<Tree[]>([])
     const [name, setName] = useState<string>("")
-    const [description, setDescription] = useState<string>("")
+    const [description, setDescription] = useState<string | null>(null)
     const [imageUrl, setImageUrl] = useState<string>("") // Zmienna dla URL zdjęcia
     const [error, setError] = useState<string>("")
     const [editingTreeId, setEditingTreeId] = useState<number | null>(null) // ID drzewa, które jest edytowane
@@ -35,8 +35,8 @@ export default function TreeList() {
     }, [])
 
     const addTree = async () => {
-        if (!name || !description) {
-            setError("Nazwa i opis są wymagane.")
+        if (!name) {
+            setError("Nazwa jest  wymagana.")
             return
         }
 
@@ -51,7 +51,7 @@ export default function TreeList() {
             })
 
             if (!response.ok) {
-                throw new Error('Failed to add tree')
+                throw new Error('Nie udało się dodać drzewa, baza dancych zwróciła błąd.')
             }
 
             const addedTree = await response.json()
@@ -63,8 +63,8 @@ export default function TreeList() {
     }
 
     const updateTree = async () => {
-        if (!editingTreeId || !name || !description) {
-            setError("Nazwa i opis są wymagane.")
+        if (!editingTreeId || !name) {
+            setError("Nazwa jest wymagana.")
             return
         }
 
