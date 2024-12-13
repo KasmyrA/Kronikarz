@@ -27,7 +27,8 @@ router.register(r'register', views.UserRegistrationView,basename='register')
 urlpatterns = [
     path('admin/', admin.site.urls),  # Admin interface
     path('api/', include(router.urls)),  # Include the router-generated URLs
-    path('persons/', include('person.urls'))
+    path('persons/', include('person.urls')),
+    path('parenthoods/', include('parenthood.urls')),
 ]
 
 
