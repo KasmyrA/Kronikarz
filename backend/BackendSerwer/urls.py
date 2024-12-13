@@ -29,8 +29,21 @@ urlpatterns = [
     path('api/', include(router.urls)),  # Include the router-generated URLs
     path('persons/', include('person.urls')),
     path('parenthoods/', include('parenthood.urls')),
+    path('relationships/', views.get_all_relationships)
+    path('relationships/<int:record_relation>/', views.get_one_relationship),
+    path('trees/',views.get_all_trees),
+    path('trees/<int:record_tree>/',views.get_one_tree),
 ]
 
+
+
+'''
+urlpatterns = [
+    path('', views.get_all),
+    path('by-child/<int:record_child>/', views.get_one_by_child),
+]
+
+'''
 
 '''
 urlpatterns = [path]
