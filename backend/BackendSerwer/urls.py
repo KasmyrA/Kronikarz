@@ -24,11 +24,12 @@ router = routers.DefaultRouter()
 router.register(r'register', views.UserRegistrationView,basename='register')
 
 # Extend urlpatterns to include the router and other paths
-urlpatterns = router.urls
-'''[
+urlpatterns = [
     path('admin/', admin.site.urls),  # Admin interface
     path('api/', include(router.urls)),  # Include the router-generated URLs
-]'''
+    path('persons/', include('person.urls')),
+    path('parenthoods/', include('parenthood.urls')),
+]
 
 
 '''

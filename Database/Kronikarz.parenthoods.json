@@ -1,0 +1,13 @@
+[{
+  "_id": {
+    "$oid": "6744826388cd5dd97bfa3bc2"
+  },
+  "mother": 10,
+  "father": 20,
+  "child": 25,
+  "adoption": {
+    "mother": 30,
+    "father": 40,
+    "date": "2000.1.1"
+  }
+}]
