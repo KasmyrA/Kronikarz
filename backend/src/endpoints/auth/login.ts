@@ -2,7 +2,7 @@ import { getUserByEmail } from "../../db/userQueries.js";
 import { Request, Response } from "../../types/helperTypes.js";
 import { User } from "../../types/userInterfaces.js";
 import { comparePasswords } from "../../utils/hashPassword.js";
-import { generateTokens } from "../../utils/token.js";
+import { generateAccessToken } from "../../utils/token.js";
 import { INT_LOGIN_ERROR, LoginRequest, LoginResponse, WRONG_EMAIL, WRONG_PASSWORD } from "./authTypes.js";
 
 
@@ -28,7 +28,7 @@ export async function login(req: Request<LoginRequest>, res: Response<LoginRespo
     return;
   }
 
-  const tokens = generateTokens(user._id)
+  const accessToken = generateAccessToken(user._id)
 
-  res.status(200).json(tokens);
+  res.status(200).json({ accessToken });
 }
