@@ -1,17 +1,22 @@
 import express from 'express'
 import cors from 'cors'
+import { loadEnv } from './utils/env.js';
+import { authRouter } from './endpoints/auth/auth.js';
 
-const app = express()
-const port = 4000
+const port = 4000;
 
-app.use(express.json())
-app.use(cors())
+loadEnv();
 
+const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// Api enpoints
+app.use("/auth", authRouter);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Example app listening on port ${port}`);
 })
