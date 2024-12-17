@@ -1,23 +1,7 @@
-import { Parenthood } from "./parenthoodInterfaces.js";
-import { PartialPerson, Person } from "./personInterfaces.js";
-import { Relationship } from "./relaionshipInterfaces.js";
-
 export interface Tree {
-  id: number;
+  _id: string;
   name: string;
-  people: Person[];
-  relationships: Relationship[];
-  parenthoods: Parenthood[];
+  peopleIds: string[];
+  relationshipsIds: string[];
+  parenthoodsIds: string[];
 }
-
-export interface PartialTree {
-  id: number;
-  name: string;
-  people: PartialPerson[];
-  relationships: Relationship[];
-  parenthoods: Parenthood[];
-}
-
-
-
-

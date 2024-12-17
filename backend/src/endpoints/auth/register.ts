@@ -33,7 +33,7 @@ export async function register(req: Request<RegisterRequest>, res: Response<Regi
   let userId: string
   const newUser: Omit<User, "_id"> = {
     email,
-    trees: [],
+    treeIds: [],
     hashedPassword
   }
 
