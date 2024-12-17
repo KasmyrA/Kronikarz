@@ -1,17 +1,31 @@
+import { ObjectId } from "mongodb";
 import { User } from "../types/userInterfaces.js";
-import { db, IdType } from "./db.js";
+import { db } from "./db.js";
 
-const usersCollection = db.collection<User>("users");;
-
-export async function getUserByEmail(email: string) {
-  return usersCollection.findOne({ email });
+interface DbUser extends Omit<User, "_id"> {
+  _id: ObjectId;
 }
 
-export async function getUserById(_id: IdType) {
-  return usersCollection.findOne({ _id });
+function dbUserToUser(usr: DbUser): User {
+  return {
+    ...usr,
+    _id: usr._id.toString()
+  }
 }
 
-export async function createUser(user: Omit<User, "_id">): Promise<IdType> {
-  const { insertedId } = await usersCollection.insertOne(user as User);
-  return insertedId;
+const usersCollection = db.collection<DbUser>("users");;
+
+export async function getUserByEmail(email: string): Promise<User> {
+  const usr = await usersCollection.findOne({ email });
+  return dbUserToUser(usr);
+}
+
+export async function getUserById(_id: string): Promise<User> {
+  const usr = await usersCollection.findOne({ _id: new ObjectId(_id) });
+  return dbUserToUser(usr);
+}
+
+export async function createUser(user: Omit<User, "_id">): Promise<string> {
+  const { insertedId } = await usersCollection.insertOne(user as DbUser);
+  return insertedId.toString();
 }

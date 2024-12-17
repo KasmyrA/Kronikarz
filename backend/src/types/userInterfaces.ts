@@ -1,8 +1,7 @@
-import { ObjectId } from "mongodb";
 import { Tree } from "./treeInterfaces.js";
 
 export interface User {
-  _id: ObjectId;
+  _id: string;
   email: string;
   hashedPassword: string;
   trees: Tree[];

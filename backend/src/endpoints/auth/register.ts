@@ -1,4 +1,3 @@
-import { IdType } from "../../db/db.js";
 import { createUser, getUserByEmail } from "../../db/userQueries.js";
 import { Request, Response } from "../../types/helperTypes.js";
 import { User } from "../../types/userInterfaces.js";
@@ -31,7 +30,7 @@ export async function register(req: Request<RegisterRequest>, res: Response<Regi
 
   const hashedPassword = await hashPassword(password);
 
-  let userId: IdType
+  let userId: string
   const newUser: Omit<User, "_id"> = {
     email,
     trees: [],

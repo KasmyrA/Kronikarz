@@ -1,6 +1,4 @@
-import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
-
-export type IdType = ObjectId;
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 const uri = "mongodb://localhost:27017";
 const dbName = "kronikarz";
