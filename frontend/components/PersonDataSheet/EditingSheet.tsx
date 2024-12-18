@@ -66,18 +66,16 @@ export function EditingSheet({ person, closeSheet }: Props) {
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
-      <SheetFooter className="mx-auto w-full max-w-xl">
-        <div className="flex gap-4">
-          <Button onClick={closeSheet} variant="outline" className="flex-1">
-            Nie zapisuj
-          </Button>
-          <Button onClick={handleSave} className="flex-1">
-            Zapisz
-          </Button>
-          <Button onClick={handleDelete} variant="destructive" className="flex-1">
-            Usuń
-          </Button>
-        </div>
+      <SheetFooter className="mx-auto w-full max-w-xl gap-4">
+        <Button onClick={closeSheet} variant="outline" className="flex-1">
+          Nie zapisuj
+        </Button>
+        <Button onClick={handleSave} className="flex-1">
+          Zapisz
+        </Button>
+        <Button onClick={handleDelete} variant="destructive" className="flex-1">
+          Usuń
+        </Button>
       </SheetFooter>
     </>
   )
