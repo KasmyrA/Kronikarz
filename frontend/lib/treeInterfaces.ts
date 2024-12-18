@@ -1,11 +1,11 @@
 import { Parenthood } from "./parenthoodInterfaces";
-import { RelationshipKind } from "./relaionshipInterfaces"
+import { Relationship } from "./relaionshipInterfaces"
 
 export interface Tree {
   id: number;
   name: string;
   people: TreePerson[];
-  relationships: TreeRelationship[];
+  relationships: Relationship[];
   parenthoods: Parenthood[];
 }
 
@@ -23,11 +23,4 @@ export interface TreePerson {
 export interface Position {
   x: number;
   y: number
-}
-
-export interface TreeRelationship {
-  id: number;
-  parrner1: number;
-  partner2: number;
-  kind: RelationshipKind;
 }
