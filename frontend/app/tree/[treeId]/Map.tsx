@@ -7,6 +7,7 @@ import { Position, TreePerson } from '@/lib/treeInterfaces';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
+import { RelationshipConnection } from '@/components/Map/RelationshipConnection/RelationshipConnection';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -21,13 +22,14 @@ interface Props {
   peopleHighlights: HighlightData;
   onPersonClick: (p: TreePerson) => void;
   onPersonDrop: (pos: Position, pers: TreePerson) => void;
+  onRelationshipClick: (r: number) => void
 }
 
 export interface MapHandle {
   getViewMiddlePosition: () => Position;
 }
 
-export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, onPersonClick, onPersonDrop }, ref) {
+export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, onPersonClick, onPersonDrop, onRelationshipClick }, ref) {
   const [mapSize, setMapSize] = useState({
     width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
     height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
@@ -39,6 +41,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
   const mapRef = useRef<HTMLDivElement>(null);
   const getMapContainer = () => mapRef.current!.parentElement!.parentElement!;
   const [isDragging, setIsDragging] = useState(false);
+  const [draggedPerson, setDraggedPerson] = useState<number | null>(null);
   const startPosition = useRef({ x: 0, y: 0 });
   const scrollPosition = useRef({ left: 0, top: 0 });
 
@@ -101,8 +104,10 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
 
   const peopleCards = people.map((person) => {
     const handleClick = () => onPersonClick(person);
+    const handleDragStart = () => setDraggedPerson(person.id);
     const handleDrop = (position: Position) => {
       onPersonDrop(position, person);
+      setDraggedPerson(null);
 
       // Increase size of map if needed
       const positionX = Math.abs(position.x);
@@ -132,11 +137,24 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         highlight={peopleHighlights[person.id]}
         onClick={handleClick}
         onDrop={handleDrop}
+        onDragStart={handleDragStart}
         key={person.id}
         scale={scale}
       />
     )
-  })
+  });
+
+  const relationshipConnections = relationships.map((rel) => {
+    return (
+      <RelationshipConnection
+        key={rel.id}
+        relationship={rel}
+        people={people}
+        draggedPerson={draggedPerson}
+        onClick={() => onRelationshipClick(rel.id)}
+      />
+    )
+  });
 
   const mapStyleVariables = {
     '--map-width': `calc(${mapSize.width * 2}px + 300vw)`,
@@ -155,6 +173,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         onMouseUp={handleMauseUp}
         onMouseLeave={()=>setIsDragging(false)}
       >
+        {relationshipConnections}
         {peopleCards}
       </div>
       <ScrollBar orientation="vertical" />

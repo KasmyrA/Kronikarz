@@ -10,16 +10,18 @@ interface Props {
   scale: number;
   person: TreePerson;
   highlight: string | undefined;
+  onDragStart: () => void;
   onDrop: (p: Position) => void;
   onClick: () => void;
 }
 
-export function PersonCard({ scale, person, highlight, onDrop, onClick }: Props) {
+export function PersonCard({ scale, person, highlight, onDrop, onClick, onDragStart }: Props) {
   const [isDragged, setIsDragged] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const handleDrag: DraggableEventHandler = () => {
     setIsDragged(true);
+    onDragStart();
   }
 
   const handleStop: DraggableEventHandler = (e, d) => {

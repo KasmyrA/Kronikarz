@@ -1,0 +1,21 @@
+.rel-connection {
+  position: absolute;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.rel-line {
+  stroke: black;
+  stroke-width: 3px;
+  transition: stroke .25s;
+}
+
+.rel-margin {
+  pointer-events: all;
+  visibility: hidden;
+  cursor: pointer;
+}
+
+.rel-margin:hover ~ .rel-line {
+  stroke: goldenrod;
+}

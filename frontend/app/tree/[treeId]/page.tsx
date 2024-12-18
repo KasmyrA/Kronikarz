@@ -92,6 +92,12 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     updatePersonPosition(person.id, position);
   }
 
+  const handleRelationshipClick = (id: number | "new") => {
+    if (selectedRelation === null) {
+      setSelectedRelation(id);
+    }
+  }
+
   const handleRelationshipEditorClose = () => {
     setSelectedRelation(null);
   }
@@ -127,6 +133,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
         onPersonDrop={handlePersonDrop}
+        onRelationshipClick={handleRelationshipClick}
       />
 
       <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
@@ -145,7 +152,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         isOpened={isRelationsSheetOpened}
         relationships={tree.relationships}
         people={tree.people}
-        onRelationshipClick={setSelectedRelation}
+        onRelationshipClick={handleRelationshipClick}
         onClose={() => setRelationsSheetOpened(false)}
       />
       <RelationshipEditor
