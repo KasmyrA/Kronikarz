@@ -35,7 +35,11 @@ urlpatterns = [
     path('relationships/delete/<str:uid>/<int:id>/',views.delete_one_relationship),
     path('relationships/update/<str:uid>/<int:id>/',views.update_one_relationship),
     path('trees/', views.get_all_trees),
-    path('trees/<str:record_tree>/', views.get_one_tree),
+    path('trees/<str:uid>/<int:id>/', views.get_one_tree),
+    path('trees/delete/<str:uid>/<int:id>/',views.delete_one_tree),
+    path('trees/update/<str:uid>/<int:id>/', views.update_one_tree),
+    path('trees/create/<str:uid>/',views.create_tree),
+
 ]
 
 

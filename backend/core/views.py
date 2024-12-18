@@ -19,6 +19,8 @@ from django.views.decorators.csrf import csrf_exempt
 from bson import ObjectId
 
 
+#views for relationships
+
 def get_all_relationships(request):
     relationships = list(relationships_collection.find())
     for relationship in relationships:
@@ -197,8 +199,7 @@ def create_relationship(request, uid):
 
 
 
-
-
+#views for trees
 
 
 def get_all_trees(request):
@@ -207,20 +208,126 @@ def get_all_trees(request):
         tree['_id'] = str(tree['_id'])
     return JsonResponse(trees, safe=False)
 
-def get_one_tree(request, record_tree):
+def get_one_tree(request, uid, id):
     try:
-        record_tree = int(record_tree)
+        uid = ObjectId(uid)
     except ValueError:
-        return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
+        return JsonResponse({"error": "Invalid document ID format."}, status=400)
     
-    record = trees_collection.find_one({"tree": record_tree})
-    if record:
-        record['_id'] = str(record['_id'])
-        return JsonResponse(record)
+    record = trees_collection.find_one({"_id": uid})
+    print("tutaj jest record -- ",record)
+    if not record:
+        return JsonResponse({"error": "Parent document not found."}, status=404)
+    tree = next((tree for tree in record.get("trees", []) if tree["id"] == id), None)
+    if tree:
+        return JsonResponse(tree, safe=False)
     else:
-        return JsonResponse({"error": "Record not found"}, status=404)
+        return JsonResponse({"error": "Tree not found."}, status=404)
+
+def delete_one_tree(request, uid, id):
+    if request.method == "DELETE":
+        try:
+            
+            uid = ObjectId(uid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid document ID format."}, status=400)
+        record = trees_collection.find_one({"_id": uid})
+        if not record:
+            return JsonResponse({"error": "Parent document not found."}, status=404)
+
+        tree_index = next((index for index, tree in enumerate(record.get("trees", [])) if tree["id"] == id), None)
+        if tree_index is not None:
+            record["trees"].pop(tree_index)
+            result = trees_collection.update_one({"_id": uid}, {"$set": {"trees": record["trees"]}})
+            if result.modified_count > 0:
+                return JsonResponse({"message": f"Tree with ID {id} successfully deleted."}, status=200)
+            else:
+                return JsonResponse({"error": "Failed to delete the tree."}, status=500)
+        else:
+            return JsonResponse({"error": "Tree not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
 
 
+@csrf_exempt
+def create_tree(request, uid):
+    if request.method == 'POST':
+        try:
+            uid = ObjectId(uid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+        required_fields = ['name', 'people', 'relationships', 'parenthoods']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+
+        # Retrieve the parent tree by UID
+        parent_tree = trees_collection.find_one({"_id": uid})
+        if not parent_tree:
+            return JsonResponse({"error": "Parent tree not found."}, status=404)
+
+        # Prepare the new tree data
+        new_tree = {
+            "name": data.get('name', ''),
+            "people": data.get('people', []),
+            "relationships": data.get('relationships', []),
+            "parenthoods": data.get('parenthoods', [])
+        }
+
+        # Insert the new tree into the MongoDB collection
+        result = trees_collection.insert_one(new_tree)
+        if result.inserted_id:
+            return JsonResponse({'status': 'success', 'tree_id': result.inserted_id}, status=201)
+        else:
+            return JsonResponse({"error": "Failed to add new tree."}, status=500)
+
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+def update_one_tree(request, uid, id):
+    if request.method == "PUT":
+        try:
+
+            uid = ObjectId(uid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+        try:
+
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+        required_fields = ["name", "people", "relationships", "parenthoods"]
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+
+        record = trees_collection.find_one({"_id": uid})
+        if not record:
+            return JsonResponse({"error": "Parent document not found."}, status=404)
+
+        tree_index = next((i for i, tree in enumerate(record["trees"]) if tree["id"] == id), None)
+        if tree_index is None:
+            return JsonResponse({"error": "Tree not found."}, status=404)
+
+
+        record["trees"][tree_index].update(data)
+
+        update_result = trees_collection.replace_one({"_id": uid}, record)
+
+        if update_result.modified_count > 0:
+            return JsonResponse({"message": "Tree successfully updated."}, status=200)
+        else:
+            return JsonResponse({"message": "No changes made to the tree."}, status=200)
+    else:
+        return JsonResponse({"error": "Invalid request method. Use PUT."}, status=405)
 
 class UserRegistrationView(viewsets.ViewSet):
     def post(self, request):
