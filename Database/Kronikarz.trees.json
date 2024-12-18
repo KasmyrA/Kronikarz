@@ -1,0 +1,112 @@
+{
+  "trees": [
+    {
+      "id": 1,
+      "name": "Smith Family Tree",
+      "people": [
+        {
+          "id": 1,
+          "name": "John",
+          "surname": "Smith",
+          "sex": "M",
+          "imageUrl": "https://example.com/images/john_smith.jpg",
+          "birthDate": "1980-05-14",
+          "deathDate": "",
+          "position": { "x": 0, "y": 0 }
+        },
+        {
+          "id": 2,
+          "name": "Jane",
+          "surname": "Doe",
+          "sex": "F",
+          "imageUrl": "https://example.com/images/jane_doe.jpg",
+          "birthDate": "1983-07-20",
+          "deathDate": "",
+          "position": { "x": 1, "y": 0 }
+        },
+        {
+          "id": 3,
+          "name": "Michael",
+          "surname": "Smith",
+          "sex": "M",
+          "imageUrl": null,
+          "birthDate": "2009-03-22",
+          "deathDate": "",
+          "position": { "x": 0, "y": 1 }
+        },
+        {
+          "id": 4,
+          "name": "Emily",
+          "surname": "Smith",
+          "sex": "F",
+          "imageUrl": null,
+          "birthDate": "2012-11-12",
+          "deathDate": "",
+          "position": { "x": 1, "y": 1 }
+        }
+      ],
+      "relationships": [
+        {
+          "id": 1,
+          "parrner1": 1,
+          "partner2": 2,
+          "kind": "marriage"
+        }
+      ],
+      "parenthoods": [
+        { "parentId": 1, "childId": 3 },
+        { "parentId": 2, "childId": 3 },
+        { "parentId": 1, "childId": 4 },
+        { "parentId": 2, "childId": 4 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Doe Family Tree",
+      "people": [
+        {
+          "id": 5,
+          "name": "James",
+          "surname": "Doe",
+          "sex": "M",
+          "imageUrl": "https://example.com/images/james_doe.jpg",
+          "birthDate": "1975-12-02",
+          "deathDate": "",
+          "position": { "x": 0, "y": 0 }
+        },
+        {
+          "id": 6,
+          "name": "Sophia",
+          "surname": "Green",
+          "sex": "F",
+          "imageUrl": null,
+          "birthDate": "1978-10-16",
+          "deathDate": "",
+          "position": { "x": 1, "y": 0 }
+        },
+        {
+          "id": 7,
+          "name": "Liam",
+          "surname": "Doe",
+          "sex": "M",
+          "imageUrl": null,
+          "birthDate": "2000-05-05",
+          "deathDate": "",
+          "position": { "x": 0, "y": 1 }
+        }
+      ],
+      "relationships": [
+        {
+          "id": 2,
+          "parrner1": 5,
+          "partner2": 6,
+          "kind": "marriage"
+        }
+      ],
+      "parenthoods": [
+        { "parentId": 5, "childId": 7 },
+        { "parentId": 6, "childId": 7 }
+      ]
+    }
+  ]
+}

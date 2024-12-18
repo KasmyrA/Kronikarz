@@ -94,7 +94,7 @@ def get_all_trees(request):
         tree['_id'] = str(tree['_id'])
     return JsonResponse(trees, safe=False)
 
-def get_one_relationship(request, record_tree):
+def get_one_tree(request, record_tree):
     try:
         record_tree = int(record_tree)
     except ValueError:
