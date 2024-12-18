@@ -25,14 +25,14 @@ router.register(r'register', views.UserRegistrationView,basename='register')
 
 # Extend urlpatterns to include the router and other paths
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Admin interface
-    path('api/', include(router.urls)),  # Include the router-generated URLs
-    path('persons/', include('person.urls')),
-    path('parenthoods/', include('parenthood.urls')),
-    path('relationships/', views.get_all_relationships)
+    path('admin/', admin.site.urls),  
+    path('api/', include(router.urls)),  
+    path('persons/', include('person.urls')),  
+    path('parenthoods/', include('parenthood.urls')),  
+    path('relationships/', views.get_all_relationships),
     path('relationships/<int:record_relation>/', views.get_one_relationship),
-    path('trees/',views.get_all_trees),
-    path('trees/<int:record_tree>/',views.get_one_tree),
+    path('trees/', views.get_all_trees),
+    path('trees/<int:record_tree>/', views.get_one_tree),
 ]
 
 
