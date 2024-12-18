@@ -244,3 +244,9 @@ paket-files/
 .idea/
 *.sln.iml
 /.idea
+
+
+
+**/__pycache__/
+*.pyc
+*.pyo 

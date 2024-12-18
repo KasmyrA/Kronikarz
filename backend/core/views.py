@@ -14,7 +14,7 @@ from django.shortcuts import render
 from .models import relationships_collection
 from .models import trees_collection
 from django.http import HttpResponse, JsonResponse
-
+import uuid
 
 
 
@@ -26,7 +26,7 @@ def get_all_relationships(request):
 
 def get_one_relationship(request, record_relation):
     try:
-        record_relation = int(record_relation)
+        record_relation = str(record_relation)
     except ValueError:
         return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
     
@@ -40,7 +40,7 @@ def get_one_relationship(request, record_relation):
 def delete_one_relationship(request, record_relation):
     if request.method == "DELETE":
         try:
-            record_relation = int(record_relation)
+            record_relation = str(record_relation)
         except ValueError:
             return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
         
@@ -85,6 +85,55 @@ def update_one_relationship(request, record_relation):
     else:
         return JsonResponse({"error": "Invalid request method. Use PUT."}, status=405)
         
+
+def create_relationship(request):
+    if request.method == 'POST':
+        try:
+                data = json.loads(request.body)
+            
+            
+                required_fields = ['partner1', 'partner2', 'kind']
+                for field in required_fields:
+                    if field not in data:
+                        return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+            
+            
+                if 'id' in data:
+                    existing_record = relationships_collection.find_one({"_id": data['id']})
+                    if existing_record:
+                        return JsonResponse({"error": "UUID already exists. Cannot overwrite existing record."}, status=400)
+                else:
+                    data['id'] = str(uuid.uuid4())  
+            
+            
+                relationship = {
+                    "_id": data['id'],
+                    "partner1": data['partner1'],
+                    "partner2": data['partner2'],
+                    "kind": data['kind']
+                }
+            
+            
+                result = relationships_collection.insert_one(relationship)
+            
+            
+                created_relationship = relationships_collection.find_one({"_id": result.inserted_id})
+                created_relationship['_id'] = str(created_relationship['_id'])
+                return JsonResponse(created_relationship)
+        
+        except ValueError:
+            return JsonResponse({"error": "Invalid data format."}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON."}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+        
+
+
+
+
 
 
 
