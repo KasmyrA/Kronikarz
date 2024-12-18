@@ -4,6 +4,11 @@
   transition: opacity .25s;
 }
 
+.rel-symbol {
+  r: 12px;
+  fill: white;
+}
+
 .rel-line {
   stroke: black;
   stroke-width: 3px;
@@ -14,6 +19,7 @@
   pointer-events: all;
   visibility: hidden;
   cursor: pointer;
+  stroke-dasharray: none !important;
 }
 
 .rel-margin:hover ~ .rel-line {
