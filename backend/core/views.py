@@ -15,7 +15,8 @@ from .models import relationships_collection
 from .models import trees_collection
 from django.http import HttpResponse, JsonResponse
 import uuid
-
+from django.views.decorators.csrf import csrf_exempt
+from bson import ObjectId
 
 
 def get_all_relationships(request):
@@ -24,111 +25,174 @@ def get_all_relationships(request):
         relationship['_id'] = str(relationship['_id'])
     return JsonResponse(relationships, safe=False)
 
-def get_one_relationship(request, record_relation):
-    try:
-        record_relation = str(record_relation)
-    except ValueError:
-        return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
-    
-    record = relationships_collection.find_one({"relationship": record_relation})
-    if record:
-        record['_id'] = str(record['_id'])
-        return JsonResponse(record)
-    else:
-        return JsonResponse({"error": "Record not found"}, status=404)
 
-def delete_one_relationship(request, record_relation):
+def get_one_relationship(request, uid, id):
+    try:
+        uid = ObjectId(uid)
+        id = int(id)
+    except ValueError:
+        return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+    record = relationships_collection.find_one({"_id": uid})
+    print(record)
+    if record and "relationships" in record:
+        for relationship in record["relationships"]:
+            if relationship["id"] == id:
+                return JsonResponse(relationship,safe=False)
+    
+    return JsonResponse("Not Found",safe=False)
+
+
+def delete_one_relationship(request, uid, id):
     if request.method == "DELETE":
         try:
-            record_relation = str(record_relation)
+            uid = ObjectId(uid)
+            id = int(id)
         except ValueError:
-            return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
-        
-        
-        result = relationships_collection.delete_one({"relationship": record_relation})
-        
-        if result.deleted_count > 0:
-            return JsonResponse({"message": f"Record with relationship {record_relation} successfully deleted."}, status=200)
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        record = relationships_collection.find_one({"_id": uid})
+        if record and "relationships" in record:
+
+            updated_relationships = [
+                relationship for relationship in record["relationships"] if relationship["id"] != id
+            ]
+            
+
+            if len(updated_relationships) < len(record["relationships"]):
+                result = relationships_collection.update_one(
+                    {"_id": uid},
+                    {"$set": {"relationships": updated_relationships}}
+                )
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"Relationship with id {id} successfully deleted."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to delete relationship."}, status=500)
+            else:
+                return JsonResponse({"error": "Relationship not found."}, status=404)
         else:
-            return JsonResponse({"error": "Record not found or already deleted."}, status=404)
+            return JsonResponse({"error": "Document not found."}, status=404)
     else:
         return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
 
-def update_one_relationship(request, record_relation):
+
+
+from bson import ObjectId
+from django.http import JsonResponse
+import json
+
+def update_one_relationship(request, uid, id):
     if request.method == "PUT":
         try:
-            
-            record_relation = int(record_relation)
+            uid = ObjectId(uid)  
+            id = int(id)  
         except ValueError:
-            return JsonResponse({"error": "Invalid ID format. Must be an integer."}, status=400)
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
 
-        
         try:
-            data = json.loads(request.body)  
+            data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON body."}, status=400)
 
-        
-        record = relationships_collection.find_one({"relationship": record_relation})
+        record = relationships_collection.find_one({"_id": uid})
         if not record:
-            return JsonResponse({"error": "Record not found."}, status=404)
+            return JsonResponse({"error": "Document not found."}, status=404)
 
-        
-        update_result = relationships_collection.update_one(
-            {"relationship": record_relation},  
-            {"$set": data}                      
+        updated = False
+        for relationship in record.get("relationships", []):
+            if relationship["id"] == id:
+                relationship.update(data)
+                updated = True
+                break
+
+        if not updated:
+            return JsonResponse({"error": "Relationship not found."}, status=404)
+
+        result = relationships_collection.update_one(
+            {"_id": uid},
+            {"$set": {"relationships": record["relationships"]}}
         )
-        if update_result.modified_count > 0:
-            return JsonResponse({"message": "Record successfully updated."}, status=200)
+
+        if result.modified_count > 0:
+            return JsonResponse({"message": f"Relationship with id {id} successfully updated."}, status=200)
         else:
-            return JsonResponse({"message": "No changes made to the record."}, status=200)
+            return JsonResponse({"message": "No changes made to the relationship."}, status=200)
     else:
         return JsonResponse({"error": "Invalid request method. Use PUT."}, status=405)
+
         
 
-def create_relationship(request):
+
+
+
+
+@csrf_exempt
+def create_relationship(request, uid):
     if request.method == 'POST':
         try:
-                data = json.loads(request.body)
-            
-            
-                required_fields = ['partner1', 'partner2', 'kind']
-                for field in required_fields:
-                    if field not in data:
-                        return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
-            
-            
-                if 'id' in data:
-                    existing_record = relationships_collection.find_one({"_id": data['id']})
-                    if existing_record:
-                        return JsonResponse({"error": "UUID already exists. Cannot overwrite existing record."}, status=400)
-                else:
-                    data['id'] = str(uuid.uuid4())  
-            
-            
-                relationship = {
-                    "_id": data['id'],
-                    "partner1": data['partner1'],
-                    "partner2": data['partner2'],
-                    "kind": data['kind']
-                }
-            
-            
-                result = relationships_collection.insert_one(relationship)
-            
-            
-                created_relationship = relationships_collection.find_one({"_id": result.inserted_id})
-                created_relationship['_id'] = str(created_relationship['_id'])
-                return JsonResponse(created_relationship)
-        
+           
+            uid = ObjectId(uid)
         except ValueError:
-            return JsonResponse({"error": "Invalid data format."}, status=400)
+            return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+        try:
+
+            data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON."}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+
+
+        required_fields = ['partner1', 'partner2', 'kind']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+
+        record = relationships_collection.find_one({"_id": uid})
+        if not record:
+
+            new_relationship = {
+                "id": 1, 
+                "partner1": data['partner1'],
+                "partner2": data['partner2'],
+                "kind": data['kind'],
+                "date": data.get('date', None),
+            }
+            new_record = {
+                "_id": uid,
+                "relationships": [new_relationship]
+            }
+            relationships_collection.insert_one(new_record)
+            return JsonResponse(new_relationship, status=201)
+
+
+        relationships = record.get("relationships", [])
+        max_id = max((relationship["id"] for relationship in relationships), default=0)
+        new_relationship_id = max_id + 1
+
+
+        new_relationship = {
+            "id": new_relationship_id,
+            "partner1": data['partner1'],
+            "partner2": data['partner2'],
+            "kind": data['kind'],
+            "date": data.get('date', None),
+        }
+
+        relationships.append(new_relationship)
+        result = relationships_collection.update_one(
+            {"_id": uid},
+            {"$set": {"relationships": relationships}}
+        )
+
+        if result.modified_count > 0:
+            return JsonResponse(new_relationship, status=201)
+        else:
+            return JsonResponse({"error": "Failed to add new relationship."}, status=500)
+
     else:
         return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+
         
 
 
