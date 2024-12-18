@@ -14,7 +14,7 @@ export function RelationshipConnection({ relationship: rel, people, draggedPerso
   const partner1 = people.find((p) => p.id === rel.partner1)!;
   const partner2 = people.find((p) => p.id === rel.partner2)!;
 
-  const clickmargin = 15;
+  const clickmargin = 25;
   const posX = Math.min(partner1.position.x, partner2.position.x) - clickmargin;
   const posY = Math.min(partner1.position.y, partner2.position.y) - clickmargin;
   const width = Math.abs(partner1.position.x - partner2.position.x) + clickmargin;
