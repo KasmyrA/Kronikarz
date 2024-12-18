@@ -30,9 +30,10 @@ urlpatterns = [
     path('persons/', include('person.urls')),  
     path('parenthoods/', include('parenthood.urls')),  
     path('relationships/', views.get_all_relationships),
-    path('relationships/<int:record_relation>/', views.get_one_relationship),
+    path('relationships/<str:record_relation>/', views.get_one_relationship),
+    path('relationships/create',views.create_relationship),
     path('trees/', views.get_all_trees),
-    path('trees/<int:record_tree>/', views.get_one_tree),
+    path('trees/<str:record_tree>/', views.get_one_tree),
 ]
 
 
