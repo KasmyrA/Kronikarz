@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# fixing the issue of line endings
+* text=auto
+*.tsx text eol=lf
