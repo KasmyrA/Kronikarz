@@ -251,7 +251,7 @@ def delete_one_tree(request, uid, id):
 
 @csrf_exempt
 def create_tree(request, uid):
-    if request.method == 'POST':
+    if request.method in ['POST', 'PUT']:
         try:
             uid = ObjectId(uid)
         except ValueError:
@@ -267,28 +267,63 @@ def create_tree(request, uid):
             if field not in data:
                 return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
 
-        # Retrieve the parent tree by UID
-        parent_tree = trees_collection.find_one({"_id": uid})
-        if not parent_tree:
-            return JsonResponse({"error": "Parent tree not found."}, status=404)
+        
+        doc = trees_collection.find_one({"_id": uid})
 
-        # Prepare the new tree data
-        new_tree = {
-            "name": data.get('name', ''),
-            "people": data.get('people', []),
-            "relationships": data.get('relationships', []),
-            "parenthoods": data.get('parenthoods', [])
-        }
-
-        # Insert the new tree into the MongoDB collection
-        result = trees_collection.insert_one(new_tree)
-        if result.inserted_id:
-            return JsonResponse({'status': 'success', 'tree_id': result.inserted_id}, status=201)
+        if not doc:
+           
+            new_tree = {
+                "id": 1,  
+                "name": data.get('name', ''),
+                "people": data.get('people', []),
+                "relationships": data.get('relationships', []),
+                "parenthoods": data.get('parenthoods', [])
+            }
+            new_document = {
+                "_id": uid,
+                "trees": [new_tree]
+            }
+            result = trees_collection.insert_one(new_document)
+            if result.inserted_id:
+                return JsonResponse(new_tree, status=201)
+            else:
+                return JsonResponse({"error": "Failed to add new tree."}, status=500)
         else:
-            return JsonResponse({"error": "Failed to add new tree."}, status=500)
+
+            trees = doc.get("trees", [])
+            tree_exists = next((tree for tree in trees if tree.get("id") == data.get("id")), None)
+
+            if tree_exists:
+
+                tree_exists.update({
+                    "name": data.get('name', tree_exists.get('name', '')),
+                    "people": data.get('people', tree_exists.get('people', [])),
+                    "relationships": data.get('relationships', tree_exists.get('relationships', [])),
+                    "parenthoods": data.get('parenthoods', tree_exists.get('parenthoods', []))
+                })
+            else:
+
+                new_tree = {
+                    "id": len(trees) + 1,
+                    "name": data.get('name', ''),
+                    "people": data.get('people', []),
+                    "relationships": data.get('relationships', []),
+                    "parenthoods": data.get('parenthoods', [])
+                }
+                trees.append(new_tree)
+
+            result = trees_collection.update_one(
+                {"_id": uid},
+                {"$set": {"trees": trees}}
+            )
+
+            if result.modified_count > 0:
+                return JsonResponse(new_tree if tree_exists else trees[-1], status=201)
+            else:
+                return JsonResponse({"error": "Failed to update tree."}, status=500)
 
     else:
-        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+        return JsonResponse({"error": "Only POST and PUT requests are allowed."}, status=405)
 
 def update_one_tree(request, uid, id):
     if request.method == "PUT":
