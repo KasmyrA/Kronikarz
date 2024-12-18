@@ -1,7 +1,7 @@
 "use client";
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
-import { HighlightData, Map, MapHandle } from './Map';
+import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Heart, Loader2, Plus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
