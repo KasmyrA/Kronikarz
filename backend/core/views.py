@@ -14,6 +14,7 @@ from django.shortcuts import render
 from .models import relationships_collection
 from .models import trees_collection
 from .models import persons_collection
+from .models import parenthoods_collection
 from django.http import HttpResponse, JsonResponse
 import uuid
 from django.views.decorators.csrf import csrf_exempt
@@ -564,6 +565,172 @@ def create_person(request, uid):
             return JsonResponse(new_person, status=201)
         else:
             return JsonResponse({"error": "Failed to add new person."}, status=500)
+
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+
+
+# Parenthoods
+
+def get_all_parenthoods(request):
+    parenthoods = list(parenthoods_collection.find())
+    for parenthood in parenthoods:
+        parenthood['_id'] = str(parenthood['_id'])
+    return JsonResponse(parenthoods, safe=False) 
+
+def get_one_parenthood(request, uid, id):
+    try:
+        uid = ObjectId(uid)
+        id = int(id)
+    except ValueError:
+        return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+    record = parenthoods_collection.find_one({"_id": uid})
+    print(record)
+    if record and "parenthoods" in record:
+        for parenthood in record["parenthoods"]:
+            if parenthood["id"] == id:
+                return JsonResponse(parenthood,safe=False)
+    
+    return JsonResponse("Not Found",safe=False)
+
+
+def delete_one_parenthood(request, uid, id):
+    if request.method == "DELETE":
+        try:
+            uid = ObjectId(uid)
+            id = int(id)
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        record = parenthoods_collection.find_one({"_id": uid})
+        if record and "parenthoods" in record:
+            updated_parenthoods = [
+                parenthood for parenthood in record["parenthoods"] if parenthood["id"] != id
+            ]
+
+            if len(updated_parenthoods) < len(record["parenthoods"]):
+                result = parenthoods_collection.update_one(
+                    {"_id": uid},
+                    {"$set": {"parenthoods": updated_parenthoods}}
+                )
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"Parenthood with id {id} successfully deleted."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to delete parenthood."}, status=500)
+            else:
+                return JsonResponse({"error": "Parenthood not found."}, status=404)
+        else:
+            return JsonResponse({"error": "Document not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
+    
+
+def update_one_parenthood(request, uid, id):
+    if request.method == "PUT":
+        try:
+            uid = ObjectId(uid)
+            id = int(id)
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+        record = parenthoods_collection.find_one({"_id": uid})
+        if not record:
+            return JsonResponse({"error": "Document not found."}, status=404)
+
+        updated = False
+        for parenthood in record.get("parenthoods", []):
+            if parenthood["id"] == id:
+                parenthood.update(data)
+                updated = True
+                break
+
+        if not updated:
+            return JsonResponse({"error": "Parenthood not found."}, status=404)
+
+        result = parenthoods_collection.update_one(
+            {"_id": uid},
+            {"$set": {"parenthoods": record["parenthoods"]}}
+        )
+
+        if result.modified_count > 0:
+            return JsonResponse({"message": f"Parenthood with id {id} successfully updated."}, status=200)
+        else:
+            return JsonResponse({"message": "No changes made to the parenthood."}, status=200)
+    else:
+        return JsonResponse({"error": "Invalid request method. Use PUT."}, status=405)
+    
+
+@csrf_exempt
+def create_parenthood(request, uid):
+    if request.method == 'POST':
+        try:
+            uid = ObjectId(uid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+        required_fields = ['id', 'mother', 'father', 'child', 'adoption']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+
+        adoption_fields = ['mother', 'father', 'date']
+        if data['adoption'] is not None:
+            for field in adoption_fields:
+                if field not in data['adoption']:
+                    return JsonResponse({"error": f"Missing field '{field}' in adoption."}, status=400)
+
+        record = parenthoods_collection.find_one({"_id": uid})
+
+        if not record:
+            new_parenthood = {
+                "id": data['id'],
+                "mother": data['mother'],
+                "father": data['father'],
+                "child": data['child'],
+                "adoption": data['adoption'],
+            }
+            new_record = {
+                "_id": uid,
+                "parenthoods": [new_parenthood]
+            }
+            parenthoods_collection.insert_one(new_record)
+            return JsonResponse(new_parenthood, status=201)
+
+        parenthoods = record.get("parenthoods", [])
+        max_id = max((parenthood["id"] for parenthood in parenthoods), default=0)
+        new_parenthood_id = max_id + 1
+
+        new_parenthood = {
+            "id": new_parenthood_id,
+            "mother": data['mother'],
+            "father": data['father'],
+            "child": data['child'],
+            "adoption": data['adoption'],
+        }
+
+        parenthoods.append(new_parenthood)
+
+        result = parenthoods_collection.update_one(
+            {"_id": uid},
+            {"$set": {"parenthoods": parenthoods}}
+        )
+
+        if result.modified_count > 0:
+            return JsonResponse(new_parenthood, status=201)
+        else:
+            return JsonResponse({"error": "Failed to add new parenthood."}, status=500)
 
     else:
         return JsonResponse({"error": "Only POST requests are allowed."}, status=405)

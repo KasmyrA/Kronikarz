@@ -34,7 +34,11 @@ urlpatterns = [
     path('persons/delete/<str:uid>/<int:id>/', views.delete_one_person),  
     path('persons/update/<str:uid>/<int:id>/', views.update_one_person),
     # Parenthoods  
-    path('parenthoods/', include('parenthood.urls')),
+    path('parenthoods/', views.get_all_parenthoods),
+    path('parenthoods/<str:uid>/<int:id>/', views.get_one_parenthood),
+    path('parenthoods/create/<str:uid>/', views.create_parenthood),
+    path('parenthoods/delete/<str:uid>/<int:id>/', views.delete_one_parenthood),
+    path('parenthoods/update/<str:uid>/<int:id>/', views.update_one_parenthood),
     # Relationships  
     path('relationships/', views.get_all_relationships),
     path('relationships/<str:uid>/<int:id>/', views.get_one_relationship),

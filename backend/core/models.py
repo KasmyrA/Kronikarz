@@ -6,6 +6,7 @@ from db_connection import db
 relationships_collection = db['relationships']
 trees_collection  = db['trees']
 persons_collection = db['persons']
+parenthoods_collection = db['parenthoods']
 '''
 class RelationshipConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

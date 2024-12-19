@@ -1,485 +1,90 @@
-[{
-  "_id": {
-    "$oid": "6744817917aec3bf58fe9c63"
-  },
-  "id": 0,
-  "names": [
-    "Magdalena",
-    "Joanna"
-  ],
-  "image": 0,
-  "description": "opis",
-  "sex": "F",
-  "birth": {
-    "date": "2003.11.21",
-    "place": "Poland, Rybnik"
-  },
-  "death": {
-    "date": "",
-    "place": ""
-  },
-  "surnames": [
-    {
-      "surname": "Goik",
-      "untill": ""
-    },
-    {
-      "surname": "Hanak",
-      "untill": "2024.7"
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Piekarz",
-      "place": "",
-      "from": "2021",
-      "untill": "2024.9"
-    },
-    {
-      "name": "Lekarz",
-      "place": "Poland, Zabrze",
-      "from": "2024.10",
-      "untill": ""
-    }
-  ],
-  "files": []
-},
 {
   "_id": {
-    "$oid": "675c745cf03a3c83978dadad"
+    "$oid": "67645a2ffc88db1b3117c885"
   },
-  "id": 1,
-  "names": [
-    "Anna",
-    "Maria"
-  ],
-  "image": 2,
-  "description": "A passionate teacher and writer.",
-  "sex": "F",
-  "birth": {
-    "date": "1985-07-15",
-    "place": "Kraków, Poland"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Kowalska",
-      "untill": "2010-05-10"
-    },
-    {
-      "surname": "Nowak",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Teacher",
-      "place": "High School No. 1",
-      "from": "2008-09-01",
-      "untill": "2018-06-30"
-    },
-    {
-      "name": "Writer",
-      "place": "Freelance",
-      "from": "2018-07-01",
-      "untill": ""
-    }
-  ],
-  "files": [
+  "persons": [
     {
       "id": 1,
-      "name": "Resume",
-      "url": "https://example.com/files/resume1.pdf"
+      "names": [
+        "John",
+        "Doe"
+      ],
+      "image": 0,
+      "description": "A renowned scientist known for groundbreaking work in physics.",
+      "sex": "M",
+      "birth": {
+        "date": "1950-05-15",
+        "place": "New York, USA"
+      },
+      "death": {
+        "date": "2020-10-10",
+        "place": "Boston, USA"
+      },
+      "surnames": [
+        {
+          "surname": "Doe",
+          "untill": "2000-01-01"
+        }
+      ],
+      "jobs": [
+        {
+          "name": "Physicist",
+          "place": "MIT",
+          "from": "1980-01-01",
+          "untill": "2015-12-31"
+        }
+      ],
+      "files": [
+        {
+          "id": 0,
+          "name": "profile_picture.jpg",
+          "url": "https://example.com/profile_picture.jpg"
+        },
+        {
+          "id": 1,
+          "name": "research_paper.pdf",
+          "url": "https://example.com/research_paper.pdf"
+        }
+      ]
     },
     {
       "id": 2,
-      "name": "Profile Picture",
-      "url": "https://example.com/files/image1.jpg"
+      "names": [
+        "Jane",
+        "Smith"
+      ],
+      "image": null,
+      "description": "A celebrated artist and philanthropist.",
+      "sex": "F",
+      "birth": {
+        "date": "1985-02-28",
+        "place": "Los Angeles, USA"
+      },
+      "death": {
+        "date": "null",
+        "place": "null"
+      },
+      "surnames": [
+        {
+          "surname": "Smith",
+          "untill": "null"
+        }
+      ],
+      "jobs": [
+        {
+          "name": "Painter",
+          "place": "Self-Employed",
+          "from": "2005-01-01",
+          "untill": "2023-12-31"
+        }
+      ],
+      "files": [
+        {
+          "id": 0,
+          "name": "art_gallery.jpg",
+          "url": "https://example.com/art_gallery.jpg"
+        }
+      ]
     }
   ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadae"
-  },
-  "id": 2,
-  "names": [
-    "John",
-    "Adam"
-  ],
-  "image": 1,
-  "description": "A software engineer with a passion for open-source.",
-  "sex": "M",
-  "birth": {
-    "date": "1990-11-22",
-    "place": "London, UK"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Smith",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Software Engineer",
-      "place": "TechCorp",
-      "from": "2012-06-01",
-      "untill": "2020-12-31"
-    },
-    {
-      "name": "Team Lead",
-      "place": "InnoTech",
-      "from": "2021-01-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 3,
-      "name": "Portfolio",
-      "url": "https://example.com/files/portfolio.pdf"
-    },
-    {
-      "id": 1,
-      "name": "Profile Picture",
-      "url": "https://example.com/files/image2.jpg"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadaf"
-  },
-  "id": 3,
-  "names": [
-    "Ewa"
-  ],
-  "image": null,
-  "description": "A nurse dedicated to community health.",
-  "sex": "F",
-  "birth": {
-    "date": "1978-03-14",
-    "place": "Warsaw, Poland"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Wiśniewska",
-      "untill": "2000-08-12"
-    },
-    {
-      "surname": "Lewandowska",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Nurse",
-      "place": "City Hospital",
-      "from": "1999-07-01",
-      "untill": ""
-    }
-  ],
-  "files": []
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb0"
-  },
-  "id": 4,
-  "names": [
-    "Michael"
-  ],
-  "image": 4,
-  "description": "A historian and lecturer.",
-  "sex": "M",
-  "birth": {
-    "date": "1967-01-30",
-    "place": "Berlin, Germany"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Müller",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Historian",
-      "place": "National Museum",
-      "from": "1990-05-01",
-      "untill": "2005-11-30"
-    },
-    {
-      "name": "Lecturer",
-      "place": "University of Berlin",
-      "from": "2006-01-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 4,
-      "name": "Publications List",
-      "url": "https://example.com/files/publications.pdf"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb1"
-  },
-  "id": 5,
-  "names": [
-    "Sarah",
-    "Elizabeth"
-  ],
-  "image": null,
-  "description": "An artist exploring modern visual expressions.",
-  "sex": "F",
-  "birth": {
-    "date": "1992-06-19",
-    "place": "New York, USA"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Johnson",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Artist",
-      "place": "Independent",
-      "from": "2015-04-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 5,
-      "name": "Gallery Portfolio",
-      "url": "https://example.com/files/gallery_portfolio.pdf"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb2"
-  },
-  "id": 6,
-  "names": [
-    "Robert"
-  ],
-  "image": null,
-  "description": "A retired firefighter with a heart of gold.",
-  "sex": "M",
-  "birth": {
-    "date": "1955-02-11",
-    "place": "Sydney, Australia"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Brown",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Firefighter",
-      "place": "Sydney Fire Department",
-      "from": "1975-03-01",
-      "untill": "2005-05-01"
-    }
-  ],
-  "files": []
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb3"
-  },
-  "id": 7,
-  "names": [
-    "Katarzyna",
-    "Joanna"
-  ],
-  "image": 3,
-  "description": "A chef specializing in international cuisine.",
-  "sex": "F",
-  "birth": {
-    "date": "1988-09-05",
-    "place": "Gdańsk, Poland"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Zielińska",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Chef",
-      "place": "Golden Fork Restaurant",
-      "from": "2010-07-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 6,
-      "name": "Recipe Book",
-      "url": "https://example.com/files/recipes.pdf"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb4"
-  },
-  "id": 8,
-  "names": [
-    "James"
-  ],
-  "image": null,
-  "description": "A photographer capturing the essence of life.",
-  "sex": "M",
-  "birth": {
-    "date": "1983-12-21",
-    "place": "Edinburgh, Scotland"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Cameron",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Photographer",
-      "place": "Freelance",
-      "from": "2005-01-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 7,
-      "name": "Portfolio",
-      "url": "https://example.com/files/photo_portfolio.pdf"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb5"
-  },
-  "id": 9,
-  "names": [
-    "Alice",
-    "Sophia"
-  ],
-  "image": 5,
-  "description": "A data scientist analyzing trends and patterns.",
-  "sex": "F",
-  "birth": {
-    "date": "1995-04-12",
-    "place": "San Francisco, USA"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Evans",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Data Scientist",
-      "place": "DataCorp",
-      "from": "2017-08-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 8,
-      "name": "Research Papers",
-      "url": "https://example.com/files/research_papers.pdf"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "675c745cf03a3c83978dadb6"
-  },
-  "id": 10,
-  "names": [
-    "Liam"
-  ],
-  "image": 6,
-  "description": "An architect designing modern cityscapes.",
-  "sex": "M",
-  "birth": {
-    "date": "1980-10-15",
-    "place": "Toronto, Canada"
-  },
-  "death": {
-    "date": null,
-    "place": null
-  },
-  "surnames": [
-    {
-      "surname": "Taylor",
-      "untill": ""
-    }
-  ],
-  "jobs": [
-    {
-      "name": "Architect",
-      "place": "Urban Design Studio",
-      "from": "2004-02-01",
-      "untill": ""
-    }
-  ],
-  "files": [
-    {
-      "id": 9,
-      "name": "Design Portfolio",
-      "url": "https://example.com/files/design_portfolio.pdf"
-    }
-  ]
-}]
+}
