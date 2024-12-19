@@ -26,14 +26,22 @@ router.register(r'register', views.UserRegistrationView,basename='register')
 # Extend urlpatterns to include the router and other paths
 urlpatterns = [
     path('admin/', admin.site.urls),  
-    path('api/', include(router.urls)),  
-    path('persons/', include('person.urls')),  
-    path('parenthoods/', include('parenthood.urls')),  
+    path('api/', include(router.urls)),
+    # Persons  
+    path('persons/', views.get_all_persons),  
+    path('persons/<str:uid>/<int:id>/', views.get_one_person),  
+    path('persons/create/<str:uid>/', views.create_person),  
+    path('persons/delete/<str:uid>/<int:id>/', views.delete_one_person),  
+    path('persons/update/<str:uid>/<int:id>/', views.update_one_person),
+    # Parenthoods  
+    path('parenthoods/', include('parenthood.urls')),
+    # Relationships  
     path('relationships/', views.get_all_relationships),
     path('relationships/<str:uid>/<int:id>/', views.get_one_relationship),
     path('relationships/create/<str:uid>/',views.create_relationship),
     path('relationships/delete/<str:uid>/<int:id>/',views.delete_one_relationship),
     path('relationships/update/<str:uid>/<int:id>/',views.update_one_relationship),
+    # Trees
     path('trees/', views.get_all_trees),
     path('trees/<str:uid>/<int:id>/', views.get_one_tree),
     path('trees/delete/<str:uid>/<int:id>/',views.delete_one_tree),
