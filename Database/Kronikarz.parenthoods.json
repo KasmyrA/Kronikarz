@@ -1,13 +1,32 @@
-[{
+{
   "_id": {
-    "$oid": "6744826388cd5dd97bfa3bc2"
+    "$oid": "64cfcfad7c0a2f0012e4b9e1"
   },
-  "mother": 10,
-  "father": 20,
-  "child": 25,
-  "adoption": {
-    "mother": 30,
-    "father": 40,
-    "date": "2000.1.1"
-  }
-}]
+  "parenthoods": [
+    {
+      "id": 1,
+      "mother": 101,
+      "father": 102,
+      "child": 201,
+      "adoption": null
+    },
+    {
+      "id": 2,
+      "mother": 103,
+      "father": 104,
+      "child": 202,
+      "adoption": {
+        "mother": 105,
+        "father": 106,
+        "date": "2023-03-15"
+      }
+    },
+    {
+      "id": 3,
+      "mother": 107,
+      "father": null,
+      "child": 203,
+      "adoption": null
+    }
+  ]
+}
