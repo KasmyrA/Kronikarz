@@ -51,7 +51,12 @@ urlpatterns = [
     path('trees/delete/<str:uid>/<int:id>/',views.delete_one_tree),
     path('trees/update/<str:uid>/<int:id>/', views.update_one_tree),
     path('trees/create/<str:uid>/',views.create_tree),
-
+    # Users
+    path('users/', views.get_users),
+    path('users/<str:uid>/<str:UserUid>/', views.get_one_user),
+    path('users/delete/<str:uid>/<str:UserUid>/', views.delete_user),
+    path('users/update/<str:uid>/<str:UserUid>/', views.update_user),
+    path('users/create/<str:uid>/',views.create_user),
 ]
 
 

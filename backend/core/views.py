@@ -15,6 +15,7 @@ from .models import relationships_collection
 from .models import trees_collection
 from .models import persons_collection
 from .models import parenthoods_collection
+from .models import users_collection
 from django.http import HttpResponse, JsonResponse
 import uuid
 from django.views.decorators.csrf import csrf_exempt
@@ -734,3 +735,68 @@ def create_parenthood(request, uid):
 
     else:
         return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+
+    # views for users
+    '''path('users/', views.get_users),
+    path('users/<str:uid>/<str:UserUid>/', views.get_one_user),
+    path('users/delete/<str:uid>/<str:UserUid>/', views.delete_user),
+    path('users/update/<str:uid>/<str:UserUid>/', views.update_user),
+    path('users/create/<str:uid>/',views.create_user),
+]'''
+
+from django.http import JsonResponse
+
+def get_users(request):
+    document = users_collection.find_one({}, {"_id": 0, "users": 1})
+    
+    if not document or "users" not in document:
+        return JsonResponse([], safe=False)  
+
+    users = document["users"]
+
+    for user in users:
+        user['_id'] = str(user['_id'])
+        user['parenthoods'] = [str(oid) for oid in user.get('parenthoods', [])]
+        user['persons'] = [str(oid) for oid in user.get('persons', [])]
+        user['relationships'] = [str(oid) for oid in user.get('relationships', [])]
+        user['trees'] = [str(oid) for oid in user.get('trees', [])]
+
+    return JsonResponse(users, safe=False)
+
+
+
+def get_one_user(request, uid, UserUid):
+    try:
+        uid = ObjectId(uid)
+        UserUid = ObjectId(UserUid)
+    except ValueError:
+        return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+    record = users_collection.find_one({"_id": uid}, {"_id": 0, "users": 1})
+
+    if not record or "users" not in record:
+        return JsonResponse({"error": "Users not found."}, status=404)
+
+    for user in record["users"]:
+        if user["_id"] == UserUid:
+            user["_id"] = str(user["_id"])
+            user["parenthoods"] = [str(oid) for oid in user.get("parenthoods", [])]
+            user["persons"] = [str(oid) for oid in user.get("persons", [])]
+            user["relationships"] = [str(oid) for oid in user.get("relationships", [])]
+            user["trees"] = [str(oid) for oid in user.get("trees", [])]
+            return JsonResponse(user, safe=False)
+
+    return JsonResponse({"error": "User not found."}, status=404)
+        
+
+
+def delete_user(request,uid,UserUid):
+    return 0
+    
+def update_user(request,uid,UserUid):
+    return 0
+
+def create_user(request,uid):
+    return 0
+    

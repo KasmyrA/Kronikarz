@@ -1,0 +1,21 @@
+{
+  "users": [
+    {
+      "_id": { "$oid": "64d81c04e62e834f5dcb034c" },
+      "password": "examplePassword123",
+      "login": "exampleUser",
+      "parenthoods": [
+        { "$oid": "64d81c04e62e834f5dcb034d" }
+      ],
+      "persons": [
+        { "$oid": "64d81c04e62e834f5dcb034e" }
+      ],
+      "relationships": [
+        { "$oid": "64d81c04e62e834f5dcb034f" }
+      ],
+      "trees": [
+        { "$oid": "64d81c04e62e834f5dcb0350" }
+      ]
+    }
+  ]
+}
