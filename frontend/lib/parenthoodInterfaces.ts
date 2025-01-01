@@ -1,6 +1,6 @@
 export interface Parenthood {
-  mother: number;
-  father: number;
+  mother: number | null;
+  father: number | null;
   child: number;
   adoption: {
     mother: number | null;

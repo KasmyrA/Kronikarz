@@ -7,18 +7,14 @@ import { User } from "lucide-react";
 import { Card } from "../ui/card";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { PersonFilesList } from "./PersonFilesList";
-import { useState } from "react";
 
 interface ReadingSheetProps {
   person: Person;
-  closeSheet: () => void;
+  onClose: () => void;
   goToEditingSheet: () => void;
 } 
 
-export function ReadingSheet({ person: { files: personFiles, image: personImage, names, surnames, sex, birth, death, description, jobs, id: personId }, closeSheet, goToEditingSheet }: ReadingSheetProps) {
-  const [files, setFiles] = useState(personFiles);
-  const [image, setImage] = useState(personImage);
-
+export function ReadingSheet({ person: { files, image, names, surnames, sex, birth, death, description, jobs }, onClose, goToEditingSheet }: ReadingSheetProps) {
   const imageFile = files.find((f) => f.id === image);
   const personImageElement = imageFile ? 
     <img src={imageFile.url} alt="Person image" className="size-full object-cover"/> :
@@ -65,13 +61,13 @@ export function ReadingSheet({ person: { files: personFiles, image: personImage,
 
           {surnamesSection(surnames)}
           {jobsSection(jobs)}
-          <PersonFilesList {...{files, setFiles, image, setImage, personId }} />
+          <PersonFilesList files={files} />
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
       <SheetFooter className="mx-auto w-full max-w-xl gap-4">
-        <Button onClick={closeSheet} variant="outline" className="flex-1">
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Zamknij
         </Button>
         <Button onClick={goToEditingSheet} className="flex-1">

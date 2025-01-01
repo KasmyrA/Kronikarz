@@ -1,7 +1,7 @@
 "use client"
 
 import { getPerson } from "@/lib/personActions";
-import { Person } from "@/lib/personInterfaces";
+import { FileInfo, Person } from "@/lib/personInterfaces";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { useEffect, useState } from "react";
 import { EditingSheet } from "./EditingSheet";
@@ -12,9 +12,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 interface Props {
   person: TreePerson | null;
   onClose: () => void;
+  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onDelete: () => void;
+  onFileAdd: (f: File) => Promise<FileInfo>;
+  onFileDelete: (f: FileInfo) => Promise<void>;
 }
 
-export function PersonDataSheet({ person, onClose }: Props) {
+export function PersonDataSheet({ person, ...callbacks }: Props) {
   const [pers, setPers] = useState<Person | null>(null)
 
   useEffect(() => {
@@ -27,7 +31,7 @@ export function PersonDataSheet({ person, onClose }: Props) {
   }, [person]);
 
   const content = pers ? 
-    <OpenedSheet closeSheet={onClose} person={pers} /> :
+    <OpenedSheet person={pers} {...callbacks} /> :
     <div className='size-full flex items-center justify-center'><Loader2 className="h-16 w-16 animate-spin" /></div>;
 
   return (
@@ -45,7 +49,11 @@ export function PersonDataSheet({ person, onClose }: Props) {
 
 interface OpenedSheetProps {
   person: Person;
-  closeSheet: () => void;
+  onClose: () => void;
+  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onDelete: () => void;
+  onFileAdd: (f: File) => Promise<FileInfo>;
+  onFileDelete: (f: FileInfo) => Promise<void>;
 }
 
 function OpenedSheet(props: OpenedSheetProps) {
