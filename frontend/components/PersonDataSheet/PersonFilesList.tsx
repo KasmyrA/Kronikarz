@@ -4,19 +4,17 @@ import { Card } from "../ui/card";
 import { Download, File as FileIcon, Plus, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { ChangeEventHandler, useRef } from "react";
-import { addFileToPerson, deleteFileFromPerson } from "@/lib/personActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { isImageFile } from "@/lib/utils";
 
 interface Props {
   files: FileInfo[];
-  setFiles: (files: FileInfo[]) => void;
-  image: number | null;
-  setImage: (image: number | null) => void;
-  personId: number;
+  image?: number | null;
+  onFileAdd?: (f: File) => Promise<FileInfo>;
+  onFileDelete?: (f: FileInfo) => Promise<void>;
 }
 
-export function PersonFilesList({ files, setFiles, image, setImage, personId }: Props) {
+export function PersonFilesList({ files, image, onFileAdd, onFileDelete }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const fileCards = files.map((file) => {
@@ -24,11 +22,7 @@ export function PersonFilesList({ files, setFiles, image, setImage, personId }: 
       <img src={file.url} alt="File image" className="size-full object-cover"/> :
       <FileIcon className="size-10" />;
 
-    const handleDeleteFile = async () => {
-      await deleteFileFromPerson(personId, file.id);
-      setFiles(files.filter(f => f.id !== file.id));
-      if (image === file.id)  setImage(null);
-    }
+    const handleDeleteFile = () => onFileDelete && onFileDelete(file);
 
     return (
       <DropdownMenu key={file.id}>
@@ -53,10 +47,10 @@ export function PersonFilesList({ files, setFiles, image, setImage, personId }: 
                 Pobierz
               </DropdownMenuItem>
             </a>
-            <DropdownMenuItem onClick={handleDeleteFile}>
+            {onFileDelete && <DropdownMenuItem onClick={handleDeleteFile}>
               <Trash className="text-destructive" />
               <span className="text-destructive">Usuń { image === file.id && "(usunie również zdjęcie profilowe)" }</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem>}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -64,10 +58,8 @@ export function PersonFilesList({ files, setFiles, image, setImage, personId }: 
   });
 
   const handleAddFile: ChangeEventHandler<HTMLInputElement> = async (e) => {
-    if (!e.target.files?.length) return;
-
-    const newFile = await addFileToPerson(personId, e.target.files[0]);
-    setFiles([ ...files, newFile ]);
+    if (!e.target.files?.length || !onFileAdd) return;
+    await onFileAdd(e.target.files[0]);  
   };
 
   return (
@@ -78,10 +70,10 @@ export function PersonFilesList({ files, setFiles, image, setImage, personId }: 
       <Card className="p-4 flex flex-wrap gap-2">
         { fileCards }
         <input type="file" className="hidden" ref={inputRef} onChange={handleAddFile} />
-        <Button onClick={() => inputRef.current?.click()} variant="outline" className="w-32 h-40 flex flex-col items-center justify-center">
+        {onFileAdd && <Button onClick={() => inputRef.current?.click()} variant="outline" className="w-32 h-40 flex flex-col items-center justify-center">
           <Plus className="size-8" />
           Dodaj plik
-        </Button>
+        </Button>}
       </Card>
     </>
   )

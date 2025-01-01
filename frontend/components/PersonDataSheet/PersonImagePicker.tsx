@@ -6,18 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { isImageFile } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
-import { addFileToPerson } from "@/lib/personActions";
 import { ChangeEventHandler, useRef } from "react";
 
 interface Props {
   image: number | null;
-  setImage: (image: number | null) => void;
   files: FileInfo[];
-  setFiles: (files: FileInfo[]) => void;
-  personId: number;
+  setImage: (image: number | null) => void;
+  onFileAdd: (f: File) => Promise<FileInfo>;
 }
 
-export function PersonImagePicker({ image, setImage, files, setFiles, personId }: Props) {
+export function PersonImagePicker({ image, files, setImage, onFileAdd }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const imageFile = files.find((f) => f.id === image);
@@ -43,8 +41,7 @@ export function PersonImagePicker({ image, setImage, files, setFiles, personId }
   const handleAddFile: ChangeEventHandler<HTMLInputElement> = async (e) => {
     if (!e.target.files?.length) return;
 
-    const newFile = await addFileToPerson(personId, e.target.files[0]);
-    setFiles([ ...files, newFile ]);
+    const newFile = await onFileAdd(e.target.files[0]);
     setImage(newFile.id);
   };
 
