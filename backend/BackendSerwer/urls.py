@@ -26,14 +26,37 @@ router.register(r'register', views.UserRegistrationView,basename='register')
 # Extend urlpatterns to include the router and other paths
 urlpatterns = [
     path('admin/', admin.site.urls),  
-    path('api/', include(router.urls)),  
-    path('persons/', include('person.urls')),  
-    path('parenthoods/', include('parenthood.urls')),  
+    path('api/', include(router.urls)),
+    # Persons  
+    path('persons/', views.get_all_persons),  
+    path('persons/<str:uid>/<int:id>/', views.get_one_person),  
+    path('persons/create/<str:uid>/', views.create_person),  
+    path('persons/delete/<str:uid>/<int:id>/', views.delete_one_person),  
+    path('persons/update/<str:uid>/<int:id>/', views.update_one_person),
+    # Parenthoods  
+    path('parenthoods/', views.get_all_parenthoods),
+    path('parenthoods/<str:uid>/<int:id>/', views.get_one_parenthood),
+    path('parenthoods/create/<str:uid>/', views.create_parenthood),
+    path('parenthoods/delete/<str:uid>/<int:id>/', views.delete_one_parenthood),
+    path('parenthoods/update/<str:uid>/<int:id>/', views.update_one_parenthood),
+    # Relationships  
     path('relationships/', views.get_all_relationships),
-    path('relationships/<str:record_relation>/', views.get_one_relationship),
-    path('relationships/create',views.create_relationship),
+    path('relationships/<str:uid>/<int:id>/', views.get_one_relationship),
+    path('relationships/create/<str:uid>/',views.create_relationship),
+    path('relationships/delete/<str:uid>/<int:id>/',views.delete_one_relationship),
+    path('relationships/update/<str:uid>/<int:id>/',views.update_one_relationship),
+    # Trees
     path('trees/', views.get_all_trees),
-    path('trees/<str:record_tree>/', views.get_one_tree),
+    path('trees/<str:uid>/<int:id>/', views.get_one_tree),
+    path('trees/delete/<str:uid>/<int:id>/',views.delete_one_tree),
+    path('trees/update/<str:uid>/<int:id>/', views.update_one_tree),
+    path('trees/create/<str:uid>/',views.create_tree),
+    # Users
+    path('users/', views.get_users),
+    path('users/<str:uid>/<str:UserUid>/', views.get_one_user),
+    path('users/delete/<str:uid>/<str:UserUid>/', views.delete_user),
+    path('users/update/<str:uid>/<str:UserUid>/', views.update_user),
+    path('users/create/<str:uid>/',views.create_user),
 ]
 
 

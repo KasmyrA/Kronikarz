@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+#potrzebne do csrf cookie
 #'django.middleware.csrf.CsrfViewMiddleware',
 
 ROOT_URLCONF = 'BackendSerwer.urls'
