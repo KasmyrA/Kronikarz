@@ -1,16 +1,16 @@
 "use client";
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
-import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Loader2, Plus } from 'lucide-react';
+import { Heart, Loader2, Plus, Users, Home, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
-import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
+import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
-import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
+import { ParenthoodEditor } from '@/components/Parenthood/ParenthoodEditor';
+import { mockGetTree, mockCreatePerson, mockGetTreePerson, mockUpdatePersonPosition, mockCreateRelationship, mockUpdateRelationship, mockDeleteRelationship, mockUpdateParenthood } from '@/lib/mockActions';
 
 interface Props {
   params: {
@@ -22,7 +22,7 @@ export default function Page({ params: { treeId } }: Props) {
   const [tree, setTree] = useState<Tree | null>(null);
   
   useEffect(() => {
-    getTree(+treeId)
+    mockGetTree(+treeId)
       .then(t => setTree(t))
   }, [treeId])
 
@@ -43,6 +43,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [selectedRelation, setSelectedRelation] = useState<number | "new" | null>(null);
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
+  const [selectedParenthood, setSelectedParenthood] = useState<number | "new" | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
   const peopleHighlights = !partnerPicker ?
@@ -58,7 +59,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleAddPerson = async () => {
     const newPersonPosition = mapRef.current!.getViewMiddlePosition();
-    const newPerson = await createPerson(newPersonPosition);
+    const newPerson = await mockCreatePerson(newPersonPosition);
     tree.people.push(newPerson);
     setTree({...tree});
   }
@@ -67,7 +68,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     const { id } = selectedPerson!;
     setSelectedPerson(null);
     const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    const newPersonData = await getTreePerson(id);
+    const newPersonData = await mockGetTreePerson(id);
 
     if (newPersonData) {
       tree.people[updatedPersonIndex] = newPersonData;
@@ -89,7 +90,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const handlePersonDrop = (position: Position, person: TreePerson) => {
     person.position = position;
     setTree({...tree});
-    updatePersonPosition(person.id, position);
+    mockUpdatePersonPosition(person.id, position);
   }
 
   const handleRelationshipClick = (id: number | "new") => {
@@ -104,10 +105,10 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleRelationshipEditorSave = async (rel: Relationship) => {
     if (selectedRelation === "new") {
-      const newRelationData = await createRelationship(rel);
+      const newRelationData = await mockCreateRelationship(rel);
       tree.relationships.push(newRelationData);
     } else {
-      await updateRelationship(rel);
+      await mockUpdateRelationship(rel);
       const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
       tree.relationships[updatedRelationIndex] = rel;
     }
@@ -116,11 +117,38 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handleRelationshipEditorDelete = async () => {
-    await deleteRelationship(selectedRelation as number);
+    await mockDeleteRelationship(selectedRelation as number);
     const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
     tree.relationships.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
     setSelectedRelation(null);
+  };
+
+  const handleParenthoodEditorClose = () => {
+    setSelectedParenthood(null);
+  };
+
+  const handleParenthoodEditorSave = async (parenthood: Parenthood) => {
+    if (selectedParenthood === "new") {
+      const newParenthoodData = { ...parenthood, id: Date.now() };
+      tree.parenthoods.push(newParenthoodData);
+    } else {
+      await mockUpdateParenthood(parenthood);
+      const index = tree.parenthoods.findIndex(p => p.id === parenthood.id);
+      if (index !== -1) {
+        tree.parenthoods[index] = parenthood;
+      }
+      tree.parenthoods[index] = parenthood;
+    }
+    setTree({ ...tree });
+    setSelectedParenthood(null);
+  };
+
+  const handleParenthoodEditorDelete = () => {
+    const index = tree.parenthoods.findIndex(p => p.id === selectedParenthood);
+    tree.parenthoods.splice(index, 1);
+    setTree({ ...tree });
+    setSelectedParenthood(null);
   };
 
   return (
@@ -141,6 +169,9 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       </Button>
       <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
         <Plus className="h-4 w-4" />
+      </Button>
+      <Button onClick={() => setSelectedParenthood("new")} size="icon" className='absolute right-40 bottom-8'>
+        <UserPlus className="h-4 w-4" />
       </Button>
 
       <PersonDataSheet
@@ -163,6 +194,15 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onClose={handleRelationshipEditorClose}
         onSave={handleRelationshipEditorSave}
         onDelete={handleRelationshipEditorDelete}
+      />
+      <ParenthoodEditor
+        parenthoodId={selectedParenthood}
+        people={tree.people}
+        parentPicker={null}
+        setParentPicker={() => {}}
+        onSave={handleParenthoodEditorSave}
+        onDelete={handleParenthoodEditorDelete}
+        onClose={handleParenthoodEditorClose}
       />
     </>
   )
