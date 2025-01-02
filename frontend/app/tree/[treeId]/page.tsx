@@ -1,16 +1,21 @@
 "use client";
 import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
+import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Heart, Loader2, Plus, Users, Home, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
+import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
+
 import { Button } from '@/components/ui/button';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
+import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
+
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
 import { ParenthoodEditor } from '@/components/Parenthood/ParenthoodEditor';
-import { mockGetTree, mockCreatePerson, mockGetTreePerson, mockUpdatePersonPosition, mockCreateRelationship, mockUpdateRelationship, mockDeleteRelationship, mockUpdateParenthood } from '@/lib/mockActions';
+
 
 interface Props {
   params: {
@@ -22,7 +27,7 @@ export default function Page({ params: { treeId } }: Props) {
   const [tree, setTree] = useState<Tree | null>(null);
   
   useEffect(() => {
-    mockGetTree(+treeId)
+    getTree(+treeId)
       .then(t => setTree(t))
   }, [treeId])
 
@@ -59,7 +64,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleAddPerson = async () => {
     const newPersonPosition = mapRef.current!.getViewMiddlePosition();
-    const newPerson = await mockCreatePerson(newPersonPosition);
+    const newPerson = await createPerson(newPersonPosition);
     tree.people.push(newPerson);
     setTree({...tree});
   }
@@ -68,7 +73,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     const { id } = selectedPerson!;
     setSelectedPerson(null);
     const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    const newPersonData = await mockGetTreePerson(id);
+    const newPersonData = await getTreePerson(id);
 
     if (newPersonData) {
       tree.people[updatedPersonIndex] = newPersonData;
@@ -90,7 +95,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const handlePersonDrop = (position: Position, person: TreePerson) => {
     person.position = position;
     setTree({...tree});
-    mockUpdatePersonPosition(person.id, position);
+    updatePersonPosition(person.id, position);
   }
 
   const handleRelationshipClick = (id: number | "new") => {
@@ -105,10 +110,10 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleRelationshipEditorSave = async (rel: Relationship) => {
     if (selectedRelation === "new") {
-      const newRelationData = await mockCreateRelationship(rel);
+      const newRelationData = await createRelationship(rel);
       tree.relationships.push(newRelationData);
     } else {
-      await mockUpdateRelationship(rel);
+      await updateRelationship(rel);
       const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
       tree.relationships[updatedRelationIndex] = rel;
     }
@@ -117,7 +122,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handleRelationshipEditorDelete = async () => {
-    await mockDeleteRelationship(selectedRelation as number);
+    await deleteRelationship(selectedRelation as number);
     const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
     tree.relationships.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
@@ -133,7 +138,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       const newParenthoodData = { ...parenthood, id: Date.now() };
       tree.parenthoods.push(newParenthoodData);
     } else {
-      await mockUpdateParenthood(parenthood);
+      await updateParenthood(parenthood);
       const index = tree.parenthoods.findIndex(p => p.id === parenthood.id);
       if (index !== -1) {
         tree.parenthoods[index] = parenthood;
@@ -200,9 +205,10 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         people={tree.people}
         parentPicker={null}
         setParentPicker={() => {}}
+        onClose={handleParenthoodEditorClose}
         onSave={handleParenthoodEditorSave}
         onDelete={handleParenthoodEditorDelete}
-        onClose={handleParenthoodEditorClose}
+        
       />
     </>
   )
