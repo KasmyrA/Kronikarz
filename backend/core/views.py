@@ -745,7 +745,7 @@ def create_parenthood(request, uid):
     path('users/create/<str:uid>/',views.create_user),
 ]'''
 
-from django.http import JsonResponse
+
 
 def get_users(request):
     document = users_collection.find_one({}, {"_id": 0, "users": 1})
@@ -763,6 +763,144 @@ def get_users(request):
         user['trees'] = [str(oid) for oid in user.get('trees', [])]
 
     return JsonResponse(users, safe=False)
+
+
+    
+def delete_user(request, uid, UserUid):
+    
+    if request.method == "DELETE":
+        try:
+            uid = ObjectId(uid)
+            UserUid = ObjectId(UserUid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+        
+        user_record = users_collection.find_one({"_id": uid})
+        if user_record and "users" in user_record:
+            
+            updated_users = [
+                user for user in user_record["users"] if user["_id"] != UserUid
+            ]
+            
+            if len(updated_users) < len(user_record["users"]):
+                result = users_collection.update_one(
+                    {"_id": uid},
+                    {"$set": {"users": updated_users}}
+                )
+                
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"User with id {UserUid} successfully deleted."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to delete user."}, status=500)
+            else:
+                return JsonResponse({"error": "User not found."}, status=404)
+        else:
+            return JsonResponse({"error": "Document not found."}, status=404)
+    
+    else:
+        return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
+    
+def update_user(request, uid, UserUid):
+    if request.method == "PATCH":  
+        try:
+            uid = ObjectId(uid)  
+            UserUid = ObjectId(UserUid)  
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        try:
+            data = json.loads(request.body)  
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
+
+        if not data:
+            return JsonResponse({"error": "No data provided to update."}, status=400)
+
+        user_record = users_collection.find_one({"_id": uid})
+        
+        if user_record and "users" in user_record:
+            user_to_update = None
+            for user in user_record["users"]:
+                if user["_id"] == UserUid:
+                    user_to_update = user
+                    break
+            
+            if user_to_update:
+                for key, value in data.items():
+                    if key in user_to_update:  
+                        user_to_update[key] = value
+
+                result = users_collection.update_one(
+                    {"_id": uid, "users._id": UserUid},
+                    {"$set": {"users.$": user_to_update}}  
+                )
+
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"User with id {UserUid} successfully updated."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to update user."}, status=500)
+            else:
+                return JsonResponse({"error": "User not found in the array."}, status=404)
+        else:
+            return JsonResponse({"error": "Document not found."}, status=404)
+
+    else:
+        return JsonResponse({"error": "Invalid request method. Use PATCH."}, status=405)
+
+@csrf_exempt
+def create_user(request, uid):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+    try:
+        uid = ObjectId(uid)
+    except ValueError:
+        return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    if 'login' not in data or 'password' not in data:
+        return JsonResponse({"error": "Missing required fields: 'login' and 'password'."}, status=400)
+
+    login = data['login']
+    password = data['password']
+
+    record = users_collection.find_one({"_id": uid})
+
+    if not record:
+        return JsonResponse({"error": "Document not found."}, status=404)
+
+    new_user = {
+        "_id": ObjectId(),
+        "login": login,
+        "password": password,
+        "parenthoods": [ObjectId()],
+        "persons": [ObjectId()],
+        "relationships": [ObjectId()],
+        "trees": [ObjectId()],
+    }
+
+    result = users_collection.update_one(
+        {"_id": uid},
+        {"$push": {"users": new_user}}
+    )
+
+    if result.modified_count > 0:
+        new_user_serializable = {
+            "_id": str(new_user["_id"]),
+            "login": new_user["login"],
+            "password": new_user["password"],
+            "parenthoods": [str(oid) for oid in new_user["parenthoods"]],
+            "persons": [str(oid) for oid in new_user["persons"]],
+            "relationships": [str(oid) for oid in new_user["relationships"]],
+            "trees": [str(oid) for oid in new_user["trees"]],
+        }
+        return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
+    else:
+        return JsonResponse({"error": "Failed to add new user."}, status=500)
 
 
 
@@ -791,12 +929,5 @@ def get_one_user(request, uid, UserUid):
         
 
 
-def delete_user(request,uid,UserUid):
-    return 0
-    
-def update_user(request,uid,UserUid):
-    return 0
-
-def create_user(request,uid):
-    return 0
+        
     
