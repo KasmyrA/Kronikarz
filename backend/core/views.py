@@ -767,38 +767,49 @@ def get_users(request):
 
     
 def delete_user(request, uid, UserUid):
-    
     if request.method == "DELETE":
         try:
             uid = ObjectId(uid)
             UserUid = ObjectId(UserUid)
         except ValueError:
             return JsonResponse({"error": "Invalid ID format."}, status=400)
-        
+
         user_record = users_collection.find_one({"_id": uid})
         if user_record and "users" in user_record:
-            
-            updated_users = [
-                user for user in user_record["users"] if user["_id"] != UserUid
-            ]
-            
-            if len(updated_users) < len(user_record["users"]):
+            user_to_delete = next((user for user in user_record["users"] if user["_id"] == UserUid), None)
+
+            if user_to_delete:
+                persons_ids = [ObjectId(person_id) for person_id in user_to_delete.get("persons", [])]
+                parenthoods_ids = [ObjectId(parenthood_id) for parenthood_id in user_to_delete.get("parenthoods", [])]
+                trees_ids = [ObjectId(tree_id) for tree_id in user_to_delete.get("trees", [])]
+                relationships_ids = [ObjectId(relationship_id) for relationship_id in user_to_delete.get("relationships", [])]
+
+                persons_collection.delete_many({"_id": {"$in": persons_ids}})
+                parenthoods_collection.delete_many({"_id": {"$in": parenthoods_ids}})
+                trees_collection.delete_many({"_id": {"$in": trees_ids}})
+                relationships_collection.delete_many({"_id": {"$in": relationships_ids}})
+
+                updated_users = [
+                    user for user in user_record["users"] if user["_id"] != UserUid
+                ]
+
                 result = users_collection.update_one(
                     {"_id": uid},
                     {"$set": {"users": updated_users}}
                 )
-                
+
                 if result.modified_count > 0:
-                    return JsonResponse({"message": f"User with id {UserUid} successfully deleted."}, status=200)
+                    return JsonResponse({"message": f"User with id {UserUid} and associated elements successfully deleted."}, status=200)
                 else:
                     return JsonResponse({"error": "Failed to delete user."}, status=500)
             else:
                 return JsonResponse({"error": "User not found."}, status=404)
         else:
             return JsonResponse({"error": "Document not found."}, status=404)
-    
+
     else:
         return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
+
     
 def update_user(request, uid, UserUid):
     if request.method == "PATCH":  
@@ -873,84 +884,138 @@ def create_user(request, uid):
     if not record:
         return JsonResponse({"error": "Document not found."}, status=404)
 
-    person_template = {
-        "_id": ObjectId(),
-        "id": 0,
-        "names": ["Template", "Person"],
-        "image": 0,
-        "description": "Default description",
-        "sex": "U",
-        "birth": {"date": None, "place": None},
-        "death": {"date": None, "place": None},
-        "surnames": [],
-        "jobs": [],
-        "files": []
-    }
-
-    parenthood_template = {
-        "_id": ObjectId(),
-        "mother": None,
-        "father": None,
-        "child": None,
-        "adoption": {"mother": None, "father": None, "date": None}
-    }
-
-    tree_template = {
-        "_id": ObjectId(),
-        "trees": [
+    new_tree = {
+        "id": 0,  
+        "name": "New Family Tree",
+        "people": [
+            {
+                "id": 0,  
+                "name": "James",
+                "surname": "Doe",
+                "sex": "M",
+                "imageUrl": "https://example.com/images/james_doe.jpg",
+                "birthDate": "1975-12-02",
+                "deathDate": "",
+                "position": {"x": 0, "y": 0}
+            },
             {
                 "id": 1,
-                "name": "Template Family Tree",
-                "people": [],
-                "relationships": [],
-                "parenthoods": []
+                "name": "Sophia",
+                "surname": "Green",
+                "sex": "F",
+                "imageUrl": None,
+                "birthDate": "1978-10-16",
+                "deathDate": "",
+                "position": {"x": 1, "y": 0}
+            },
+            {
+                "id": 2,
+                "name": "Liam",
+                "surname": "Doe",
+                "sex": "M",
+                "imageUrl": None,
+                "birthDate": "2000-05-05",
+                "deathDate": "",
+                "position": {"x": 0, "y": 1}
+            }
+        ],
+        "relationships": [
+            {
+                "id": 0,  
+                "partner1": 0,
+                "partner2": 1,
+                "kind": "marriage"
+            }
+        ],
+        "parenthoods": [
+            {
+                "parentId": 0,
+                "childId": 2
+            },
+            {
+                "parentId": 1,
+                "childId": 2
             }
         ]
     }
 
-    relationship_template = {
-        "_id": ObjectId(),
-        "relationships": []
-    }
+    result = trees_collection.insert_one({"trees": [new_tree]})
+    if result.inserted_id:
+        tree_object_id = result.inserted_id
 
-    persons_collection.insert_one({"persons": [person_template]})
-    parenthoods_collection.insert_one({"parenthoods": [parenthood_template]})
-    trees_collection.insert_one({"trees": [tree_template]})
-    relationships_collection.insert_one({"relationships": [relationship_template]})
+        person_template = {
+            "_id": ObjectId(),
+            "id": 0,
+            "names": ["Template", "Person"],
+            "image": 0,
+            "description": "Default description",
+            "sex": "U",
+            "birth": {"date": None, "place": None},
+            "death": {"date": None, "place": None},
+            "surnames": [],
+            "jobs": [],
+            "files": []
+        }
 
-    new_user = {
-        "_id": ObjectId(),
-        "login": login,
-        "password": password,
-        "parenthoods": [str(parenthood_template["_id"])],
-        "persons": [str(person_template["_id"])],
-        "relationships": [str(relationship_template["_id"])],
-        "trees": [str(tree_template["_id"])],
-    }
+        parenthood_template = {
+            "_id": ObjectId(),
+            "mother": None,
+            "father": None,
+            "child": None,
+            "adoption": {"mother": None, "father": None, "date": None}
+        }
 
-    result = users_collection.update_one(
-        {"_id": uid},
-        {"$push": {"users": new_user}}
-    )
+        relationship_template = {
+            "_id": ObjectId(),
+            "relationships": []
+        }
 
-    if result.modified_count > 0:
-        new_user_serializable = {
-            "_id": str(new_user["_id"]),
-            "login": new_user["login"],
-            "password": new_user["password"],
+        persons_collection.insert_one({"persons": [person_template]})
+        parenthoods_collection.insert_one({"parenthoods": [parenthood_template]})
+        relationships_collection.insert_one({"relationships": [relationship_template]})
+
+        new_user = {
+            "_id": ObjectId(),
+            "login": login,
+            "password": password,
             "parenthoods": [str(parenthood_template["_id"])],
             "persons": [str(person_template["_id"])],
             "relationships": [str(relationship_template["_id"])],
-            "trees": [str(tree_template["_id"])],
+            "trees": [str(tree_object_id)],  
         }
-        return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
-    else:
-        persons_collection.delete_one({"_id": person_template["_id"]})
-        parenthoods_collection.delete_one({"_id": parenthood_template["_id"]})
-        trees_collection.delete_one({"_id": tree_template["_id"]})
-        relationships_collection.delete_one({"_id": relationship_template["_id"]})
 
-        return JsonResponse({"error": "Failed to add new user."}, status=500)
+        result = users_collection.update_one(
+            {"_id": uid},
+            {"$push": {"users": new_user}}
+        )
+
+        if result.modified_count > 0:
+            new_user_serializable = {
+                "_id": str(new_user["_id"]),
+                "login": new_user["login"],
+                "password": new_user["password"],
+                "parenthoods": [str(parenthood_template["_id"])],
+                "persons": [str(person_template["_id"])],
+                "relationships": [str(relationship_template["_id"])],
+                "trees": [str(tree_object_id)],  
+            }
+            return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
+        else:
+            persons_collection.delete_one({"_id": person_template["_id"]})
+            parenthoods_collection.delete_one({"_id": parenthood_template["_id"]})
+            trees_collection.delete_one({"_id": tree_object_id})
+            relationships_collection.delete_one({"_id": relationship_template["_id"]})
+
+            return JsonResponse({"error": "Failed to add new user."}, status=500)
+    else:
+        return JsonResponse({"error": "Failed to create tree."}, status=500)
+
+
+
+
+
+
+
 
 
 
