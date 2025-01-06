@@ -517,7 +517,7 @@ def create_person(request, uid):
         if not isinstance(data['surnames'], list) or not isinstance(data['jobs'], list) or not isinstance(data['files'], list):
             return JsonResponse({"error": "Fields 'surnames', 'jobs', and 'files' must be arrays."}, status=400)
 
-        record = relationships_collection.find_one({"_id": uid})
+        record = persons_collection.find_one({"_id": uid})
 
         if not record:
             new_person = {
@@ -536,7 +536,7 @@ def create_person(request, uid):
                 "_id": uid,
                 "people": [new_person]
             }
-            relationships_collection.insert_one(new_record)
+            persons_collection.insert_one(new_record)
             return JsonResponse(new_person, status=201)
 
         people = record.get("people", [])
@@ -557,7 +557,7 @@ def create_person(request, uid):
         }
 
         people.append(new_person)
-        result = relationships_collection.update_one(
+        result = persons_collection.update_one(
             {"_id": uid},
             {"$set": {"people": people}}
         )
@@ -873,14 +873,59 @@ def create_user(request, uid):
     if not record:
         return JsonResponse({"error": "Document not found."}, status=404)
 
+    person = {
+        "_id": ObjectId(),
+        "id": 1,
+        "names": ["Template", "Person"],
+        "image": 0,
+        "description": "Default description",
+        "sex": "U",
+        "birth": {"date": None, "place": None},
+        "death": {"date": None, "place": None},
+        "surnames": [],
+        "jobs": [],
+        "files": []
+    }
+
+    parenthood = {
+        "_id": ObjectId(),
+        "mother": None,
+        "father": None,
+        "child": None,
+        "adoption": {"mother": None, "father": None, "date": None}
+    }
+
+    tree = {
+        "_id": ObjectId(),
+        "trees": [
+            {
+                "id": 1,
+                "name": "Template Family Tree",
+                "people": [],
+                "relationships": [],
+                "parenthoods": []
+            }
+        ]
+    }
+
+    relationship = {
+        "_id": ObjectId(),
+        "relationships": []
+    }
+
+    persons_collection.insert_one(person)
+    parenthoods_collection.insert_one(parenthood)
+    trees_collection.insert_one(tree)
+    relationships_collection.insert_one(relationship)
+
     new_user = {
         "_id": ObjectId(),
         "login": login,
         "password": password,
-        "parenthoods": [ObjectId()],
-        "persons": [ObjectId()],
-        "relationships": [ObjectId()],
-        "trees": [ObjectId()],
+        "parenthoods": [parenthood["_id"]],
+        "persons": [person["_id"]],
+        "relationships": [relationship["_id"]],
+        "trees": [tree["_id"]],
     }
 
     result = users_collection.update_one(
@@ -893,14 +938,20 @@ def create_user(request, uid):
             "_id": str(new_user["_id"]),
             "login": new_user["login"],
             "password": new_user["password"],
-            "parenthoods": [str(oid) for oid in new_user["parenthoods"]],
-            "persons": [str(oid) for oid in new_user["persons"]],
-            "relationships": [str(oid) for oid in new_user["relationships"]],
-            "trees": [str(oid) for oid in new_user["trees"]],
+            "parenthoods": [str(parenthood["_id"])],
+            "persons": [str(person["_id"])],
+            "relationships": [str(relationship["_id"])],
+            "trees": [str(tree["_id"])],
         }
         return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
     else:
+        persons_collection.delete_one({"_id": person["_id"]})
+        parenthoods_collection.delete_one({"_id": parenthood["_id"]})
+        trees_collection.delete_one({"_id": tree["_id"]})
+        relationships_collection.delete_one({"_id": relationship["_id"]})
+
         return JsonResponse({"error": "Failed to add new user."}, status=500)
+
 
 
 
