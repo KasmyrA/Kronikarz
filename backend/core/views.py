@@ -889,7 +889,7 @@ def create_user(request, uid):
         "name": "New Family Tree",
         "people": [
             {
-                "id": 0,  
+                "id": 0,
                 "name": "James",
                 "surname": "Doe",
                 "sex": "M",
@@ -921,7 +921,7 @@ def create_user(request, uid):
         ],
         "relationships": [
             {
-                "id": 0,  
+                "id": 0,
                 "partner1": 0,
                 "partner2": 1,
                 "kind": "marriage"
@@ -939,76 +939,74 @@ def create_user(request, uid):
         ]
     }
 
-    result = trees_collection.insert_one({"trees": [new_tree]})
-    if result.inserted_id:
-        tree_object_id = result.inserted_id
+    tree_result = trees_collection.insert_one({"trees": [new_tree]})
+    tree_object_id = tree_result.inserted_id
 
-        person_template = {
-            "_id": ObjectId(),
-            "id": 0,
-            "names": ["Template", "Person"],
-            "image": 0,
-            "description": "Default description",
-            "sex": "U",
-            "birth": {"date": None, "place": None},
-            "death": {"date": None, "place": None},
-            "surnames": [],
-            "jobs": [],
-            "files": []
+    person_template = {
+        "id": 0,
+        "names": ["Template", "Person"],
+        "image": 0,
+        "description": "Default description",
+        "sex": "U",
+        "birth": {"date": None, "place": None},
+        "death": {"date": None, "place": None},
+        "surnames": [],
+        "jobs": [],
+        "files": []
+    }
+    person_result = persons_collection.insert_one({"persons": [person_template]})
+    persons_list_object_id = person_result.inserted_id
+
+    parenthood_template = {
+        "mother": None,
+        "father": None,
+        "child": None,
+        "adoption": {"mother": None, "father": None, "date": None}
+    }
+    parenthood_result = parenthoods_collection.insert_one({"parenthoods": [parenthood_template]})
+    parenthoods_list_object_id = parenthood_result.inserted_id
+
+    relationship_template = {
+        "id": 0,
+        "relationships": []
+    }
+    relationship_result = relationships_collection.insert_one({"relationships": relationship_template})
+    relationships_list_object_id = relationship_result.inserted_id
+
+    new_user = {
+        "_id": ObjectId(),
+        "login": login,
+        "password": password,
+        "trees": [str(tree_object_id)],
+        "persons": [str(persons_list_object_id)],
+        "parenthoods": [str(parenthoods_list_object_id)],
+        "relationships": [str(relationships_list_object_id)]
+    }
+
+    result = users_collection.update_one(
+        {"_id": uid},
+        {"$push": {"users": new_user}}
+    )
+
+    if result.modified_count > 0:
+        new_user_serializable = {
+            "_id": str(new_user["_id"]),
+            "login": new_user["login"],
+            "password": new_user["password"],
+            "trees": [str(tree_object_id)],
+            "persons": [str(persons_list_object_id)],
+            "parenthoods": [str(parenthoods_list_object_id)],
+            "relationships": [str(relationships_list_object_id)]
         }
-
-        parenthood_template = {
-            "_id": ObjectId(),
-            "mother": None,
-            "father": None,
-            "child": None,
-            "adoption": {"mother": None, "father": None, "date": None}
-        }
-
-        relationship_template = {
-            "_id": ObjectId(),
-            "relationships": []
-        }
-
-        persons_collection.insert_one({"persons": [person_template]})
-        parenthoods_collection.insert_one({"parenthoods": [parenthood_template]})
-        relationships_collection.insert_one({"relationships": [relationship_template]})
-
-        new_user = {
-            "_id": ObjectId(),
-            "login": login,
-            "password": password,
-            "parenthoods": [str(parenthood_template["_id"])],
-            "persons": [str(person_template["_id"])],
-            "relationships": [str(relationship_template["_id"])],
-            "trees": [str(tree_object_id)],  
-        }
-
-        result = users_collection.update_one(
-            {"_id": uid},
-            {"$push": {"users": new_user}}
-        )
-
-        if result.modified_count > 0:
-            new_user_serializable = {
-                "_id": str(new_user["_id"]),
-                "login": new_user["login"],
-                "password": new_user["password"],
-                "parenthoods": [str(parenthood_template["_id"])],
-                "persons": [str(person_template["_id"])],
-                "relationships": [str(relationship_template["_id"])],
-                "trees": [str(tree_object_id)],  
-            }
-            return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
-        else:
-            persons_collection.delete_one({"_id": person_template["_id"]})
-            parenthoods_collection.delete_one({"_id": parenthood_template["_id"]})
-            trees_collection.delete_one({"_id": tree_object_id})
-            relationships_collection.delete_one({"_id": relationship_template["_id"]})
-
-            return JsonResponse({"error": "Failed to add new user."}, status=500)
+        return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
     else:
-        return JsonResponse({"error": "Failed to create tree."}, status=500)
+        persons_collection.delete_one({"_id": persons_list_object_id})
+        parenthoods_collection.delete_one({"_id": parenthoods_list_object_id})
+        trees_collection.delete_one({"_id": tree_object_id})
+        relationships_collection.delete_one({"_id": relationships_list_object_id})
+
+        return JsonResponse({"error": "Failed to add new user."}, status=500)
+
 
 
 
