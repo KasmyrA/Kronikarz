@@ -9,7 +9,7 @@ export interface Parenthood {
   mother: number | null;
   father: number | null;
   child: number;
-  type: ParenthoodType;
+  type: ParenthoodKind;
   startDate: string | null;
   endDate: string | null;
   adoption: {

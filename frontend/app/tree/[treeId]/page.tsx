@@ -173,7 +173,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       tree.parenthoods.push(newParenthoodData);
     } else {
       await updateParenthood(parenthood);
-      const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedRelation!);
+      const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedParenthood!);
       tree.parenthoods[updatedParenthoodIndex] = parenthood;
     }
     setTree({ ...tree });

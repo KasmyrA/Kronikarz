@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { Parenthood, ParenthoodType } from "@/lib/parenthoodInterfaces"
+import { Parenthood, ParenthoodKind } from "@/lib/parenthoodInterfaces"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Button } from "../ui/button";
@@ -35,7 +35,7 @@ export function ParenthoodEditor({ parenthoodId, people, parentPicker, setParent
       setParenthood(null);
     }
     else if (parenthoodId === "new") {
-      setParenthood({ id: -1, mother: -1, father: -1, child: -1, type: "biological", startDate: null, endDate: null, adoption: null });
+      setParenthood({ id: -1, mother: -1, father: -1, child: -1, type: ParenthoodKind.BIOLOGICAL, startDate: null, endDate: null, adoption: null });
     }
     else {
       getParenthood(parenthoodId).then((p) => setParenthood(p!))
@@ -77,7 +77,7 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
     (parenthood.mother ?? -1) >= 0 &&
     (parenthood.father ?? -1) >= 0 &&
     (parenthood.child ?? -1) >= 0 &&
-    (parenthood.type === "biological" || parenthood.type === "adoptive");
+    (parenthood.type === ParenthoodKind.BIOLOGICAL || parenthood.type === ParenthoodKind.ADOPTIVE);
 
   const mother = people.find((p) => p.id === parenthood.mother);
   const father = people.find((p) => p.id === parenthood.father);
@@ -190,15 +190,15 @@ function ParentPickerComponent({ title, person, isPicking, startPicking, cancelP
 }
 
 interface ParenthoodTypePickerProps {
-  type: ParenthoodType;
-  setType: (t: ParenthoodType) => void;
+  type: ParenthoodKind;
+  setType: (t: ParenthoodKind) => void;
 }
 
 function ParenthoodTypePicker({ type, setType }: ParenthoodTypePickerProps) {
-  const availableTypes = ["biological", "adoptive"].map((t) => {
+  const availableTypes = Object.values(ParenthoodKind).map((t) => {
     return (
       <SelectItem key={t} value={t}>
-        {parenthoodTypeToString[t as ParenthoodType]}
+        {parenthoodTypeToString[t]}
       </SelectItem>
     )
   })

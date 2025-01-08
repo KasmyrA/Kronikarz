@@ -8,6 +8,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { RelationshipConnection } from '@/components/Map/RelationshipConnection/RelationshipConnection';
+import { ParenthoodConnection } from '@/components/Map/ParenthoodConnection/ParenthoodConnection';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -29,7 +30,7 @@ export interface MapHandle {
   getViewMiddlePosition: () => Position;
 }
 
-export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, onPersonClick, onPersonDrop, onRelationshipClick }, ref) {
+export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, parenthoods, onPersonClick, onPersonDrop, onRelationshipClick }, ref) {
   const [mapSize, setMapSize] = useState({
     width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
     height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
@@ -156,6 +157,17 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
     )
   });
 
+  const parenthoodConnections = parenthoods.map((parenthood) => {
+    return (
+      <ParenthoodConnection
+        key={parenthood.id}
+        parenthood={parenthood}
+        people={people}
+        draggedPerson={draggedPerson}
+      />
+    )
+  });
+
   const mapStyleVariables = {
     '--map-width': `calc(${mapSize.width * 2}px + 300vw)`,
     '--map-height': `calc(${mapSize.height * 2}px + 300vh)`,
@@ -174,6 +186,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         onMouseLeave={()=>setIsDragging(false)}
       >
         {relationshipConnections}
+        {parenthoodConnections}
         {peopleCards}
       </div>
       <ScrollBar orientation="vertical" />
