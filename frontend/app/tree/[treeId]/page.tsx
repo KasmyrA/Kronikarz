@@ -10,7 +10,7 @@ import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personA
 import { Button } from '@/components/ui/button';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
-
+import {createParenthood, deleteParenthood,updateParenthood } from '@/lib/parenthoodActions';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
