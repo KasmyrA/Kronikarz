@@ -195,11 +195,11 @@ interface ParenthoodTypePickerProps {
 }
 
 function ParenthoodTypePicker({ type, setType }: ParenthoodTypePickerProps) {
-  const availableTypes = ["biological", "adoptive"].map((t: ParenthoodType) => {
+  const availableTypes = ["biological", "adoptive"].map((t) => {
     return (
-    <SelectItem key={t} value={t}>
-        {parenthoodTypeToString(t)}
-    </SelectItem>
+      <SelectItem key={t} value={t}>
+        {parenthoodTypeToString[t as ParenthoodType]}
+      </SelectItem>
     )
   })
 
