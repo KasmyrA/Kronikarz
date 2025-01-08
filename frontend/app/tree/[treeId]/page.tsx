@@ -3,20 +3,15 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Loader2, Plus, Users, Home, UserPlus } from 'lucide-react';
+import { Heart, Loader2, Plus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
-import { createPerson, getTreePerson, updatePersonPosition } from '@/lib/personActions';
-
 import { Button } from '@/components/ui/button';
-import { Parenthood } from '@/lib/parenthoodInterfaces';
-import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
-import {createParenthood, deleteParenthood,updateParenthood } from '@/lib/parenthoodActions';
+import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
-import { ParenthoodEditor } from '@/components/Parenthood/ParenthoodEditor';
-
-
+import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
+import { FileInfo, Person } from '@/lib/personInterfaces';
 
 interface Props {
   params: {
@@ -70,20 +65,55 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({...tree});
   }
 
-  const handlePersonDataSheetClose = async () => {
-    const { id } = selectedPerson!;
+  const handlePersonDataSheetClose = () => {
     setSelectedPerson(null);
-    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    const newPersonData = await getTreePerson(id);
+  };
 
-    if (newPersonData) {
-      tree.people[updatedPersonIndex] = newPersonData;
-    } else {
-      tree.people.splice(updatedPersonIndex, 1);
-    }
-    
+  const handlePersonDataSheetSave = async (pers: Omit<Person, "files">) => {
+    await updatePerson(pers);
+    const newPersonData = await getTreePerson(pers.id);
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
+    tree.people[updatedPersonIndex] = newPersonData!;
     setTree({...tree});
-  }
+    setSelectedPerson(null);
+  };
+
+  const handlePersonDataSheetDelete = async () => {
+    const { id } = selectedPerson!;
+    await deletePerson(id);
+    tree.people = tree.people.filter((p) => p.id !== id);
+    tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
+    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id);
+    tree.parenthoods.forEach((p, i) => {
+      if (p.father === id) {
+        p.father = null;
+      } else if (p.mother === id) {
+        p.mother = null;
+      } else if (p.adoption?.father === id) {
+        p.adoption.father = null;
+      } else if (p.adoption?.mother === id) {
+        p.adoption.mother = null;
+      }
+      tree.parenthoods[i] = p;
+    });
+    setTree({...tree});
+    setSelectedPerson(null);
+  };
+
+  const handlePersonDataSheetFileAdd = async (f: File) => {
+    const { id } = selectedPerson!;
+    return await addFileToPerson(id, f);
+  };
+
+  const handlePersonDataSheetFileDelete = async (f: FileInfo) => {
+    const { id } = selectedPerson!;
+    await deleteFileFromPerson(id, f.id);
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
+    if (tree.people[updatedPersonIndex].imageUrl === f.url) {
+      tree.people[updatedPersonIndex].imageUrl = null;
+    }
+    setTree({...tree});
+  };
 
   const handlePersonClick = (person: TreePerson) => {
     if (!selectedRelation && !isRelationsSheetOpened) {
@@ -129,7 +159,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({ ...tree });
     setSelectedRelation(null);
   };
-
   const handleParenthoodEditorClose = () => {
     setSelectedParenthood(null);
   };
@@ -181,8 +210,12 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       </Button>
 
       <PersonDataSheet
-        onClose={handlePersonDataSheetClose}
         person={selectedPerson}
+        onClose={handlePersonDataSheetClose}
+        onSave={handlePersonDataSheetSave}
+        onDelete={handlePersonDataSheetDelete}
+        onFileAdd={handlePersonDataSheetFileAdd}
+        onFileDelete={handlePersonDataSheetFileDelete}
       />
 
       <RelationshipsList

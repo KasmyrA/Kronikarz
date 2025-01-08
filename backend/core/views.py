@@ -15,6 +15,7 @@ from .models import relationships_collection
 from .models import trees_collection
 from .models import persons_collection
 from .models import parenthoods_collection
+from .models import users_collection
 from django.http import HttpResponse, JsonResponse
 import uuid
 from django.views.decorators.csrf import csrf_exempt
@@ -516,7 +517,7 @@ def create_person(request, uid):
         if not isinstance(data['surnames'], list) or not isinstance(data['jobs'], list) or not isinstance(data['files'], list):
             return JsonResponse({"error": "Fields 'surnames', 'jobs', and 'files' must be arrays."}, status=400)
 
-        record = relationships_collection.find_one({"_id": uid})
+        record = persons_collection.find_one({"_id": uid})
 
         if not record:
             new_person = {
@@ -535,7 +536,7 @@ def create_person(request, uid):
                 "_id": uid,
                 "people": [new_person]
             }
-            relationships_collection.insert_one(new_record)
+            persons_collection.insert_one(new_record)
             return JsonResponse(new_person, status=201)
 
         people = record.get("people", [])
@@ -556,7 +557,7 @@ def create_person(request, uid):
         }
 
         people.append(new_person)
-        result = relationships_collection.update_one(
+        result = persons_collection.update_one(
             {"_id": uid},
             {"$set": {"people": people}}
         )
@@ -734,3 +735,314 @@ def create_parenthood(request, uid):
 
     else:
         return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+
+    # views for users
+    '''path('users/', views.get_users),
+    path('users/<str:uid>/<str:UserUid>/', views.get_one_user),
+    path('users/delete/<str:uid>/<str:UserUid>/', views.delete_user),
+    path('users/update/<str:uid>/<str:UserUid>/', views.update_user),
+    path('users/create/<str:uid>/',views.create_user),
+]'''
+
+
+
+def get_users(request):
+    document = users_collection.find_one({}, {"_id": 0, "users": 1})
+    
+    if not document or "users" not in document:
+        return JsonResponse([], safe=False)  
+
+    users = document["users"]
+
+    for user in users:
+        user['_id'] = str(user['_id'])
+        user['parenthoods'] = [str(oid) for oid in user.get('parenthoods', [])]
+        user['persons'] = [str(oid) for oid in user.get('persons', [])]
+        user['relationships'] = [str(oid) for oid in user.get('relationships', [])]
+        user['trees'] = [str(oid) for oid in user.get('trees', [])]
+
+    return JsonResponse(users, safe=False)
+
+
+    
+def delete_user(request, uid, UserUid):
+    if request.method == "DELETE":
+        try:
+            uid = ObjectId(uid)
+            UserUid = ObjectId(UserUid)
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        user_record = users_collection.find_one({"_id": uid})
+        if user_record and "users" in user_record:
+            user_to_delete = next((user for user in user_record["users"] if user["_id"] == UserUid), None)
+
+            if user_to_delete:
+                persons_ids = [ObjectId(person_id) for person_id in user_to_delete.get("persons", [])]
+                parenthoods_ids = [ObjectId(parenthood_id) for parenthood_id in user_to_delete.get("parenthoods", [])]
+                trees_ids = [ObjectId(tree_id) for tree_id in user_to_delete.get("trees", [])]
+                relationships_ids = [ObjectId(relationship_id) for relationship_id in user_to_delete.get("relationships", [])]
+
+                persons_collection.delete_many({"_id": {"$in": persons_ids}})
+                parenthoods_collection.delete_many({"_id": {"$in": parenthoods_ids}})
+                trees_collection.delete_many({"_id": {"$in": trees_ids}})
+                relationships_collection.delete_many({"_id": {"$in": relationships_ids}})
+
+                updated_users = [
+                    user for user in user_record["users"] if user["_id"] != UserUid
+                ]
+
+                result = users_collection.update_one(
+                    {"_id": uid},
+                    {"$set": {"users": updated_users}}
+                )
+
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"User with id {UserUid} and associated elements successfully deleted."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to delete user."}, status=500)
+            else:
+                return JsonResponse({"error": "User not found."}, status=404)
+        else:
+            return JsonResponse({"error": "Document not found."}, status=404)
+
+    else:
+        return JsonResponse({"error": "Invalid request method. Use DELETE."}, status=405)
+
+    
+def update_user(request, uid, UserUid):
+    if request.method == "PATCH":  
+        try:
+            uid = ObjectId(uid)  
+            UserUid = ObjectId(UserUid)  
+        except ValueError:
+            return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+        try:
+            data = json.loads(request.body)  
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
+
+        if not data:
+            return JsonResponse({"error": "No data provided to update."}, status=400)
+
+        user_record = users_collection.find_one({"_id": uid})
+        
+        if user_record and "users" in user_record:
+            user_to_update = None
+            for user in user_record["users"]:
+                if user["_id"] == UserUid:
+                    user_to_update = user
+                    break
+            
+            if user_to_update:
+                for key, value in data.items():
+                    if key in user_to_update:  
+                        user_to_update[key] = value
+
+                result = users_collection.update_one(
+                    {"_id": uid, "users._id": UserUid},
+                    {"$set": {"users.$": user_to_update}}  
+                )
+
+                if result.modified_count > 0:
+                    return JsonResponse({"message": f"User with id {UserUid} successfully updated."}, status=200)
+                else:
+                    return JsonResponse({"error": "Failed to update user."}, status=500)
+            else:
+                return JsonResponse({"error": "User not found in the array."}, status=404)
+        else:
+            return JsonResponse({"error": "Document not found."}, status=404)
+
+    else:
+        return JsonResponse({"error": "Invalid request method. Use PATCH."}, status=405)
+
+@csrf_exempt
+def create_user(request, uid):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+    try:
+        uid = ObjectId(uid)
+    except ValueError:
+        return JsonResponse({"error": "Invalid document ID format."}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    if 'login' not in data or 'password' not in data:
+        return JsonResponse({"error": "Missing required fields: 'login' and 'password'."}, status=400)
+
+    login = data['login']
+    password = data['password']
+
+    record = users_collection.find_one({"_id": uid})
+
+    if not record:
+        return JsonResponse({"error": "Document not found."}, status=404)
+
+    new_tree = {
+        "id": 0,  
+        "name": "New Family Tree",
+        "people": [
+            {
+                "id": 0,
+                "name": "James",
+                "surname": "Doe",
+                "sex": "M",
+                "imageUrl": "https://example.com/images/james_doe.jpg",
+                "birthDate": "1975-12-02",
+                "deathDate": "",
+                "position": {"x": 0, "y": 0}
+            },
+            {
+                "id": 1,
+                "name": "Sophia",
+                "surname": "Green",
+                "sex": "F",
+                "imageUrl": None,
+                "birthDate": "1978-10-16",
+                "deathDate": "",
+                "position": {"x": 1, "y": 0}
+            },
+            {
+                "id": 2,
+                "name": "Liam",
+                "surname": "Doe",
+                "sex": "M",
+                "imageUrl": None,
+                "birthDate": "2000-05-05",
+                "deathDate": "",
+                "position": {"x": 0, "y": 1}
+            }
+        ],
+        "relationships": [
+            {
+                "id": 0,
+                "partner1": 0,
+                "partner2": 1,
+                "kind": "marriage"
+            }
+        ],
+        "parenthoods": [
+            {
+                "parentId": 0,
+                "childId": 2
+            },
+            {
+                "parentId": 1,
+                "childId": 2
+            }
+        ]
+    }
+
+    tree_result = trees_collection.insert_one({"trees": [new_tree]})
+    tree_object_id = tree_result.inserted_id
+
+    person_template = {
+        "id": 0,
+        "names": ["Template", "Person"],
+        "image": 0,
+        "description": "Default description",
+        "sex": "U",
+        "birth": {"date": None, "place": None},
+        "death": {"date": None, "place": None},
+        "surnames": [],
+        "jobs": [],
+        "files": []
+    }
+    person_result = persons_collection.insert_one({"persons": [person_template]})
+    persons_list_object_id = person_result.inserted_id
+
+    parenthood_template = {
+        "mother": None,
+        "father": None,
+        "child": None,
+        "adoption": {"mother": None, "father": None, "date": None}
+    }
+    parenthood_result = parenthoods_collection.insert_one({"parenthoods": [parenthood_template]})
+    parenthoods_list_object_id = parenthood_result.inserted_id
+
+    relationship_template = {
+        "id": 0,
+        "relationships": []
+    }
+    relationship_result = relationships_collection.insert_one({"relationships": relationship_template})
+    relationships_list_object_id = relationship_result.inserted_id
+
+    new_user = {
+        "_id": ObjectId(),
+        "login": login,
+        "password": password,
+        "trees": [str(tree_object_id)],
+        "persons": [str(persons_list_object_id)],
+        "parenthoods": [str(parenthoods_list_object_id)],
+        "relationships": [str(relationships_list_object_id)]
+    }
+
+    result = users_collection.update_one(
+        {"_id": uid},
+        {"$push": {"users": new_user}}
+    )
+
+    if result.modified_count > 0:
+        new_user_serializable = {
+            "_id": str(new_user["_id"]),
+            "login": new_user["login"],
+            "password": new_user["password"],
+            "trees": [str(tree_object_id)],
+            "persons": [str(persons_list_object_id)],
+            "parenthoods": [str(parenthoods_list_object_id)],
+            "relationships": [str(relationships_list_object_id)]
+        }
+        return JsonResponse({"message": "User created successfully.", "user": new_user_serializable}, status=201)
+    else:
+        persons_collection.delete_one({"_id": persons_list_object_id})
+        parenthoods_collection.delete_one({"_id": parenthoods_list_object_id})
+        trees_collection.delete_one({"_id": tree_object_id})
+        relationships_collection.delete_one({"_id": relationships_list_object_id})
+
+        return JsonResponse({"error": "Failed to add new user."}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_one_user(request, uid, UserUid):
+    try:
+        uid = ObjectId(uid)
+        UserUid = ObjectId(UserUid)
+    except ValueError:
+        return JsonResponse({"error": "Invalid ID format."}, status=400)
+
+    record = users_collection.find_one({"_id": uid}, {"_id": 0, "users": 1})
+
+    if not record or "users" not in record:
+        return JsonResponse({"error": "Users not found."}, status=404)
+
+    for user in record["users"]:
+        if user["_id"] == UserUid:
+            user["_id"] = str(user["_id"])
+            user["parenthoods"] = [str(oid) for oid in user.get("parenthoods", [])]
+            user["persons"] = [str(oid) for oid in user.get("persons", [])]
+            user["relationships"] = [str(oid) for oid in user.get("relationships", [])]
+            user["trees"] = [str(oid) for oid in user.get("trees", [])]
+            return JsonResponse(user, safe=False)
+
+    return JsonResponse({"error": "User not found."}, status=404)
+        
+
+
+        
+    

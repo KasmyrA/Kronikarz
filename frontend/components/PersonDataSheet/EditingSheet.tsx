@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { SheetFooter } from "@/components/ui/sheet";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { deletePerson, updatePerson } from "@/lib/personActions";
-import { Person } from "@/lib/personInterfaces";
+import { FileInfo, Person } from "@/lib/personInterfaces";
 import { useKeyedState } from "@/lib/useKeyedState";
 import { useState } from "react";
 import { NamesTable } from "./NamesTable";
@@ -16,10 +15,14 @@ import { PersonImagePicker } from "./PersonImagePicker";
 
 interface Props {
   person: Person;
-  closeSheet: () => void;
+  onClose: () => void;
+  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onDelete: () => void;
+  onFileAdd: (f: File) => Promise<FileInfo>;
+  onFileDelete: (f: FileInfo) => Promise<void>;
 }
 
-export function EditingSheet({ person, closeSheet }: Props) {
+export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onFileDelete }: Props) {
   const [names, addName, updateName, deleteName] = useKeyedState(person.names);
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
   const [jobs, addJob, updateJob, deleteJob] = useKeyedState(person.jobs);
@@ -31,7 +34,7 @@ export function EditingSheet({ person, closeSheet }: Props) {
   const [image, setImage] = useState(person.image);
 
   const handleSave = async () => {
-    await updatePerson({
+    await onSave({
       id: person.id,
       names: names.map((n) => n.value),
       surnames: surnames.map((s) => s.value),
@@ -42,32 +45,45 @@ export function EditingSheet({ person, closeSheet }: Props) {
       description,
       image
     });
-    closeSheet();
   }
 
-  const handleDelete = async () => {
-    await deletePerson(person.id);
-    closeSheet();
+  const handleDelete = onDelete;
+
+  const handleFileAdd = async (f: File) => {
+    const fileInfo = await onFileAdd(f);
+    setFiles([...files, fileInfo]);
+    return fileInfo;
+  };
+
+  const handleFileDelete = async (file: FileInfo) => {
+    await onFileDelete(file);
+    setFiles(files.filter(f => f.id !== file.id));
+    if (image === file.id)  setImage(null);
   }
 
   return (
     <>
       <ScrollArea className="flex-1 pb-1 overflow-auto" type="auto">
         <div className="mx-auto w-full max-w-xl">
-          <PersonImagePicker {...{image, setImage, files, setFiles, personId: person.id}} />
+          <PersonImagePicker image={image} files={files} setImage={setImage} onFileAdd={handleFileAdd} />
           <NamesTable {...{names, addName, updateName, deleteName}} />
           <SurnamesTable {...{surnames, addSurname, updateSurname, deleteSurname}} />
           <SexPicker {...{sex, setSex}} />
           <BirthDeathPicker {...{birth, death, setBirth, setDeath}} />
           <JobsTable {...{jobs, addJob, updateJob, deleteJob}} />
           <PersonDescription {...{description, setDescription}} />
-          <PersonFilesList {...{files, setFiles, image, setImage, personId: person.id}} />
+          <PersonFilesList
+            files={files}
+            image={image}
+            onFileAdd={handleFileAdd}
+            onFileDelete={handleFileDelete}
+          />
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
       <SheetFooter className="mx-auto w-full max-w-xl gap-4">
-        <Button onClick={closeSheet} variant="outline" className="flex-1">
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Nie zapisuj
         </Button>
         <Button onClick={handleSave} className="flex-1">
