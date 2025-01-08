@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { Loader2, User } from "lucide-react";
 import { Card } from "../ui/card";
 import { TreePerson } from "@/lib/treeInterfaces";
-import { getNameSurname } from "@/lib/utils";
+import { getNameSurname, parenthoodTypeToString } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export interface ParentPicker {
@@ -35,7 +35,7 @@ export function ParenthoodEditor({ parenthoodId, people, parentPicker, setParent
       setParenthood(null);
     }
     else if (parenthoodId === "new") {
-      setParenthood({ id:0, mother: -1, father: -1, child: -1, type: "biological", startDate: null, endDate: null, adoption: null });
+      setParenthood({ id: -1, mother: -1, father: -1, child: -1, type: "biological", startDate: null, endDate: null, adoption: null });
     }
     else {
       getParenthood(parenthoodId).then((p) => setParenthood(p!))
@@ -50,8 +50,8 @@ export function ParenthoodEditor({ parenthoodId, people, parentPicker, setParent
     <Sheet open={!!parenthoodId} modal={false}>
       <SheetContent className="flex flex-col px-0 w-96" side="left">
         <SheetHeader className="mx-6">
-          <SheetTitle>Edytuj rodzicielstwo</SheetTitle>
-          <SheetDescription>Uzupełnij informacje o rodzicielstwie</SheetDescription>
+          <SheetTitle>Rodzicielstwo</SheetTitle>
+          <SheetDescription>Przeglądaj, dodawaj, usuwaj realacje rodzinne</SheetDescription>
         </SheetHeader>
 
         {content}
@@ -72,18 +72,18 @@ interface LoadedParenthoodProps {
 }
 
 function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, setParenthood, onSave, onClose, onDelete }: LoadedParenthoodProps) {
-  const isNewParenthood = parenthood.child < 0;
+  const isNewParenthood = parenthood.id < 0;
   const isParenthoodValid = 
-    parenthood.mother >= 0 &&
-    parenthood.father >= 0 &&
-    parenthood.child >= 0 &&
-    (parenthood.type === "biological" || parenthood.type === "adoptive"); // Corrected condition
+    (parenthood.mother ?? -1) >= 0 &&
+    (parenthood.father ?? -1) >= 0 &&
+    (parenthood.child ?? -1) >= 0 &&
+    (parenthood.type === "biological" || parenthood.type === "adoptive");
 
   const mother = people.find((p) => p.id === parenthood.mother);
   const father = people.find((p) => p.id === parenthood.father);
   const child = people.find((p) => p.id === parenthood.child);
 
-  const forbiddenParentIds = [parenthood.mother, parenthood.father, parenthood.child];
+  const forbiddenParentIds = [parenthood.mother, parenthood.father, parenthood.child].filter((id): id is number => id !== null && id >= 0);
 
   // Cleanup on component destroy
   useEffect(() => {
@@ -195,11 +195,11 @@ interface ParenthoodTypePickerProps {
 }
 
 function ParenthoodTypePicker({ type, setType }: ParenthoodTypePickerProps) {
-  const availableTypes = ["biological", "adoptive"].map((t) => {
+  const availableTypes = ["biological", "adoptive"].map((t: ParenthoodType) => {
     return (
-      <SelectItem key={t} value={t}>
-        {t}
-      </SelectItem>
+    <SelectItem key={t} value={t}>
+        {parenthoodTypeToString(t)}
+    </SelectItem>
     )
   })
 

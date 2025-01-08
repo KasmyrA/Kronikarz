@@ -1,40 +1,57 @@
 import { Parenthood } from "./parenthoodInterfaces";
 
-const PARENTHOOD_STORAGE_KEY = "parenthoods";
-
-function getParenthoodsFromStorage(): Parenthood[] {
-  if (typeof window === "undefined") return [];
-  const parenthoods = localStorage.getItem(PARENTHOOD_STORAGE_KEY);
-  return parenthoods ? JSON.parse(parenthoods) : [];
+function getUniqueId<T extends { id: number }>(arr: T[]) {
+  let id: number;
+  do {
+    id = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
+  } while (arr.some(t => t.id === id));
+  return id;
 }
 
-function saveParenthoodsToStorage(parenthoods: Parenthood[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(PARENTHOOD_STORAGE_KEY, JSON.stringify(parenthoods));
+export function createParenthood(parenthood: Omit<Parenthood, "id">): Promise<Parenthood> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const parenthoods: Parenthood[] = JSON.parse(localStorage.getItem('parenthoods') ?? "[]");
+      const newParenthood: Parenthood = {
+        ...parenthood,
+        id: getUniqueId(parenthoods),
+      };
+      parenthoods.push(newParenthood)
+      localStorage.setItem('parenthoods', JSON.stringify(parenthoods));
+      resolve(newParenthood);
+    }, 1000);
+  });
 }
 
-export async function getParenthood(id: number): Promise<Parenthood | null> {
-  const parenthoods = getParenthoodsFromStorage();
-  return parenthoods.find(p => p.child === id) || null;
+export function getParenthood(parenthoodId: number): Promise<Parenthood | undefined> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const parenthoods: Parenthood[] = JSON.parse(localStorage.getItem('parenthoods') ?? "[]");
+      resolve(parenthoods.find(r => r.id === parenthoodId));
+    }, 1000);
+  });
 }
 
-export async function getAllParenthoods(): Promise<Parenthood[]> {
-  return getParenthoodsFromStorage();
+export function updateParenthood(parenthood: Parenthood): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const parenthoods: Parenthood[] = JSON.parse(localStorage.getItem('parenthoods') ?? "[]");
+      const i = parenthoods.findIndex(p => p.id === parenthood.id);
+      parenthoods[i] = parenthood;
+      localStorage.setItem('parenthoods', JSON.stringify(parenthoods));
+      resolve();
+    }, 1000);
+  });
 }
 
-export async function saveParenthood(parenthood: Parenthood): Promise<void> {
-  const parenthoods = getParenthoodsFromStorage();
-  const index = parenthoods.findIndex(p => p.child === parenthood.child);
-  if (index >= 0) {
-    parenthoods[index] = parenthood;
-  } else {
-    parenthoods.push(parenthood);
-  }
-  saveParenthoodsToStorage(parenthoods);
-}
-
-export async function deleteParenthood(id: number): Promise<void> {
-  let parenthoods = getParenthoodsFromStorage();
-  parenthoods = parenthoods.filter(p => p.child !== id);
-  saveParenthoodsToStorage(parenthoods);
+export function deleteParenthood(parenthoodId: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const parenthoods: Parenthood[] = JSON.parse(localStorage.getItem('parenthoods') ?? "[]");
+      const i = parenthoods.findIndex(p => p.id === parenthoodId);
+      parenthoods.splice(i, 1);
+      localStorage.setItem('parenthoods', JSON.stringify(parenthoods));
+      resolve();
+    }, 1000);
+  });
 }

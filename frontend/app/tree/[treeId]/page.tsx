@@ -3,7 +3,7 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Loader2, Plus } from 'lucide-react';
+import { Heart, Loader2, Plus, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
@@ -12,6 +12,9 @@ import { RelationshipsList } from '@/components/RelationshipsSheet/Relationships
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
 import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
 import { FileInfo, Person } from '@/lib/personInterfaces';
+import { Parenthood} from '@/lib/parenthoodInterfaces';
+import { createParenthood, deleteParenthood, updateParenthood } from '@/lib/parenthoodActions';
+import { ParentPicker,ParenthoodEditor} from '@/components/ParenthoodSheet/ParenthoodEditor';
 
 interface Props {
   params: {
@@ -45,6 +48,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
   const [selectedParenthood, setSelectedParenthood] = useState<number | "new" | null>(null);
+  const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
   const peopleHighlights = !partnerPicker ?
@@ -165,23 +169,21 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleParenthoodEditorSave = async (parenthood: Parenthood) => {
     if (selectedParenthood === "new") {
-      const newParenthoodData = { ...parenthood, id: Date.now() };
+      const newParenthoodData = await createParenthood(parenthood);
       tree.parenthoods.push(newParenthoodData);
     } else {
       await updateParenthood(parenthood);
-      const index = tree.parenthoods.findIndex(p => p.id === parenthood.id);
-      if (index !== -1) {
-        tree.parenthoods[index] = parenthood;
-      }
-      tree.parenthoods[index] = parenthood;
+      const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedRelation!);
+      tree.parenthoods[updatedParenthoodIndex] = parenthood;
     }
     setTree({ ...tree });
     setSelectedParenthood(null);
   };
 
-  const handleParenthoodEditorDelete = () => {
-    const index = tree.parenthoods.findIndex(p => p.id === selectedParenthood);
-    tree.parenthoods.splice(index, 1);
+  const handleParenthoodEditorDelete = async () => {
+    await deleteParenthood(selectedParenthood as number);
+    const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedParenthood!);
+    tree.parenthoods.splice(updatedParenthoodIndex, 1);
     setTree({ ...tree });
     setSelectedParenthood(null);
   };
@@ -237,8 +239,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       <ParenthoodEditor
         parenthoodId={selectedParenthood}
         people={tree.people}
-        parentPicker={null}
-        setParentPicker={() => {}}
+        parentPicker={parentPicker}
+        setParentPicker={setParentPicker}
         onClose={handleParenthoodEditorClose}
         onSave={handleParenthoodEditorSave}
         onDelete={handleParenthoodEditorDelete}
