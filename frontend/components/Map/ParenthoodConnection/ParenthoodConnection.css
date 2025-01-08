@@ -1,0 +1,22 @@
+.parenthood-connection {
+  position: absolute;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.parenthood-line {
+  stroke: black;
+  stroke-width: 3px;
+  transition: stroke .25s;
+}
+
+.parenthood-margin {
+  pointer-events: all;
+  visibility: hidden;
+  cursor: pointer;
+  stroke-dasharray: none !important;
+}
+
+.parenthood-margin:hover ~ .parenthood-line {
+  stroke: goldenrod;
+}
