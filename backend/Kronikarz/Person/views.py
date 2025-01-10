@@ -17,10 +17,12 @@ def persons_list(request, format=None):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = PersonSerializer(deta=request.data)
+        serializer = PersonSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
@@ -55,10 +57,11 @@ def surnames_list(request, format=None):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = SurnameSerializer(deta=request.data)
+        serializer = SurnameSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
@@ -93,10 +96,11 @@ def jobs_list(request, format=None):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = JobSerializer(deta=request.data)
+        serializer = JobSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
@@ -131,10 +135,11 @@ def events_list(request, format=None):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = EventInLifeSerializer(deta=request.data)
+        serializer = EventInLifeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
@@ -169,10 +174,11 @@ def files_list(request, format=None):
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = FileInfoSerializer(deta=request.data)
+        serializer = FileInfoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
