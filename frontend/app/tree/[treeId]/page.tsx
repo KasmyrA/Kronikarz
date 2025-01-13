@@ -7,14 +7,18 @@ import { Heart, Loader2, Plus, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
+
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
 import { PartnerPicker, RelationshipEditor } from '@/components/RelationshipsSheet/RelationshipEditor';
 import { createRelationship, deleteRelationship, updateRelationship } from '@/lib/relationshipActions';
-import { FileInfo, Person } from '@/lib/personInterfaces';
+
 import { Parenthood} from '@/lib/parenthoodInterfaces';
-import { createParenthood, deleteParenthood, updateParenthood } from '@/lib/parenthoodActions';
+import {ParenthoodList} from '@/components/ParenthoodSheet/ParenthoodList';
 import { ParentPicker,ParenthoodEditor} from '@/components/ParenthoodSheet/ParenthoodEditor';
+import { createParenthood, deleteParenthood, updateParenthood } from '@/lib/parenthoodActions';
+
+import { FileInfo, Person } from '@/lib/personInterfaces';
 
 interface Props {
   params: {
@@ -47,6 +51,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [selectedRelation, setSelectedRelation] = useState<number | "new" | null>(null);
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
+
+  const [isParenthoodSheetOpened,setParenthoodSheetOpened] = useState(false);
   const [selectedParenthood, setSelectedParenthood] = useState<number | "new" | null>(null);
   const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
@@ -163,6 +169,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({ ...tree });
     setSelectedRelation(null);
   };
+
+  const handleParenthoodClick =(id:number|"new")=>{
+    if(selectedParenthood===null){
+      setSelectedParenthood(id);
+    }
+  }
+
   const handleParenthoodEditorClose = () => {
     setSelectedParenthood(null);
   };
@@ -235,6 +248,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onClose={handleRelationshipEditorClose}
         onSave={handleRelationshipEditorSave}
         onDelete={handleRelationshipEditorDelete}
+      />
+      <ParenthoodList
+      isOpened={isParenthoodSheetOpened}
+      parenthoods={tree.parenthoods}
+      people={tree.people}
+      onParenthoodClick={handleParenthoodClick}
+      onClose={()=>setParenthoodSheetOpened(false)}
       />
       <ParenthoodEditor
         parenthoodId={selectedParenthood}

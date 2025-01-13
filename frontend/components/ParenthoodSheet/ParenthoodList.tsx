@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getNameSurname } from "@/lib/utils";
 import { Plus, User } from "lucide-react";
-import { Parenthood } from "@/lib/parenthoodInterfaces";
+import { Parenthood, ParenthoodKind } from "@/lib/parenthoodInterfaces";
 import { Card } from "../ui/card";
 
 interface Props {
@@ -24,7 +24,7 @@ export function ParenthoodList({ isOpened, parenthoods, people, onParenthoodClic
     const child = people.find((p) => p.id === parenthood.child)!;
 
     return (
-      <Button key={parenthood.child} onClick={() => onParenthoodClick(parenthood.child)} variant="outline" className="w-full h-auto p-4 block mt-4">
+      <Button key={parenthood.id} onClick={() => onParenthoodClick(parenthood.id)} variant="outline" className="w-full h-auto p-4 block mt-4">
         <div className="flex justify-around">
           <ParentImage person={mother} />
           <ParentImage person={father} />
