@@ -103,10 +103,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         p.father = null;
       } else if (p.mother === id) {
         p.mother = null;
-      } else if (p.adoption?.father === id) {
-        p.adoption.father = null;
-      } else if (p.adoption?.mother === id) {
-        p.adoption.mother = null;
       }
       tree.parenthoods[i] = p;
     });
