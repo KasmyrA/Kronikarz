@@ -2,8 +2,7 @@ export type ParenthoodType = "biological" | "adoptive";
 export enum ParenthoodKind {
   BIOLOGICAL = "biological",
   ADOPTIVE = "adoptive",
-  
-};
+}
 export interface Parenthood {
   id: number;
   mother: number | null;
