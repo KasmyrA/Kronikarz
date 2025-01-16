@@ -57,16 +57,20 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
-  const peopleHighlights = !partnerPicker ?
-    {} : 
+  const forbiddenPeopleIds = [
+    ...(partnerPicker?.forbiddenPartnerIds ?? []),
+    ...(parentPicker?.forbiddenParentIds ?? []),
+  ];
+  const peopleHighlights = (partnerPicker || parentPicker) ?
     tree.people.reduce((acc: HighlightData, p) => {
-      if (partnerPicker.forbiddenPartnerIds.includes(p.id)) {
+      if (forbiddenPeopleIds.includes(p.id)) {
         acc[p.id] = "hsl(var(--destructive))";
       } else {
         acc[p.id] = "#44adef";
       }
       return acc;
-    }, {})
+    }, {}) :
+    {};
 
   const handleAddPerson = async () => {
     const newPersonPosition = mapRef.current!.getViewMiddlePosition();
@@ -126,10 +130,12 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonClick = (person: TreePerson) => {
-    if (!selectedRelation && !isRelationsSheetOpened) {
+    if (!selectedRelation && !isRelationsSheetOpened && !selectedParenthood && !isParenthoodSheetOpened) {
       setSelectedPerson(person);
     } else if (partnerPicker && !partnerPicker.forbiddenPartnerIds.includes(person.id)) {
       partnerPicker.pickPartner(person.id)
+    } else if (parentPicker && !parentPicker.forbiddenParentIds.includes(person.id)) {
+      parentPicker.pickParent(person.id);
     }
   };
 
