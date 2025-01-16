@@ -17,6 +17,6 @@
   stroke-dasharray: none !important;
 }
 
-.parenthood-margin:hover ~ .parenthood-line {
-  stroke: goldenrod;
+.parenthood-margin:hover~.parenthood-line {
+  stroke: violet;
 }

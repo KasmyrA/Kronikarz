@@ -24,13 +24,14 @@ interface Props {
   onPersonClick: (p: TreePerson) => void;
   onPersonDrop: (pos: Position, pers: TreePerson) => void;
   onRelationshipClick: (r: number) => void
+  onParenthoodClick: (p: number) => void
 }
 
 export interface MapHandle {
   getViewMiddlePosition: () => Position;
 }
 
-export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, parenthoods, onPersonClick, onPersonDrop, onRelationshipClick }, ref) {
+export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, parenthoods, onPersonClick, onPersonDrop, onRelationshipClick, onParenthoodClick }, ref) {
   const [mapSize, setMapSize] = useState({
     width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
     height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
@@ -164,6 +165,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         parenthood={parenthood}
         people={people}
         draggedPerson={draggedPerson}
+        onClick={() => onParenthoodClick(parenthood.id)}
       />
     )
   });

@@ -97,7 +97,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     await deletePerson(id);
     tree.people = tree.people.filter((p) => p.id !== id);
     tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
-    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id);
+    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id || (p.father === id && p.mother === null) || (p.mother === id && p.father === null));
     tree.parenthoods.forEach((p, i) => {
       if (p.father === id) {
         p.father = null;
@@ -176,7 +176,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setSelectedRelation(null);
   };
 
-  const handleParenthoodClick =(id:number|"new")=>{
+  const handleParenthoodClick =(id: number | "new")=>{
     if(selectedParenthood===null){
       setSelectedParenthood(id);
     }
@@ -218,6 +218,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onPersonClick={handlePersonClick}
         onPersonDrop={handlePersonDrop}
         onRelationshipClick={handleRelationshipClick}
+        onParenthoodClick={handleParenthoodClick}
       />
 
       <Button onClick={() => setParenthoodSheetOpened(true)} size="icon" className='absolute right-40 bottom-8'>

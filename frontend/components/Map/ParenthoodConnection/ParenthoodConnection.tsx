@@ -1,5 +1,5 @@
 import "./ParenthoodConnection.css"
-import { Parenthood } from "@/lib/parenthoodInterfaces";
+import { Parenthood, ParenthoodKind } from "@/lib/parenthoodInterfaces";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { CSSProperties } from "react";
 
@@ -7,9 +7,10 @@ interface Props {
   parenthood: Parenthood;
   people: TreePerson[];
   draggedPerson: number | null;
+  onClick: () => void;
 }
 
-export function ParenthoodConnection({ parenthood, people, draggedPerson }: Props) {
+export function ParenthoodConnection({ parenthood, people, draggedPerson, onClick }: Props) {
   const mother = parenthood.mother ? people.find((p) => p.id === parenthood.mother) : null;
   const father = parenthood.father ? people.find((p) => p.id === parenthood.father) : null;
   const child = people.find((p) => p.id === parenthood.child);
@@ -24,21 +25,43 @@ export function ParenthoodConnection({ parenthood, people, draggedPerson }: Prop
 
   const viewBox = `${posX + clickmargin / 2} ${posY + clickmargin / 2} ${width} ${height}`;
   const opacity = (parenthood.mother === draggedPerson || parenthood.father === draggedPerson || parenthood.child === draggedPerson) ? 0 : 1;
+  const strokeDasharray = parenthood.type === ParenthoodKind.ADOPTIVE ?
+    "5px" :
+    "none";
   const style: CSSProperties = {
     translate: `${posX + width / 2}px ${posY + height / 2}px`,
     opacity,
     width,
-    height
+    height,
+    strokeDasharray
   };
+
+  const closerParentY = Math.abs((mother?.position.y ?? Infinity) - child.position.y) < Math.abs((father?.position.y ?? Infinity) - child.position.y) ?
+    mother!.position.y : father!.position.y;
+  const midY = (closerParentY + child.position.y) / 2;
 
   return (
     <svg viewBox={viewBox} style={style} className='parenthood-connection' xmlns="http://www.w3.org/2000/svg">
       {/* Click margin lines */}
-      {mother && <line className='parenthood-margin' strokeWidth={clickmargin} x1={mother.position.x} y1={mother.position.y} x2={child.position.x} y2={child.position.y} />}
-      {father && <line className='parenthood-margin' strokeWidth={clickmargin} x1={father.position.x} y1={father.position.y} x2={child.position.x} y2={child.position.y} />}
+      {mother && <>
+        <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={mother.position.x} y1={mother.position.y} x2={mother.position.x} y2={midY} />
+        <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={mother.position.x} y1={midY} x2={child.position.x} y2={midY} />
+      </>}
+      {father && <>
+        <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={father.position.x} y1={father.position.y} x2={father.position.x} y2={midY} />
+        <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={father.position.x} y1={midY} x2={child.position.x} y2={midY} />
+      </>}
+      <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={child.position.x} y1={midY} x2={child.position.x} y2={child.position.y} />
       {/* Visible lines */}
-      {mother && <line className='parenthood-line' x1={mother.position.x} y1={mother.position.y} x2={child.position.x} y2={child.position.y} />}
-      {father && <line className='parenthood-line' x1={father.position.x} y1={father.position.y} x2={child.position.x} y2={child.position.y} />}
+      {mother && <>
+        <line className='parenthood-line' x1={mother.position.x} y1={mother.position.y} x2={mother.position.x} y2={midY} />
+        <line className='parenthood-line' x1={mother.position.x} y1={midY} x2={child.position.x} y2={midY} />
+      </>}
+      {father && <>
+        <line className='parenthood-line' x1={father.position.x} y1={father.position.y} x2={father.position.x} y2={midY} />
+        <line className='parenthood-line' x1={father.position.x} y1={midY} x2={child.position.x} y2={midY} />
+      </>}
+      <line className='parenthood-line' x1={child.position.x} y1={midY} x2={child.position.x} y2={child.position.y} />
     </svg>
   );
 }
