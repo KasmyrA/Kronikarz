@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'Parenthood',
     'Relationship',
     'Tree',
+    'UserAuth',
 ]
 
 MIDDLEWARE = [
