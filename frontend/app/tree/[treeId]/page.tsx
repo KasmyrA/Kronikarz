@@ -3,7 +3,7 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Baby, Heart, Loader2, Plus } from 'lucide-react';
+import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
@@ -227,7 +227,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         <Heart className="h-4 w-4" />
       </Button>
       <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
-        <Plus className="h-4 w-4" />
+        <UserPlus className="h-4 w-4" />
       </Button>
 
       <PersonDataSheet
