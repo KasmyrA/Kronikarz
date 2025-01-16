@@ -3,7 +3,7 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Loader2, Plus, UserPlus } from 'lucide-react';
+import { Baby, Heart, Loader2, Plus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
@@ -52,7 +52,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
 
-  const [isParenthoodSheetOpened,setParenthoodSheetOpened] = useState(false);
+  const [isParenthoodSheetOpened, setParenthoodSheetOpened] = useState(false);
   const [selectedParenthood, setSelectedParenthood] = useState<number | "new" | null>(null);
   const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
@@ -214,14 +214,14 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onRelationshipClick={handleRelationshipClick}
       />
 
+      <Button onClick={() => setParenthoodSheetOpened(true)} size="icon" className='absolute right-40 bottom-8'>
+        <Baby className="h-4 w-4" />
+      </Button>
       <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
         <Heart className="h-4 w-4" />
       </Button>
       <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
         <Plus className="h-4 w-4" />
-      </Button>
-      <Button onClick={() => setSelectedParenthood("new")} size="icon" className='absolute right-40 bottom-8'>
-        <UserPlus className="h-4 w-4" />
       </Button>
 
       <PersonDataSheet
@@ -249,12 +249,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onSave={handleRelationshipEditorSave}
         onDelete={handleRelationshipEditorDelete}
       />
+
       <ParenthoodList
-      isOpened={isParenthoodSheetOpened}
-      parenthoods={tree.parenthoods}
-      people={tree.people}
-      onParenthoodClick={handleParenthoodClick}
-      onClose={()=>setParenthoodSheetOpened(false)}
+        isOpened={isParenthoodSheetOpened}
+        parenthoods={tree.parenthoods}
+        people={tree.people}
+        onParenthoodClick={handleParenthoodClick}
+        onClose={() => setParenthoodSheetOpened(false)}
       />
       <ParenthoodEditor
         parenthoodId={selectedParenthood}
