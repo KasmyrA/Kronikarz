@@ -1,14 +1,15 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .models import Person, EventInLife, Surname, Job, FileInfo
 from .serializers import PersonSerializer, EventInLifeSerializer, SurnameSerializer, JobSerializer, FileInfoSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 # Person
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def persons_list(request, format=None):
 
     if request.method == 'GET':
@@ -26,6 +27,7 @@ def persons_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
+@permission_classes([IsAuthenticated])
 def person_detail(request, id, format=None):
     try:
         person = Person.objects.get(pk=id)
@@ -49,6 +51,7 @@ def person_detail(request, id, format=None):
 # Surname
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def surnames_list(request, format=None):
 
     if request.method == 'GET':
@@ -64,7 +67,8 @@ def surnames_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])   
+@api_view(['GET', 'PUT', 'DELETE']) 
+@permission_classes([IsAuthenticated])
 def surname_detail(request, id, format=None):
     try:
         surname = Surname.objects.get(pk=id)
@@ -88,6 +92,7 @@ def surname_detail(request, id, format=None):
 # Job
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def jobs_list(request, format=None):
 
     if request.method == 'GET':
@@ -103,7 +108,8 @@ def jobs_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])   
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def job_detail(request, id, format=None):
     try:
         job = Job.objects.get(pk=id)
@@ -127,6 +133,7 @@ def job_detail(request, id, format=None):
 # EventInLife
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def events_list(request, format=None):
 
     if request.method == 'GET':
@@ -142,7 +149,8 @@ def events_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])   
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def event_detail(request, id, format=None):
     try:
         event = EventInLife.objects.get(pk=id)
@@ -166,6 +174,7 @@ def event_detail(request, id, format=None):
 # FileInfo
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def files_list(request, format=None):
 
     if request.method == 'GET':
@@ -181,7 +190,8 @@ def files_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])   
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def file_detail(request, id, format=None):
     try:
         file = FileInfo.objects.get(pk=id)

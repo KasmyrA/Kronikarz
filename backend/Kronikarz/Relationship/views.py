@@ -1,14 +1,15 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .models import Relationship
 from .serializers import RelationshipSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 # Relationship
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def relationships_list(request, format=None):
 
     if request.method == 'GET':
@@ -23,7 +24,8 @@ def relationships_list(request, format=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])   
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def relationship_detail(request, id, format=None):
     try:
         relationship = Relationship.objects.get(pk=id)
