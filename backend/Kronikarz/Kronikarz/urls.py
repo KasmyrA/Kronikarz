@@ -23,5 +23,6 @@ urlpatterns = [
     path('parenthoods/', include('Parenthood.urls')),
     path('relationships/', include('Relationship.urls')),
     path('trees/', include('Tree.urls')),
-    path('users/',include('UserAuth.urls'))
+    path('users/',include('UserAuth.urls')),
+    
 ]
