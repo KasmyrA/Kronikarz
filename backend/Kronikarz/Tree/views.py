@@ -1,12 +1,14 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .models import Tree
 from .serializers import TreeSerializer
+from rest_framework.permissions import IsAuthenticated
 
 # Tree List and Create
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def tree_list(request, format=None):
     if request.method == 'GET':
         trees = Tree.objects.all()
@@ -22,6 +24,7 @@ def tree_list(request, format=None):
 
 # Tree Detail (Retrieve, Update, Delete)
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def tree_detail(request, id, format=None):
     try:
         tree = Tree.objects.get(pk=id)
