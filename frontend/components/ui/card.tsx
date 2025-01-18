@@ -76,4 +76,19 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+const CenteredCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "slide-in mx-auto my-4 w-1/2 rounded-lg border bg-card text-card-foreground",
+      className
+    )}
+    {...props}
+  />
+));
+CenteredCard.displayName = "CenteredCard";
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, CenteredCard }
