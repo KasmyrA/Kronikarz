@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="mt-10 p-4 bg-gray-800 text-white w-full absolute bottom-0 flex justify-between">
+    <footer className="p-4 bg-gray-800 text-white w-full relative flex justify-between footer-padding">
       <p>&copy; 2025 Kronikarz. Wszelkie prawa zastrzeżone.</p>
       <ul className="mt-2 flex space-x-4">
         <li className="flex flex-col items-start">
