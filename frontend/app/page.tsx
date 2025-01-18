@@ -1,7 +1,9 @@
 import { CenteredCard, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
+    <>
     <div className="w-full p-8 fade-in">
       <h2 className="text-3xl font-bold slide-in">Kronikarz - zrozum realcje w zagmatwanym życiu</h2>
       <p className="slide-in">Opisz relacje rodzinne w przejrzysty i wygodny sposób</p>
@@ -50,9 +52,9 @@ export default function Home() {
       </div>
 
       <h2>krótka i ładna prezentacja funkcjonalności ze skreenshotami</h2>
-      <footer className="mt-10 p-4 bg-gray-800 text-white text-center">
-        <p>&copy; 2025 Kronikarz. Wszelkie prawa zastrzeżone.</p>
-      </footer>
+      
     </div>
+    <Footer />
+    </>
   );
 }
