@@ -6,10 +6,12 @@ import {
 } from "@/components/ui/tabs"
 import { LoginCard } from "./LoginCard"
 import { RegisterCard } from "./RegisterCard"
+import Footer from "@/components/Footer";
 
 export default function Auth() {
   return (
-    <div className="flex-1 flex center justify-center items-center">
+    <>
+    <main className="flex-1 flex center justify-center items-center">
       <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Zaloguj</TabsTrigger>
@@ -22,7 +24,8 @@ export default function Auth() {
           <RegisterCard />
         </TabsContent>
       </Tabs>
-    </div>
+    </main>
+    <Footer />
+    </>
   );
 }
-  
