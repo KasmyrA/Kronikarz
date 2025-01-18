@@ -57,6 +57,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
+  const isAnySheetOpened = isRelationsSheetOpened || isParenthoodSheetOpened || !!selectedPerson || !!selectedRelation || !!selectedParenthood;
+
   const forbiddenPeopleIds = [
     ...(partnerPicker?.forbiddenPartnerIds ?? []),
     ...(parentPicker?.forbiddenParentIds ?? []),
@@ -118,7 +120,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonClick = (person: TreePerson) => {
-    if (!selectedRelation && !isRelationsSheetOpened && !selectedParenthood && !isParenthoodSheetOpened) {
+    if (!isAnySheetOpened) {
       setSelectedPerson(person);
     } else if (partnerPicker && !partnerPicker.forbiddenPartnerIds.includes(person.id)) {
       partnerPicker.pickPartner(person.id)
@@ -131,12 +133,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     person.position = position;
     setTree({...tree});
     updatePersonPosition(person.id, position);
-  }
-
-  const handleRelationshipClick = (id: number | "new") => {
-    if (selectedRelation === null) {
-      setSelectedRelation(id);
-    }
   }
 
   const handleRelationshipEditorClose = () => {
@@ -163,12 +159,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({ ...tree });
     setSelectedRelation(null);
   };
-
-  const handleParenthoodClick =(id: number | "new")=>{
-    if(selectedParenthood===null){
-      setSelectedParenthood(id);
-    }
-  }
 
   const handleParenthoodEditorClose = () => {
     setSelectedParenthood(null);
@@ -205,17 +195,17 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
         onPersonDrop={handlePersonDrop}
-        onRelationshipClick={handleRelationshipClick}
-        onParenthoodClick={handleParenthoodClick}
+        onRelationshipClick={(r) => !isAnySheetOpened && setSelectedRelation(r)}
+        onParenthoodClick={(p) => !isAnySheetOpened && setSelectedParenthood(p)}
       />
 
-      <Button onClick={() => setParenthoodSheetOpened(true)} size="icon" className='absolute right-40 bottom-8'>
+      <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8'>
         <Baby className="h-4 w-4" />
       </Button>
-      <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
+      <Button onClick={() => setRelationsSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-24 bottom-8'>
         <Heart className="h-4 w-4" />
       </Button>
-      <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
+      <Button onClick={handleAddPerson} disabled={isAnySheetOpened} size="icon" className='absolute right-8 bottom-8'>
         <UserPlus className="h-4 w-4" />
       </Button>
 
@@ -232,7 +222,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         isOpened={isRelationsSheetOpened}
         relationships={tree.relationships}
         people={tree.people}
-        onRelationshipClick={handleRelationshipClick}
+        onRelationshipClick={(r) => setSelectedRelation(r)}
         onClose={() => setRelationsSheetOpened(false)}
       />
       <RelationshipEditor
@@ -249,7 +239,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         isOpened={isParenthoodSheetOpened}
         parenthoods={tree.parenthoods}
         people={tree.people}
-        onParenthoodClick={handleParenthoodClick}
+        onParenthoodClick={(p) => setSelectedParenthood(p)}
         onClose={() => setParenthoodSheetOpened(false)}
       />
       <ParenthoodEditor
@@ -260,7 +250,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onClose={handleParenthoodEditorClose}
         onSave={handleParenthoodEditorSave}
         onDelete={handleParenthoodEditorDelete}
-        
       />
     </>
   )
