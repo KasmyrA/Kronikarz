@@ -250,3 +250,7 @@ paket-files/
 **/__pycache__/
 *.pyc
 *.pyo 
+
+.venv/
+
+db.sqlite3
