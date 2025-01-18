@@ -40,7 +40,7 @@ export function ParenthoodEditor({ parenthoodId, people, parentPicker, setParent
     else {
       getParenthood(parenthoodId).then((p) => setParenthood(p!))
     }
-  }, [parenthoodId]);
+  }, [parenthoodId, setParenthood]);
 
   const content = parenthood ?
     <LoadedParenthood {...{parenthood, people, setParenthood, parentPicker, setParentPicker, onSave, onClose, onDelete }} /> :
@@ -105,6 +105,9 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, mother: id}); setParentPicker(null) }
           })}
+          pickParent={parentPicker?.pickParent}
+          people={people}
+          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParentPickerComponent 
@@ -117,6 +120,9 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, father: id}); setParentPicker(null) }
           })}
+          pickParent={parentPicker?.pickParent}
+          people={people}
+          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParentPickerComponent 
@@ -129,6 +135,9 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, child: id}); setParentPicker(null) }
           })}
+          pickParent={parentPicker?.pickParent}
+          people={people}
+          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParenthoodTypePicker
@@ -160,9 +169,12 @@ interface ParentPickerProps {
   isPicking: boolean;
   startPicking: () => void;
   cancelPicking: () => void;
+  pickParent?: (id: number) => void;
+  people: TreePerson[];
+  forbiddenParentIds: number[];
 }
 
-function ParentPickerComponent({ title, person, isPicking, startPicking, cancelPicking }: ParentPickerProps) {
+function ParentPickerComponent({ title, person, isPicking, startPicking, cancelPicking, pickParent, people, forbiddenParentIds }: ParentPickerProps) {
   const image = person?.imageUrl ? 
     <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
@@ -185,6 +197,15 @@ function ParentPickerComponent({ title, person, isPicking, startPicking, cancelP
         {nameSurname}
       </h3>
       <Button onClick={onClick} variant={variant} className="w-full">{buttonText}</Button>
+      {isPicking && pickParent && (
+        <div className="mt-4">
+          {people.filter(p => !forbiddenParentIds.includes(p.id)).map(p => (
+            <Button key={p.id} onClick={() => pickParent(p.id)} className="w-full mb-2">
+              {getNameSurname(p)}
+            </Button>
+          ))}
+        </div>
+      )}
     </>
   )
 }
@@ -208,7 +229,7 @@ function ParenthoodTypePicker({ type, setType }: ParenthoodTypePickerProps) {
       <h3 className="text-2xl font-semibold tracking-tight text-center mt-5 mb-4">
         Typ rodzicielstwa
       </h3>
-      <Select onValueChange={setType} value={type}>
+      <Select onValueChange={(value) => setType(value as ParenthoodKind)} value={type}>
         <SelectTrigger className="w-full">
           <SelectValue />
         </SelectTrigger>
