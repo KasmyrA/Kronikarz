@@ -5,7 +5,7 @@ import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
 import { Position, TreePerson } from '@/lib/treeInterfaces';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Relationship } from '@/lib/relaionshipInterfaces';
+import { Relationship, RelationshipKind } from '@/lib/relaionshipInterfaces';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { RelationshipConnection } from '@/components/Map/RelationshipConnection/RelationshipConnection';
 import { ParenthoodConnection } from '@/components/Map/ParenthoodConnection/ParenthoodConnection';
@@ -158,6 +158,26 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
     )
   });
 
+  const parenthoodWithoutRelationshipConnections = parenthoods
+    .filter(p => !relationships.some(r => (p.mother === r.partner1 && p.father === r.partner2) || p.father === r.partner1 && p.mother === r.partner2))
+    .map((p) => {
+      const pseudoRel: Relationship = {
+        id: -1,
+        kind: RelationshipKind.UNFORMAL,
+        partner1: p.mother,
+        partner2: p.father
+      };
+      return (
+        <RelationshipConnection
+          key={`${p.mother}_${p.father}`}
+          relationship={pseudoRel}
+          people={people}
+          draggedPerson={draggedPerson}
+          onClick={() => {}}
+        />
+      )
+  });
+
   const parenthoodConnections = parenthoods.map((parenthood) => {
     return (
       <ParenthoodConnection
@@ -187,6 +207,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         onMouseUp={handleMauseUp}
         onMouseLeave={()=>setIsDragging(false)}
       >
+        {parenthoodWithoutRelationshipConnections}
         {relationshipConnections}
         {parenthoodConnections}
         {peopleCards}
