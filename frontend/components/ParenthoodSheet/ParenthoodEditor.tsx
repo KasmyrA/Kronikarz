@@ -35,7 +35,7 @@ export function ParenthoodEditor({ parenthoodId, people, parentPicker, setParent
       setParenthood(null);
     }
     else if (parenthoodId === "new") {
-      setParenthood({ id: -1, mother: -1, father: -1, child: -1, type: ParenthoodKind.BIOLOGICAL, startDate: null, endDate: null, adoption: null });
+      setParenthood({ id: -1, mother: -1, father: -1, child: -1, type: ParenthoodKind.BIOLOGICAL });
     }
     else {
       getParenthood(parenthoodId).then((p) => setParenthood(p!))

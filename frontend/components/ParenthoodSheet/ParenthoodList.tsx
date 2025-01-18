@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getNameSurname } from "@/lib/utils";
 import { Plus, User } from "lucide-react";
-import { Parenthood, ParenthoodKind } from "@/lib/parenthoodInterfaces";
+import { Parenthood } from "@/lib/parenthoodInterfaces";
 import { Card } from "../ui/card";
 
 interface Props {

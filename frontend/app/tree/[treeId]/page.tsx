@@ -3,7 +3,7 @@ import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Loader2, Plus, UserPlus } from 'lucide-react';
+import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
@@ -52,21 +52,27 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
   const [partnerPicker, setPartnerPicker] = useState<PartnerPicker | null>(null);
 
-  const [isParenthoodSheetOpened,setParenthoodSheetOpened] = useState(false);
+  const [isParenthoodSheetOpened, setParenthoodSheetOpened] = useState(false);
   const [selectedParenthood, setSelectedParenthood] = useState<number | "new" | null>(null);
   const [parentPicker, setParentPicker] = useState<ParentPicker | null>(null);
   const mapRef = useRef<MapHandle | null>(null);
 
-  const peopleHighlights = !partnerPicker ?
-    {} : 
+  const isAnySheetOpened = isRelationsSheetOpened || isParenthoodSheetOpened || !!selectedPerson || !!selectedRelation || !!selectedParenthood;
+
+  const forbiddenPeopleIds = [
+    ...(partnerPicker?.forbiddenPartnerIds ?? []),
+    ...(parentPicker?.forbiddenParentIds ?? []),
+  ];
+  const peopleHighlights = (partnerPicker || parentPicker) ?
     tree.people.reduce((acc: HighlightData, p) => {
-      if (partnerPicker.forbiddenPartnerIds.includes(p.id)) {
+      if (forbiddenPeopleIds.includes(p.id)) {
         acc[p.id] = "hsl(var(--destructive))";
       } else {
         acc[p.id] = "#44adef";
       }
       return acc;
-    }, {})
+    }, {}) :
+    {};
 
   const handleAddPerson = async () => {
     const newPersonPosition = mapRef.current!.getViewMiddlePosition();
@@ -93,19 +99,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     await deletePerson(id);
     tree.people = tree.people.filter((p) => p.id !== id);
     tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
-    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id);
-    tree.parenthoods.forEach((p, i) => {
-      if (p.father === id) {
-        p.father = null;
-      } else if (p.mother === id) {
-        p.mother = null;
-      } else if (p.adoption?.father === id) {
-        p.adoption.father = null;
-      } else if (p.adoption?.mother === id) {
-        p.adoption.mother = null;
-      }
-      tree.parenthoods[i] = p;
-    });
+    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id && p.father !== id && p.mother !== id);
     setTree({...tree});
     setSelectedPerson(null);
   };
@@ -126,10 +120,12 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonClick = (person: TreePerson) => {
-    if (!selectedRelation && !isRelationsSheetOpened) {
+    if (!isAnySheetOpened) {
       setSelectedPerson(person);
     } else if (partnerPicker && !partnerPicker.forbiddenPartnerIds.includes(person.id)) {
       partnerPicker.pickPartner(person.id)
+    } else if (parentPicker && !parentPicker.forbiddenParentIds.includes(person.id)) {
+      parentPicker.pickParent(person.id);
     }
   };
 
@@ -137,12 +133,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     person.position = position;
     setTree({...tree});
     updatePersonPosition(person.id, position);
-  }
-
-  const handleRelationshipClick = (id: number | "new") => {
-    if (selectedRelation === null) {
-      setSelectedRelation(id);
-    }
   }
 
   const handleRelationshipEditorClose = () => {
@@ -169,12 +159,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({ ...tree });
     setSelectedRelation(null);
   };
-
-  const handleParenthoodClick =(id:number|"new")=>{
-    if(selectedParenthood===null){
-      setSelectedParenthood(id);
-    }
-  }
 
   const handleParenthoodEditorClose = () => {
     setSelectedParenthood(null);
@@ -211,16 +195,17 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
         onPersonDrop={handlePersonDrop}
-        onRelationshipClick={handleRelationshipClick}
+        onRelationshipClick={(r) => !isAnySheetOpened && setSelectedRelation(r)}
+        onParenthoodClick={(p) => !isAnySheetOpened && setSelectedParenthood(p)}
       />
 
-      <Button onClick={() => setRelationsSheetOpened(true)} size="icon" className='absolute right-24 bottom-8'>
+      <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8'>
+        <Baby className="h-4 w-4" />
+      </Button>
+      <Button onClick={() => setRelationsSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-24 bottom-8'>
         <Heart className="h-4 w-4" />
       </Button>
-      <Button onClick={handleAddPerson} size="icon" className='absolute right-8 bottom-8'>
-        <Plus className="h-4 w-4" />
-      </Button>
-      <Button onClick={() => setSelectedParenthood("new")} size="icon" className='absolute right-40 bottom-8'>
+      <Button onClick={handleAddPerson} disabled={isAnySheetOpened} size="icon" className='absolute right-8 bottom-8'>
         <UserPlus className="h-4 w-4" />
       </Button>
 
@@ -237,7 +222,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         isOpened={isRelationsSheetOpened}
         relationships={tree.relationships}
         people={tree.people}
-        onRelationshipClick={handleRelationshipClick}
+        onRelationshipClick={(r) => setSelectedRelation(r)}
         onClose={() => setRelationsSheetOpened(false)}
       />
       <RelationshipEditor
@@ -249,12 +234,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onSave={handleRelationshipEditorSave}
         onDelete={handleRelationshipEditorDelete}
       />
+
       <ParenthoodList
-      isOpened={isParenthoodSheetOpened}
-      parenthoods={tree.parenthoods}
-      people={tree.people}
-      onParenthoodClick={handleParenthoodClick}
-      onClose={()=>setParenthoodSheetOpened(false)}
+        isOpened={isParenthoodSheetOpened}
+        parenthoods={tree.parenthoods}
+        people={tree.people}
+        onParenthoodClick={(p) => setSelectedParenthood(p)}
+        onClose={() => setParenthoodSheetOpened(false)}
       />
       <ParenthoodEditor
         parenthoodId={selectedParenthood}
@@ -264,7 +250,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onClose={handleParenthoodEditorClose}
         onSave={handleParenthoodEditorSave}
         onDelete={handleParenthoodEditorDelete}
-        
       />
     </>
   )

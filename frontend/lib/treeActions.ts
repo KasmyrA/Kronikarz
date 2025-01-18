@@ -9,7 +9,7 @@ export function getTree(id: number): Promise<Tree> {
         name: "Test tree",
         people: JSON.parse(localStorage.getItem('people') ?? "[]").map(personToTreePerson),
         relationships: JSON.parse(localStorage.getItem('relations') ?? "[]"),
-        parenthoods: JSON.parse(localStorage.getItem('people') ?? "[]")
+        parenthoods: JSON.parse(localStorage.getItem('parenthoods') ?? "[]")
       });
     }, 1000);
   });

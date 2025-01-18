@@ -1,44 +1,55 @@
 import "./ParenthoodConnection.css"
-import { Parenthood } from "@/lib/parenthoodInterfaces";
+import { Parenthood, ParenthoodKind } from "@/lib/parenthoodInterfaces";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { CSSProperties } from "react";
+import { relationshipLineDistance } from "../RelationshipConnection/RelationshipConnection";
 
 interface Props {
   parenthood: Parenthood;
   people: TreePerson[];
   draggedPerson: number | null;
+  onClick: () => void;
 }
 
-export function ParenthoodConnection({ parenthood, people, draggedPerson }: Props) {
-  const mother = parenthood.mother ? people.find((p) => p.id === parenthood.mother) : null;
-  const father = parenthood.father ? people.find((p) => p.id === parenthood.father) : null;
+export function ParenthoodConnection({ parenthood, people, draggedPerson, onClick }: Props) {
+  const mother = people.find((p) => p.id === parenthood.mother);
+  const father = people.find((p) => p.id === parenthood.father);
   const child = people.find((p) => p.id === parenthood.child);
 
-  if (!child) return null;
+  if (!father || !mother || !child) return null;
 
   const clickmargin = 25;
-  const posX = Math.min(mother?.position.x ?? Infinity, father?.position.x ?? Infinity, child.position.x) - clickmargin;
-  const posY = Math.min(mother?.position.y ?? Infinity, father?.position.y ?? Infinity, child.position.y) - clickmargin;
-  const width = Math.max(mother?.position.x ?? -Infinity, father?.position.x ?? -Infinity, child.position.x) - posX + clickmargin;
-  const height = Math.max(mother?.position.y ?? -Infinity, father?.position.y ?? -Infinity, child.position.y) - posY + clickmargin;
+  const relationshipLineY = Math.max(mother.position.y, father.position.y) + relationshipLineDistance;
+  const closerParentX = Math.abs(mother.position.x - child.position.x) < Math.abs(father.position.x - child.position.x) ?
+    mother.position.x : father.position.x;
+  const posX = Math.min(child.position.x, closerParentX) - clickmargin;
+  const posY = Math.min(child.position.y, relationshipLineY) - clickmargin;
+  const width = Math.max(child.position.x, closerParentX) - posX + clickmargin;
+  const height = Math.max(child.position.y, relationshipLineY) - posY + clickmargin;
 
   const viewBox = `${posX + clickmargin / 2} ${posY + clickmargin / 2} ${width} ${height}`;
   const opacity = (parenthood.mother === draggedPerson || parenthood.father === draggedPerson || parenthood.child === draggedPerson) ? 0 : 1;
+  const strokeDasharray = parenthood.type === ParenthoodKind.ADOPTIVE ?
+    "5px" :
+    "none";
   const style: CSSProperties = {
     translate: `${posX + width / 2}px ${posY + height / 2}px`,
     opacity,
     width,
-    height
+    height,
+    strokeDasharray
   };
 
+  const childIsNotBetweenParents = child.position.x < Math.min(mother.position.x, father.position.x) || child.position.x > Math.max(mother.position.x, father.position.x);
+  
   return (
     <svg viewBox={viewBox} style={style} className='parenthood-connection' xmlns="http://www.w3.org/2000/svg">
       {/* Click margin lines */}
-      {mother && <line className='parenthood-margin' strokeWidth={clickmargin} x1={mother.position.x} y1={mother.position.y} x2={child.position.x} y2={child.position.y} />}
-      {father && <line className='parenthood-margin' strokeWidth={clickmargin} x1={father.position.x} y1={father.position.y} x2={child.position.x} y2={child.position.y} />}
+      <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={child.position.x} y1={child.position.y} x2={child.position.x} y2={relationshipLineY} />
+      {childIsNotBetweenParents && <line className='parenthood-margin' strokeWidth={clickmargin} onClick={onClick} x1={closerParentX} y1={relationshipLineY} x2={child.position.x} y2={relationshipLineY} />}
       {/* Visible lines */}
-      {mother && <line className='parenthood-line' x1={mother.position.x} y1={mother.position.y} x2={child.position.x} y2={child.position.y} />}
-      {father && <line className='parenthood-line' x1={father.position.x} y1={father.position.y} x2={child.position.x} y2={child.position.y} />}
+      <line className='parenthood-line' x1={child.position.x} y1={child.position.y} x2={child.position.x} y2={relationshipLineY} />
+      {childIsNotBetweenParents && <line className='parenthood-line' x1={closerParentX} y1={relationshipLineY} x2={child.position.x} y2={relationshipLineY} />}
     </svg>
   );
 }
