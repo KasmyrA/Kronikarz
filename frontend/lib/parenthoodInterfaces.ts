@@ -5,8 +5,8 @@ export enum ParenthoodKind {
 
 export interface Parenthood {
   id: number;
-  mother: number | null;
-  father: number | null;
+  mother: number;
+  father: number;
   child: number;
   type: ParenthoodKind;
 }

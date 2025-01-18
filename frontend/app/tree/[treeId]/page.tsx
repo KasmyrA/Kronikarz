@@ -97,15 +97,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     await deletePerson(id);
     tree.people = tree.people.filter((p) => p.id !== id);
     tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
-    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id || (p.father === id && p.mother === null) || (p.mother === id && p.father === null));
-    tree.parenthoods.forEach((p, i) => {
-      if (p.father === id) {
-        p.father = null;
-      } else if (p.mother === id) {
-        p.mother = null;
-      }
-      tree.parenthoods[i] = p;
-    });
+    tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id && p.father !== id && p.mother !== id);
     setTree({...tree});
     setSelectedPerson(null);
   };

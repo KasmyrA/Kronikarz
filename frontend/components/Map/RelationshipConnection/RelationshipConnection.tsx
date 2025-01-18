@@ -10,16 +10,17 @@ interface Props {
   onClick: () => void;
 }
 
+export const relationshipLineDistance = 200;
+
 export function RelationshipConnection({ relationship: rel, people, draggedPerson, onClick }: Props) {
   const partner1 = people.find((p) => p.id === rel.partner1)!;
   const partner2 = people.find((p) => p.id === rel.partner2)!;
 
   const clickmargin = 25;
-  const conLineDistance = 200;
   const posX = Math.min(partner1.position.x, partner2.position.x) - clickmargin;
   const posY = Math.min(partner1.position.y, partner2.position.y) - clickmargin;
-  const width = Math.abs(partner1.position.x - partner2.position.x) + clickmargin + conLineDistance;
-  const height = Math.abs(partner1.position.y - partner2.position.y) + clickmargin + conLineDistance;
+  const width = Math.abs(partner1.position.x - partner2.position.x) + clickmargin + relationshipLineDistance;
+  const height = Math.abs(partner1.position.y - partner2.position.y) + clickmargin + relationshipLineDistance;
   
   const viewBox = `${posX + clickmargin / 2} ${posY + clickmargin / 2} ${width} ${height}`;
   const opacity = (rel.partner1 === draggedPerson || rel.partner2 === draggedPerson) ? 0 : 1;
@@ -35,7 +36,7 @@ export function RelationshipConnection({ relationship: rel, people, draggedPerso
   };
 
   const midX = (partner1.position.x + partner2.position.x) / 2;
-  const conLineY = Math.max(partner1.position.y, partner2.position.y) + conLineDistance;
+  const conLineY = Math.max(partner1.position.y, partner2.position.y) + relationshipLineDistance;
 
   const relSymbol = rel.kind === RelationshipKind.SEPARATION ?
     <>
