@@ -19,6 +19,8 @@ import { ParentPicker,ParenthoodEditor} from '@/components/ParenthoodSheet/Paren
 import { createParenthood, deleteParenthood, updateParenthood } from '@/lib/parenthoodActions';
 
 import { FileInfo, Person } from '@/lib/personInterfaces';
+import { useRouter } from 'next/navigation';
+import { getCurrentUser } from '@/lib/authActions';
 
 interface Props {
   params: {
@@ -28,11 +30,22 @@ interface Props {
 
 export default function Page({ params: { treeId } }: Props) {
   const [tree, setTree] = useState<Tree | null>(null);
-  
+  const router = useRouter();
+
   useEffect(() => {
-    getTree(+treeId)
-      .then(t => setTree(t))
-  }, [treeId])
+    const loadTree = async () => {
+      const user = await getCurrentUser();
+      if (!user) {
+        router.replace('/');
+        return;
+      }
+
+      const t = await getTree(+treeId);
+      setTree(t)
+    }
+    loadTree();
+    
+  }, [treeId, router])
 
   if (tree) {
     return <LoadedPage tree={tree} setTree={setTree} />
