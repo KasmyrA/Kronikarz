@@ -38,3 +38,18 @@ Celem tego projektu jest stworzenie aplikacji, która zapewni użytkownikom najl
 - Obsługa wielu użytkowników i wielu drzew genealogicznych
 
 
+# Dodawanie drzew
+
+Aby dodać nowe drzewo w zapytaniu POST lub PUT podajemy dane wg. następującego schematu:
+
+{
+    "uid": 1,
+    "name": "My Family Tree",
+    "people": [1, 2, 3],
+    "relationships": [1, 2],
+    "parenthoods": [1]
+}
+
+Pola people, relationships i parenthoods są opcjonalne, nie trzeba ich od razu wypełniać przy tworzeniu drzewa.
+
+Dodając nowe osoby, relacje, rodzicielstwa do drzewa najpierw wysyłamy zapytania POST wraz ze szczegółami danego obiektu, a następnie wysyłamy zapytanie PUT z drzewem, gdzie jedynie w odpowiedniej liście podajemy id nowoutworzonego obiektu (id przy tworzeniu zwraca nam serwer).
