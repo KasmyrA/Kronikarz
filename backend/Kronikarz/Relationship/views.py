@@ -44,3 +44,14 @@ def relationship_detail(request, id, format=None):
     elif request.method == 'DELETE':
         relationship.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def relationships_by_uid(request, uid, format=None):
+    relationships = Relationship.objects.filter(uid=uid)
+    if not relationships.exists():
+        return Response({'error': 'No relationships found with the provided UID'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = RelationshipSerializer(relationships, many=True)
+    return Response(serializer.data)  

@@ -30,10 +30,9 @@ class Job(models.Model):
         return f"{self.name} at {self.place}"
 
 
-class FileInfo(models.Model):
+class File(models.Model):
     name = models.CharField(max_length=255)
-    url = models.URLField()
-    file_id = models.IntegerField(unique=True)
+    file = models.FileField(upload_to='files/')
 
     def __str__(self):
         return self.name
@@ -42,14 +41,14 @@ class FileInfo(models.Model):
 class Person(models.Model):
     uid = models.ForeignKey(User, on_delete=models.CASCADE)
     names = models.JSONField()
-    image = models.IntegerField(null=True, blank=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     sex = models.CharField(max_length=1, choices=[('F', 'Female'), ('M', 'Male')], null=True, blank=True)
     birth = models.OneToOneField(EventInLife, related_name='birth', on_delete=models.CASCADE)
     death = models.OneToOneField(EventInLife, related_name='death', on_delete=models.CASCADE, null=True, blank=True)
     surnames = models.ManyToManyField(Surname)
     jobs = models.ManyToManyField(Job, blank=True)
-    files = models.ManyToManyField(FileInfo, blank=True)
+    files = models.ManyToManyField(File, blank=True)
 
     def __str__(self):
         names_str = " ".join(self.names) if self.names else ""

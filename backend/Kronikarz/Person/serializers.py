@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
-from .models import Person, EventInLife, Surname, Job, FileInfo
+from .models import Person, EventInLife, Surname, Job, File
 
 class EventInLifeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,9 +20,9 @@ class JobSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FileInfoSerializer(serializers.ModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FileInfo
+        model = File
         fields = '__all__'
 
 
@@ -31,7 +31,7 @@ class PersonSerializer(serializers.ModelSerializer):
     death = EventInLifeSerializer()
     surnames = SurnameSerializer(many=True)
     jobs = JobSerializer(many=True)
-    files = FileInfoSerializer(many=True)
+    files = FileSerializer(many=True)
 
     class Meta:
         model = Person
@@ -58,7 +58,7 @@ class PersonSerializer(serializers.ModelSerializer):
             person.jobs.add(job)
 
         for file_data in files_data:
-            file = FileInfo.objects.create(**file_data)
+            file = File.objects.create(**file_data)
             person.files.add(file)
 
         return person
@@ -98,7 +98,7 @@ class PersonSerializer(serializers.ModelSerializer):
         if files_data is not None:
             instance.files.clear()
             for file_data in files_data:
-                file = FileInfo.objects.create(**file_data)
+                file = File.objects.create(**file_data)
                 instance.files.add(file)
 
         for attr, value in validated_data.items():

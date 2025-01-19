@@ -47,3 +47,14 @@ def tree_detail(request, id, format=None):
     elif request.method == 'DELETE':
         tree.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def trees_by_uid(request, uid, format=None):
+    trees = Tree.objects.filter(uid=uid)
+    if not trees.exists():
+        return Response({'error': 'No trees found with the provided UID'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = TreeSerializer(trees, many=True)
+    return Response(serializer.data)

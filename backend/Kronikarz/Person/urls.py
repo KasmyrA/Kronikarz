@@ -6,6 +6,7 @@ urlpatterns = [
     # Person
     path('', views.persons_list),
     path('<int:id>/', views.person_detail),
+    path('user/<int:uid>/', views.persons_by_uid),
 
     # Surname
     path('surnames/', views.surnames_list),
