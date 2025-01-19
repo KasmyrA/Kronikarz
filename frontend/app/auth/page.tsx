@@ -1,3 +1,4 @@
+"use client";
 import {
   Tabs,
   TabsContent,
@@ -7,10 +8,20 @@ import {
 import { LoginCard } from "./LoginCard"
 import { RegisterCard } from "./RegisterCard"
 import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { getCurrentUser } from "@/lib/authActions";
+import { Header } from "@/components/Header";
 
 export default function Auth() {
+  const router = useRouter();
+  useEffect(() => {
+    getCurrentUser().then((user) => !!user && router.replace('/tree'));
+  }, [router])
+
   return (
     <>
+    <Header isLoggedIn={false} />
     <main className="flex-1 flex center justify-center items-center">
       <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">

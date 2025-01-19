@@ -66,12 +66,30 @@ export async function login(username: string, password: string) {
   const { refresh, access } = await resp.json();
   localStorage.setItem(refreshTokenKey, refresh);
   localStorage.setItem(accessTokenKey, access);
-  const users = await getAllUsers();
-  return users?.find((u) => u.username === username);
+  return await getCurrentUser();
 }
 
-export async function getAllUsers() {
-  const resp = await authFetch(`${serverAddress}/users/`, "GET")
-  const users: User[] | null = await resp?.json();
-  return users;
+export async function getCurrentUser() {
+  const refreshToken = localStorage.getItem(refreshTokenKey);
+  if (!refreshToken) {
+    return null;
+  }
+
+  const { user_id } = JSON.parse(atob(refreshToken.split('.')[1]));
+  return await getUser(user_id);
+}
+
+export async function getUser(id: string) {
+  const resp = await authFetch(`${serverAddress}/users/${id}/`, "GET")
+  const user: User | null = await resp?.json();
+  return user;
+}
+
+export async function logout() {
+  const headers = new Headers()
+  headers.append("Content-Type", "application/json");
+  const body = { refresh: localStorage.getItem(refreshTokenKey) };
+  await authFetch(`${serverAddress}/users/logout/`, "POST", body, headers);
+  localStorage.removeItem(accessTokenKey);
+  localStorage.removeItem(refreshTokenKey);
 }

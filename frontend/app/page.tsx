@@ -1,9 +1,21 @@
+/* eslint-disable @next/next/no-img-element */
+"use client";
 import { CenteredCard, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import Footer from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/lib/authActions";
 
 export default function Home() {
+  const router = useRouter();
+  useEffect(() => {
+    getCurrentUser().then((user) => !!user && router.replace('/tree'));
+  }, [router])
+
   return (
     <>
+    <Header isLoggedIn={false} />
     <main className="w-full p-8 fade-in footer-padding">
       <h2 className="text-3xl font-bold slide-in">Kronikarz - zrozum realcje w zagmatwanym życiu</h2>
       <p className="slide-in">Opisz relacje rodzinne w przejrzysty i wygodny sposób</p>

@@ -1,8 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import React, { useEffect, useState } from "react"
 import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/lib/authActions";
+import { Header } from "@/components/Header";
 
 interface Tree {
     id: number;
@@ -25,9 +29,16 @@ export default function TreeList() {
     const [error, setError] = useState<string>("")
     const [editingTreeId, setEditingTreeId] = useState<number | null>(null) // ID drzewa, które jest edytowane
     const [loading, setLoading] = useState(true)
+    const router = useRouter();
 
     useEffect(() => {
         const fetchTrees = async () => {
+            const user = await getCurrentUser();
+            if (!user) {
+                router.replace('/');
+                return;
+            }
+
             setLoading(true)
             try {
                 const response = await fetch('/api/trees')
@@ -43,7 +54,7 @@ export default function TreeList() {
             }
         }
         fetchTrees()
-    }, [])
+    }, [router])
 
     const addTree = async () => {
         if (!name) {
@@ -121,84 +132,87 @@ export default function TreeList() {
     }
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
-                    <span className="block sm:inline">{error}</span>
-                </div>
-            )}
-            
-            <Card className="mb-8">
-                <CardContent className="p-6">
-                    <div className="space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Nazwa drzewa"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <textarea
-                            placeholder="Opis drzewa"
-                            value={description || ''}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows={3}
-                        />
-                        {editingTreeId ? (
-                            <button onClick={updateTree} 
-                                className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
-                                Zaktualizuj drzewo
-                            </button>
-                        ) : (
-                            <button onClick={addTree} 
-                                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
-                                Dodaj drzewo
-                            </button>
-                        )}
+        <>
+            <Header isLoggedIn={true} />
+            <div className="p-8 max-w-7xl mx-auto">
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
+                        <span className="block sm:inline">{error}</span>
                     </div>
-                </CardContent>
-            </Card>
+                )}
+                
+                <Card className="mb-8">
+                    <CardContent className="p-6">
+                        <div className="space-y-4">
+                            <input
+                                type="text"
+                                placeholder="Nazwa drzewa"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <textarea
+                                placeholder="Opis drzewa"
+                                value={description || ''}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                rows={3}
+                            />
+                            {editingTreeId ? (
+                                <button onClick={updateTree} 
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
+                                    Zaktualizuj drzewo
+                                </button>
+                            ) : (
+                                <button onClick={addTree} 
+                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
+                                    Dodaj drzewo
+                                </button>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {trees.map(tree => (
-                        <Card key={tree.id} className="hover:shadow-lg transition-shadow duration-200">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold">{tree.name}</CardTitle>
-                                <CardDescription className="text-gray-600">{tree.description}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {tree.imageUrl && (
-                                    <div className="relative h-48 mb-4">
-                                        <img 
-                                            src={tree.imageUrl} 
-                                            alt={tree.name} 
-                                            className="object-cover w-full h-full rounded-md"
-                                        />
-                                    </div>
-                                )}
-                            </CardContent>
-                            <CardFooter className="flex justify-end space-x-2">
-                                <button 
-                                    onClick={() => startEditing(tree)} 
-                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                    Edytuj
-                                </button>
-                                <button 
-                                    onClick={() => deleteTree(tree.id)} 
-                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                    Usuń
-                                </button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
-            )}
-        </div>
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {trees.map(tree => (
+                            <Card key={tree.id} className="hover:shadow-lg transition-shadow duration-200">
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-bold">{tree.name}</CardTitle>
+                                    <CardDescription className="text-gray-600">{tree.description}</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {tree.imageUrl && (
+                                        <div className="relative h-48 mb-4">
+                                            <img 
+                                                src={tree.imageUrl} 
+                                                alt={tree.name} 
+                                                className="object-cover w-full h-full rounded-md"
+                                            />
+                                        </div>
+                                    )}
+                                </CardContent>
+                                <CardFooter className="flex justify-end space-x-2">
+                                    <button 
+                                        onClick={() => startEditing(tree)} 
+                                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                                        Edytuj
+                                    </button>
+                                    <button 
+                                        onClick={() => deleteTree(tree.id)} 
+                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                                        Usuń
+                                    </button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </>
     )
 }
