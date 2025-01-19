@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Person.models import Person, FileInfo
+from Person.models import Person
 from .models import Position, Tree
 from Parenthood.serializers import ParenthoodSerializer
 from Relationship.serializers import RelationshipSerializer
@@ -15,11 +15,11 @@ class TreePersonSerializer(serializers.ModelSerializer):
     deathDate = serializers.CharField(source='death.date', allow_null=True)
     name = serializers.SerializerMethodField()
     surname = serializers.SerializerMethodField()
-    imageUrl = serializers.SerializerMethodField()
+    image = serializers.ImageField(source='image', required=False, allow_null=True)
 
     class Meta:
         model = Person
-        fields = ['id', 'name', 'surname', 'sex', 'imageUrl', 'birthDate', 'deathDate', 'position']
+        fields = ['id', 'name', 'surname', 'sex', 'image', 'birthDate', 'deathDate', 'position']
 
     def get_position(self, obj):
         tree = self.context.get('tree')
@@ -39,11 +39,6 @@ class TreePersonSerializer(serializers.ModelSerializer):
         surnames = obj.surnames.all()
         return surnames[0].surname if surnames.exists() else None
 
-    def get_imageUrl(self, obj):
-        if obj.image:
-            file_info = FileInfo.objects.filter(file_id=obj.image).first()
-            return file_info.url if file_info else None
-        return None
 
 class TreeSerializer(serializers.ModelSerializer):
     people = serializers.SerializerMethodField()

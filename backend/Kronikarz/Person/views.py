@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from .models import Person, EventInLife, Surname, Job, FileInfo
-from .serializers import PersonSerializer, EventInLifeSerializer, SurnameSerializer, JobSerializer, FileInfoSerializer
+from .models import Person, EventInLife, Surname, Job, File
+from .serializers import PersonSerializer, EventInLifeSerializer, SurnameSerializer, JobSerializer, FileSerializer
 from rest_framework.permissions import IsAuthenticated
 
 # Person
@@ -46,7 +46,17 @@ def person_detail(request, id, format=None):
     elif request.method == 'DELETE':
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def persons_by_uid(request, uid, format=None):
+    persons = Person.objects.filter(uid=uid)
+    if not persons.exists():
+        return Response({'error': 'No persons found with the provided UID'}, status=status.HTTP_404_NOT_FOUND)
     
+    serializer = PersonSerializer(persons, many=True)
+    return Response(serializer.data)    
 
 # Surname
 
@@ -171,19 +181,19 @@ def event_detail(request, id, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
-# FileInfo
+# File
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def files_list(request, format=None):
 
     if request.method == 'GET':
-        files = FileInfo.objects.all()
-        serializer = FileInfoSerializer(files, many=True)
+        files = File.objects.all()
+        serializer = FileSerializer(files, many=True)
         return Response(serializer.data)
     
     elif request.method == 'POST':
-        serializer = FileInfoSerializer(data=request.data)
+        serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -194,15 +204,15 @@ def files_list(request, format=None):
 @permission_classes([IsAuthenticated])
 def file_detail(request, id, format=None):
     try:
-        file = FileInfo.objects.get(pk=id)
-    except FileInfo.DoesNotExist:
+        file = File.objects.get(pk=id)
+    except File.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
-        serializer = FileInfoSerializer(file)
+        serializer = FileSerializer(file)
         return Response(serializer.data)
     elif request.method == 'PUT':
-        serializer = FileInfoSerializer(file, data=request.data)
+        serializer = FileSerializer(file, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
