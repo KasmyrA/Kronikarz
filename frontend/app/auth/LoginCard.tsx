@@ -24,10 +24,10 @@ export function LoginCard() {
       const user = await login(username, password);
       console.log(user)
       if (!user) {
-        throw new Error()
+        setError("Nieznany błąd logowania");
       }
       else if (!("id" in user)) {
-        setError(JSON.stringify(user));  
+        setError(JSON.stringify(user));
       }
       else {
         router.replace("/tree");

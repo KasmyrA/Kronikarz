@@ -22,21 +22,25 @@ export function RegisterCard() {
   const [error, setError] = useState("");
 
   const handleRegisterClick = async () => {
-    try {
-      const user = await register(email, username, password1);
-      console.log(user)
-      if (!user) {
-        setError("Nieznany błąd logowania");
-      }
-      else if (!("id" in user)) {
-        setError(JSON.stringify(user));  
-      }
-      else {
-        router.replace("/tree");
-      }
-    } catch (err) {
-      setError(JSON.stringify(err));
-    }
+		if (password1 !== password2) {
+			setError("Hasła nie są jednakowe");
+		} else {
+			try {
+				const user = await register(email, username, password1);
+				console.log(user)
+				if (!user) {
+					setError("Nieznany błąd rejestracji");
+				}
+				else if (!("id" in user)) {
+					setError(JSON.stringify(user));  
+				}
+				else {
+					router.replace("/tree");
+				}
+			} catch (err) {
+				setError(JSON.stringify(err));
+			}
+		}
   }
 
 	return (
