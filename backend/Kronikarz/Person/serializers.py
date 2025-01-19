@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import transaction
 from .models import Person, EventInLife, Surname, Job, FileInfo
 
 class EventInLifeSerializer(serializers.ModelSerializer):
@@ -43,14 +44,11 @@ class PersonSerializer(serializers.ModelSerializer):
         jobs_data = validated_data.pop('jobs', [])
         files_data = validated_data.pop('files', [])
 
-        # Tworzenie EventInLife (birth i death)
         birth = EventInLife.objects.create(**birth_data)
         death = EventInLife.objects.create(**death_data) if death_data else None
 
-        # Tworzenie osoby
         person = Person.objects.create(birth=birth, death=death, **validated_data)
 
-        # Tworzenie powiązanych obiektów
         for surname_data in surnames_data:
             surname = Surname.objects.create(**surname_data)
             person.surnames.add(surname)
@@ -64,4 +62,47 @@ class PersonSerializer(serializers.ModelSerializer):
             person.files.add(file)
 
         return person
+    
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        birth_data = validated_data.pop('birth', None)
+        if birth_data:
+            if instance.birth:
+                instance.birth.delete()
+            instance.birth = EventInLife.objects.create(**birth_data)
 
+        death_data = validated_data.pop('death', None)
+        if death_data:
+            if instance.death:
+                instance.death.delete()
+            instance.death = EventInLife.objects.create(**death_data)
+        elif instance.death:
+            instance.death.delete()
+            instance.death = None
+
+        surnames_data = validated_data.pop('surnames', None)
+        if surnames_data is not None:
+            instance.surnames.clear()
+            for surname_data in surnames_data:
+                surname = Surname.objects.create(**surname_data)
+                instance.surnames.add(surname)
+
+        jobs_data = validated_data.pop('jobs', None)
+        if jobs_data is not None:
+            instance.jobs.clear()
+            for job_data in jobs_data:
+                job = Job.objects.create(**job_data)
+                instance.jobs.add(job)
+
+        files_data = validated_data.pop('files', None)
+        if files_data is not None:
+            instance.files.clear()
+            for file_data in files_data:
+                file = FileInfo.objects.create(**file_data)
+                instance.files.add(file)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance

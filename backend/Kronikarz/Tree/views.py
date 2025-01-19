@@ -6,7 +6,9 @@ from .models import Tree
 from .serializers import TreeSerializer
 from rest_framework.permissions import IsAuthenticated
 
-# Tree List and Create
+
+# Tree
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def tree_list(request, format=None):
@@ -22,7 +24,7 @@ def tree_list(request, format=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Tree Detail (Retrieve, Update, Delete)
+
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def tree_detail(request, id, format=None):
