@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
-from .models import Person, EventInLife, Surname, Job, File, Image
+from .models import Person, EventInLife, Surname, Job, File
 
 class EventInLifeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,29 +25,13 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = '__all__'
 
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = '__all__'
-
 
 class PersonSerializer(serializers.ModelSerializer):
     birth = EventInLifeSerializer()
     death = EventInLifeSerializer(required=False)
     surnames = SurnameSerializer(many=True)
     jobs = JobSerializer(many=True, required=False)
-    
-    # Pola wejściowe (ID)
-    files = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=File.objects.all(), required=False
-    )
-    images = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Image.objects.all(), required=False
-    )
-    
-    # Pola wyjściowe (szczegóły)
-    files_details = FileSerializer(source='files', many=True, read_only=True)
-    images_details = ImageSerializer(source='images', many=True, read_only=True)
+    files = FileSerializer(many=True, required=False)
 
     class Meta:
         model = Person
@@ -55,32 +39,25 @@ class PersonSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        # Pobranie i usunięcie nested danych
         birth_data = validated_data.pop('birth')
         death_data = validated_data.pop('death', None)
         surnames_data = validated_data.pop('surnames', [])
         jobs_data = validated_data.pop('jobs', [])
-        files = validated_data.pop('files', [])
-        images = validated_data.pop('images', [])
+        files_data = validated_data.pop('files', [])
 
-        # Tworzenie EventInLife dla birth i death
         birth = EventInLife.objects.create(**birth_data)
         death = EventInLife.objects.create(**death_data) if death_data else None
 
-        # Tworzenie obiektu Person
         person = Person.objects.create(birth=birth, death=death, **validated_data)
 
-        # Tworzenie relacji
         self._create_nested_objects(person, 'surnames', Surname, surnames_data)
         self._create_nested_objects(person, 'jobs', Job, jobs_data)
-        person.files.set(files)  # Bezpośrednio ustawiamy relacje przez PrimaryKeyRelatedField
-        person.images.set(images)
+        self._create_nested_objects(person, 'files', File, files_data)
 
         return person
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        # Aktualizacja EventInLife dla birth i death
         birth_data = validated_data.pop('birth', None)
         if birth_data:
             if instance.birth:
@@ -96,7 +73,6 @@ class PersonSerializer(serializers.ModelSerializer):
             instance.death.delete()
             instance.death = None
 
-        # Aktualizacja nested objects
         surnames_data = validated_data.pop('surnames', None)
         if surnames_data is not None:
             self._update_nested_objects(instance, 'surnames', Surname, surnames_data)
@@ -105,16 +81,10 @@ class PersonSerializer(serializers.ModelSerializer):
         if jobs_data is not None:
             self._update_nested_objects(instance, 'jobs', Job, jobs_data)
 
-        # Aktualizacja relacji plików i obrazów
-        files = validated_data.pop('files', None)
-        if files is not None:
-            instance.files.set(files)
+        files_data = validated_data.pop('files', None)
+        if files_data is not None:
+            self._update_nested_objects(instance, 'files', File, files_data)
 
-        images = validated_data.pop('images', None)
-        if images is not None:
-            instance.images.set(images)
-
-        # Aktualizacja pozostałych pól
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
