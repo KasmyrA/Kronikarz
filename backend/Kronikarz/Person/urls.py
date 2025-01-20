@@ -1,6 +1,8 @@
 from Person import views
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # Person
@@ -20,9 +22,16 @@ urlpatterns = [
     path('events/', views.events_list),
     path('events/<int:id>/', views.event_detail),
 
-    # FileInfo
-    path('files/', views.files_list),
-    path('files/<int:id>/', views.file_detail),
+    # File
+    path('files/', views.FileView.as_view()),
+    path('files/<int:id>/', views.FileView.as_view()),
+
+    # Image
+    path('images/', views.ImageView.as_view()),
+    path('images/<int:id>/', views.ImageView.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
