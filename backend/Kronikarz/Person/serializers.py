@@ -90,6 +90,17 @@ class PersonSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+    
+    def delete(self, *args, **kwargs):
+        if self.birth:
+            self.birth.delete()
+        if self.death:
+            self.death.delete()
+        self.surnames.all().delete()
+        self.jobs.all().delete()
+        self.files.all().delete()
+        
+        super().delete(*args, **kwargs)
 
     def _create_nested_objects(self, parent_instance, related_name, model_class, data_list):
         related_manager = getattr(parent_instance, related_name)

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Tree.models import Tree
 
 class EventInLife(models.Model):
     date = models.CharField(max_length=255, null=True, blank=True)
@@ -41,7 +42,7 @@ class File(models.Model):
 
 
 class Person(models.Model):
-    uid = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='people')
     names = models.JSONField()
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -51,6 +52,8 @@ class Person(models.Model):
     surnames = models.ManyToManyField(Surname)
     jobs = models.ManyToManyField(Job, blank=True)
     files = models.ManyToManyField(File, blank=True)
+    x = models.FloatField()
+    y = models.FloatField()
 
     def __str__(self):
         names_str = " ".join(self.names) if self.names else ""

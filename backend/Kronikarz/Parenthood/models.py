@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Tree.models import Tree
 
 class Parenthood(models.Model):
     PARENTHOOD_TYPE_CHOICES = [
@@ -7,7 +8,7 @@ class Parenthood(models.Model):
         ("adoptive", "Adoptive"),
     ]
 
-    uid = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='parenthoods')
     mother = models.ForeignKey(
         'Person.Person', 
         on_delete=models.SET_NULL, 
