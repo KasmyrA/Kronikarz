@@ -15,7 +15,7 @@ import Link from "next/link";
 
 
 export default function TreeList() {
-  const [trees, setTrees] = useState<Tree[] | null>(null);
+  const [trees, setTrees] = useState<Tree[] | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,8 +47,10 @@ interface LoadedTreeListProps {
 function LoadedTreeList({ trees, setTrees }: LoadedTreeListProps) {
   const treeCards = trees.map((tree) => {
     const handleTreeDelete = async () => {
-      await deleteTree(tree.id);
-      setTrees(trees.filter((t) => t.id !== tree.id));
+      const resp = await deleteTree(tree.id);
+      if (resp?.ok) {
+        setTrees(trees.filter((t) => t.id !== tree.id));
+      }
     }
 
     return (
@@ -75,7 +77,9 @@ function LoadedTreeList({ trees, setTrees }: LoadedTreeListProps) {
 
   const handleTreeAdd = async (treeName: string) => {
     const newTree = await addTree(treeName);
-    setTrees([newTree, ...trees]);
+    if (newTree) {
+      setTrees([newTree, ...trees])
+    };
   }
 
   return (
@@ -109,7 +113,7 @@ function NewTreeCard({ onAddClick }: NewTreeCardProps) {
       </CardContent>
 
       <CardFooter className="flex justify-end space-x-2">
-        <Button onClick={() => onAddClick(name)} disabled={name.length === 0}>
+        <Button onClick={() => {onAddClick(name); setName("")}} disabled={name.length === 0}>
           Dodaj
         </Button>
       </CardFooter>

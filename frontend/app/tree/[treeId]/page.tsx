@@ -111,7 +111,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     const { id } = selectedPerson!;
     await deletePerson(id);
     tree.people = tree.people.filter((p) => p.id !== id);
-    tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
+    tree.relationships_details = tree.relationships_details.filter((r) => r.partner1 !== id && r.partner2 !== id);
     tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id && p.father !== id && p.mother !== id);
     setTree({...tree});
     setSelectedPerson(null);
@@ -155,11 +155,11 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const handleRelationshipEditorSave = async (rel: Relationship) => {
     if (selectedRelation === "new") {
       const newRelationData = await createRelationship(rel);
-      tree.relationships.push(newRelationData);
+      tree.relationships_details.push(newRelationData);
     } else {
       await updateRelationship(rel);
-      const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
-      tree.relationships[updatedRelationIndex] = rel;
+      const updatedRelationIndex = tree.relationships_details.findIndex((r) => r.id === selectedRelation!);
+      tree.relationships_details[updatedRelationIndex] = rel;
     }
     setTree({ ...tree });
     setSelectedRelation(null);
@@ -167,8 +167,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleRelationshipEditorDelete = async () => {
     await deleteRelationship(selectedRelation as number);
-    const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
-    tree.relationships.splice(updatedRelationIndex, 1);
+    const updatedRelationIndex = tree.relationships_details.findIndex((r) => r.id === selectedRelation!);
+    tree.relationships_details.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
     setSelectedRelation(null);
   };
@@ -203,7 +203,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       <Map
         ref={mapRef}
         people={tree.people}
-        relationships={tree.relationships}
+        relationships={tree.relationships_details}
         parenthoods={tree.parenthoods}
         peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
@@ -233,7 +233,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
       <RelationshipsList
         isOpened={isRelationsSheetOpened}
-        relationships={tree.relationships}
+        relationships={tree.relationships_details}
         people={tree.people}
         onRelationshipClick={(r) => setSelectedRelation(r)}
         onClose={() => setRelationsSheetOpened(false)}

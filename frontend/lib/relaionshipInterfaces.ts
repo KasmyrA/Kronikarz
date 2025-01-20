@@ -1,5 +1,6 @@
 export interface Relationship {
   id: number;
+  uid: number;
   partner1: number;
   partner2: number;
   kind: RelationshipKind;

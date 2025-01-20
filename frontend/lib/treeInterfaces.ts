@@ -3,9 +3,10 @@ import { Relationship } from "./relaionshipInterfaces"
 
 export interface Tree {
   id: number;
+  uid: number;
   name: string;
-  people: TreePerson[];
-  relationships: Relationship[];
+  people: number[];
+  relationships_details: Relationship[];
   parenthoods: Parenthood[];
 }
 
