@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Tree.models import Tree
 
 class Relationship(models.Model):
     RELATIONSHIP_KIND_CHOICES = [
@@ -10,7 +11,7 @@ class Relationship(models.Model):
         ("divorce", "Divorce"),
     ]
 
-    uid = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='relationships')
     partner1 = models.ForeignKey(
         'Person.Person', 
         on_delete=models.CASCADE, 
