@@ -28,15 +28,16 @@ class FileSerializer(serializers.ModelSerializer):
 
 class PersonSerializer(serializers.ModelSerializer):
     birth = EventInLifeSerializer()
-    death = EventInLifeSerializer()
+    death = EventInLifeSerializer(required=False)
     surnames = SurnameSerializer(many=True)
-    jobs = JobSerializer(many=True)
-    files = FileSerializer(many=True)
+    jobs = JobSerializer(many=True, required=False)
+    files = FileSerializer(many=True, required=False)
 
     class Meta:
         model = Person
         fields = '__all__'
 
+    @transaction.atomic
     def create(self, validated_data):
         birth_data = validated_data.pop('birth')
         death_data = validated_data.pop('death', None)
@@ -49,20 +50,12 @@ class PersonSerializer(serializers.ModelSerializer):
 
         person = Person.objects.create(birth=birth, death=death, **validated_data)
 
-        for surname_data in surnames_data:
-            surname = Surname.objects.create(**surname_data)
-            person.surnames.add(surname)
-
-        for job_data in jobs_data:
-            job = Job.objects.create(**job_data)
-            person.jobs.add(job)
-
-        for file_data in files_data:
-            file = File.objects.create(**file_data)
-            person.files.add(file)
+        self._create_nested_objects(person, 'surnames', Surname, surnames_data)
+        self._create_nested_objects(person, 'jobs', Job, jobs_data)
+        self._create_nested_objects(person, 'files', File, files_data)
 
         return person
-    
+
     @transaction.atomic
     def update(self, instance, validated_data):
         birth_data = validated_data.pop('birth', None)
@@ -82,27 +75,31 @@ class PersonSerializer(serializers.ModelSerializer):
 
         surnames_data = validated_data.pop('surnames', None)
         if surnames_data is not None:
-            instance.surnames.clear()
-            for surname_data in surnames_data:
-                surname = Surname.objects.create(**surname_data)
-                instance.surnames.add(surname)
+            self._update_nested_objects(instance, 'surnames', Surname, surnames_data)
 
         jobs_data = validated_data.pop('jobs', None)
         if jobs_data is not None:
-            instance.jobs.clear()
-            for job_data in jobs_data:
-                job = Job.objects.create(**job_data)
-                instance.jobs.add(job)
+            self._update_nested_objects(instance, 'jobs', Job, jobs_data)
 
         files_data = validated_data.pop('files', None)
         if files_data is not None:
-            instance.files.clear()
-            for file_data in files_data:
-                file = File.objects.create(**file_data)
-                instance.files.add(file)
+            self._update_nested_objects(instance, 'files', File, files_data)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
         return instance
+
+    def _create_nested_objects(self, parent_instance, related_name, model_class, data_list):
+        related_manager = getattr(parent_instance, related_name)
+        for data in data_list:
+            obj = model_class.objects.create(**data)
+            related_manager.add(obj)
+
+    def _update_nested_objects(self, instance, related_name, model_class, data_list):
+        related_manager = getattr(instance, related_name)
+        related_manager.all().delete()
+        for data in data_list:
+            obj = model_class.objects.create(**data)
+            related_manager.add(obj)

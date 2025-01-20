@@ -5,6 +5,7 @@ from Parenthood.models import Parenthood
 from .models import Position, Tree
 from Parenthood.serializers import ParenthoodSerializer
 from Relationship.serializers import RelationshipSerializer
+from Person.serializers import PersonSerializer
 
 class PositionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,39 +44,59 @@ class TreePersonSerializer(serializers.ModelSerializer):
 
 
 class TreeSerializer(serializers.ModelSerializer):
-    people = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Person.objects.all(), required=False
-    )
-    relationships = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Relationship.objects.all(), required=False, write_only=True
-    )
-    parenthoods = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Parenthood.objects.all(), required=False, write_only=True
-    )
-    relationships_details = RelationshipSerializer(
-        many=True, read_only=True, source='relationships'
-    )
-    parenthoods_details = ParenthoodSerializer(
-        many=True, read_only=True, source='parenthoods'
-    )
+    people = serializers.SerializerMethodField()
+    relationships = serializers.SerializerMethodField()
+    parenthoods = serializers.SerializerMethodField()
 
     class Meta:
         model = Tree
         fields = [
-            'uid', 'id', 'name', 'people',
-            'relationships', 'relationships_details',
-            'parenthoods', 'parenthoods_details'
+            'uid', 'id', 'name', 'people', 'relationships', 'parenthoods'
         ]
+
+    def get_people(self, obj):
+        people = obj.people.all()
+        serializer = TreePersonSerializer(
+            people, many=True, context={'tree': obj}
+        )
+        return serializer.data
+
+    def get_relationships(self, obj):
+        relationships = obj.relationships.all()
+        return RelationshipSerializer(relationships, many=True).data
+
+    def get_parenthoods(self, obj):
+        parenthoods = obj.parenthoods.all()
+        return ParenthoodSerializer(parenthoods, many=True).data
+
+    def to_internal_value(self, data):
+        people = data.pop('people', None)
+        relationships = data.pop('relationships', None)
+        parenthoods = data.pop('parenthoods', None)
+
+        validated_data = super().to_internal_value(data)
+        if people is not None:
+            validated_data['people'] = people
+        if relationships is not None:
+            validated_data['relationships'] = relationships
+        if parenthoods is not None:
+            validated_data['parenthoods'] = parenthoods
+
+        return validated_data
 
     def create(self, validated_data):
         people = validated_data.pop('people', [])
         relationships = validated_data.pop('relationships', [])
         parenthoods = validated_data.pop('parenthoods', [])
-        
+
         tree = Tree.objects.create(**validated_data)
-        tree.people.set(people)
-        tree.relationships.set(relationships)
-        tree.parenthoods.set(parenthoods)
+        if people:
+            tree.people.set(Person.objects.filter(id__in=people))
+        if relationships:
+            tree.relationships.set(Relationship.objects.filter(id__in=relationships))
+        if parenthoods:
+            tree.parenthoods.set(Parenthood.objects.filter(id__in=parenthoods))
+
         return tree
 
     def update(self, instance, validated_data):
@@ -87,11 +108,11 @@ class TreeSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
 
         if people is not None:
-            instance.people.set(people)
+            instance.people.set(Person.objects.filter(id__in=people))
         if relationships is not None:
-            instance.relationships.set(relationships)
+            instance.relationships.set(Relationship.objects.filter(id__in=relationships))
         if parenthoods is not None:
-            instance.parenthoods.set(parenthoods)
+            instance.parenthoods.set(Parenthood.objects.filter(id__in=parenthoods))
 
         instance.save()
         return instance
