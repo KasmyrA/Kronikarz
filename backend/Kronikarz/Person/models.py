@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import pre_save, pre_delete
-from django.dispatch import receiver
-import os
 
 class EventInLife(models.Model):
     date = models.CharField(max_length=255)
@@ -32,65 +29,19 @@ class Job(models.Model):
     def __str__(self):
         return f"{self.name} at {self.place}"
 
-# File
 
 class File(models.Model):
+    name = models.CharField(max_length=255)
     file = models.FileField(upload_to='files/')
 
     def __str__(self):
-        return self.file.name
-    
-@receiver(pre_save, sender=File)
-def delete_file_on_model_update(sender, instance, **kwargs):
-    if not instance.pk:
-        return
+        return self.name
 
-    try:
-        old_file = File.objects.get(pk=instance.pk).file
-    except File.DoesNotExist:
-        return
-    else:
-        if old_file and old_file != instance.file and old_file.path and os.path.isfile(old_file.path):
-            os.remove(old_file.path)
-
-@receiver(pre_delete, sender=File)
-def delete_file_on_model_delete(sender, instance, **kwargs):
-    if instance.file and os.path.isfile(instance.file.path):
-        os.remove(instance.file.path)
-
-# Image
-
-class Image(models.Model):
-    image = models.ImageField(upload_to='images/')
-
-    def __str__(self):
-        return self.image.name
-
-@receiver(pre_save, sender=Image)
-def delete_image_on_model_update(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-
-    try:
-        old_image = Image.objects.get(pk=instance.pk).image
-    except Image.DoesNotExist:
-        return
-    else:
-        if old_image and old_image != instance.image and old_image.path and os.path.isfile(old_image.path):
-            os.remove(old_image.path)
-
-
-@receiver(pre_delete, sender=Image)
-def delete_image_on_model_delete(sender, instance, **kwargs):
-    if instance.image and os.path.isfile(instance.image.path):
-        os.remove(instance.image.path)
-
-# Person
 
 class Person(models.Model):
     uid = models.ForeignKey(User, on_delete=models.CASCADE)
     names = models.JSONField()
-    image = models.OneToOneField(Image, on_delete=models.SET_NULL, null=True, blank=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     sex = models.CharField(max_length=1, choices=[('F', 'Female'), ('M', 'Male')], null=True, blank=True)
     birth = models.OneToOneField(EventInLife, related_name='birth', on_delete=models.SET_NULL, null=True)
