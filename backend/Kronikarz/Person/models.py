@@ -2,11 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class EventInLife(models.Model):
-    date = models.CharField(max_length=255)
-    place = models.CharField(max_length=255)
+    date = models.CharField(max_length=255, null=True, blank=True)
+    place = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.date} - {self.place}"
+        date_display = self.date if self.date else "___"
+        place_display = self.place if self.place else "___"
+        return f"{date_display} - {place_display}"
 
 
 class Surname(models.Model):
