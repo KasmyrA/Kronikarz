@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 # Tree
 
 @api_view(['GET', 'POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def tree_list(request, format=None):
     if request.method == 'GET':
         trees = Tree.objects.all()
@@ -26,7 +26,7 @@ def tree_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def tree_detail(request, id, format=None):
     try:
         tree = Tree.objects.get(pk=id)
