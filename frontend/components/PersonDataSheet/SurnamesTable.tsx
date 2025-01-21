@@ -34,7 +34,7 @@ export function SurnamesTable({ surnames, addSurname, updateSurname, deleteSurna
         </TableCell>
         <TableCell>
           <Label>Do kiedy używano nazwiska</Label>
-          <DateInput date={surname.value.untill} onDateChange={handleUntillDateChange} disabled={isFirst} />
+          <DateInput date={surname.value.untill ?? ""} onDateChange={handleUntillDateChange} disabled={isFirst} />
         </TableCell>
         <TableCell className="w-10">
           <Button size="icon" onClick={handleDelete}>

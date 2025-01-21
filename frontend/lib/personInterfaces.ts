@@ -25,7 +25,7 @@ export interface Surname {
 }
 
 export interface Job {
-  id: number;
+  id?: number;
   name: string;
   place: string;
   from_date: string;

@@ -8,7 +8,7 @@ import { Relationship, RelationshipKind } from '@/lib/relaionshipInterfaces';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { RelationshipConnection } from '@/components/Map/RelationshipConnection/RelationshipConnection';
 import { ParenthoodConnection } from '@/components/Map/ParenthoodConnection/ParenthoodConnection';
-import { Person } from '@/lib/personInterfaces';
+import { TreePerson } from '@/lib/treeInterfaces';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -17,12 +17,12 @@ const scaleMax = 1.5;
 export type HighlightData = { [personId: number]: string };
 
 interface Props {
-  people: Person[];
+  people: TreePerson[];
   relationships: Relationship[];
   parenthoods: Parenthood[];
   peopleHighlights: HighlightData;
-  onPersonClick: (p: Person) => void;
-  onPersonDrop: (pers: Person) => void;
+  onPersonClick: (p: TreePerson) => void;
+  onPersonDrop: (pers: TreePerson) => void;
   onRelationshipClick: (r: number) => void
   onParenthoodClick: (p: number) => void
 }

@@ -24,8 +24,8 @@ export function ReadingSheet({ person: { files, image, names, surnames, sex, bir
     : sex === "F" ? "Nieznana"
     : "Nieznany";
 
-  const birthText = formatEvent(birth);
-  const deathText = formatEvent(death);
+  const birthText = formatEvent(birth ?? { date: "", place: "" });
+  const deathText = formatEvent(death ?? { date: "", place: "" });
 
   return (
     <>
