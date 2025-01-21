@@ -1,14 +1,17 @@
 export interface Person {
   id: number;
+  tree: number;
   names: string[];
   image: number | null; // Index of an image in "files"
   description: string;
   sex: "F" | "M" | null;
-  birth: EventInLife;
-  death: EventInLife;
+  birth: EventInLife | null;
+  death: EventInLife | null;
   surnames: Surname[];
   jobs: Job[];
   files: FileInfo[]; // Additional files of any kind
+  x: number;
+  y: number;
 }
 
 export interface EventInLife {
@@ -18,14 +21,15 @@ export interface EventInLife {
 
 export interface Surname {
   surname: string;
-  untill: string;
+  untill: string | null;
 }
 
 export interface Job {
+  id: number;
   name: string;
   place: string;
-  from: string;
-  untill: string;
+  from_date: string;
+  untill_date: string;
 }
 
 export interface FileInfo {

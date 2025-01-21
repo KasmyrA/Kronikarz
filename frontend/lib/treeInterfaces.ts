@@ -5,8 +5,8 @@ export interface Tree {
   id: number;
   uid: number;
   name: string;
-  people: number[];
-  relationships_details: Relationship[];
+  people: TreePerson[];
+  relationships: Relationship[];
   parenthoods: Parenthood[];
 }
 
@@ -15,13 +15,9 @@ export interface TreePerson {
   name: string | null;
   surname: string | null;
   sex: "F" | "M" | null;
-  imageUrl: string | null;
+  image: string | null;
   birthDate: string;
   deathDate: string;
-  position: Position;
-}
-
-export interface Position {
   x: number;
-  y: number
+  y: number;
 }

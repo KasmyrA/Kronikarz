@@ -1,12 +1,12 @@
 "use client";
-import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
+import { Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
-import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
+import { addFileToPerson, createPerson, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
 
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
@@ -35,13 +35,18 @@ export default function Page({ params: { treeId } }: Props) {
   useEffect(() => {
     const loadTree = async () => {
       const user = await getCurrentUser();
-      if (!user) {
+      if (!user || !("id" in user)) {
         router.replace('/');
         return;
       }
 
-      const t = await getTree(+treeId);
-      setTree(t)
+      const tree = await getTree(+treeId);
+      if (!tree) {
+        router.replace('/tree');
+        return
+      }
+
+      setTree(tree);
     }
     loadTree();
     
@@ -88,30 +93,34 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     {};
 
   const handleAddPerson = async () => {
-    const newPersonPosition = mapRef.current!.getViewMiddlePosition();
-    const newPerson = await createPerson(newPersonPosition);
-    tree.people.push(newPerson);
-    setTree({...tree});
+    const { x, y } = mapRef.current!.getViewMiddlePosition();
+    const newPerson = await createPerson(x, y, tree.id);
+    if (newPerson) {
+      tree.people.push(personToTreePerson(newPerson));
+      setTree({...tree});
+    }
   }
 
   const handlePersonDataSheetClose = () => {
     setSelectedPerson(null);
   };
 
-  const handlePersonDataSheetSave = async (pers: Omit<Person, "files">) => {
-    await updatePerson(pers);
-    const newPersonData = await getTreePerson(pers.id);
-    const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
-    tree.people[updatedPersonIndex] = newPersonData!;
-    setTree({...tree});
-    setSelectedPerson(null);
+  const handlePersonDataSheetSave = async (pers: Person) => {
+    console.log(pers)
+    const newPersonData = await updatePerson(pers);
+    if (newPersonData) {
+      const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
+      tree.people[updatedPersonIndex] = personToTreePerson(newPersonData);
+      setTree({...tree});
+      setSelectedPerson(null);
+    }
   };
 
   const handlePersonDataSheetDelete = async () => {
     const { id } = selectedPerson!;
     await deletePerson(id);
     tree.people = tree.people.filter((p) => p.id !== id);
-    tree.relationships_details = tree.relationships_details.filter((r) => r.partner1 !== id && r.partner2 !== id);
+    tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
     tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id && p.father !== id && p.mother !== id);
     setTree({...tree});
     setSelectedPerson(null);
@@ -123,13 +132,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonDataSheetFileDelete = async (f: FileInfo) => {
-    const { id } = selectedPerson!;
-    await deleteFileFromPerson(id, f.id);
-    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    if (tree.people[updatedPersonIndex].imageUrl === f.url) {
-      tree.people[updatedPersonIndex].imageUrl = null;
-    }
-    setTree({...tree});
+    // const { id } = selectedPerson!;
+    // await deleteFileFromPerson(id, f.id);
+    // const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
+    // if (tree.people[updatedPersonIndex].imageUrl === f.url) {
+    //   tree.people[updatedPersonIndex].imageUrl = null;
+    // }
+    // setTree({...tree});
   };
 
   const handlePersonClick = (person: TreePerson) => {
@@ -142,10 +151,16 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     }
   };
 
-  const handlePersonDrop = (position: Position, person: TreePerson) => {
-    person.position = position;
+  const handlePersonDrop = async (person: TreePerson) => {
+    const personData = await getPerson(person.id);
+    if (!personData)  return;
+    personData.x = person.x;
+    personData.y = person.y;
+    const newPersonData = await updatePerson(personData);
+    if (!newPersonData)  return;
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === person.id);
+    tree.people[updatedPersonIndex] = personToTreePerson(newPersonData);
     setTree({...tree});
-    updatePersonPosition(person.id, position);
   }
 
   const handleRelationshipEditorClose = () => {
@@ -155,11 +170,11 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   const handleRelationshipEditorSave = async (rel: Relationship) => {
     if (selectedRelation === "new") {
       const newRelationData = await createRelationship(rel);
-      tree.relationships_details.push(newRelationData);
+      tree.relationships.push(newRelationData);
     } else {
       await updateRelationship(rel);
-      const updatedRelationIndex = tree.relationships_details.findIndex((r) => r.id === selectedRelation!);
-      tree.relationships_details[updatedRelationIndex] = rel;
+      const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
+      tree.relationships[updatedRelationIndex] = rel;
     }
     setTree({ ...tree });
     setSelectedRelation(null);
@@ -167,8 +182,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleRelationshipEditorDelete = async () => {
     await deleteRelationship(selectedRelation as number);
-    const updatedRelationIndex = tree.relationships_details.findIndex((r) => r.id === selectedRelation!);
-    tree.relationships_details.splice(updatedRelationIndex, 1);
+    const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
+    tree.relationships.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
     setSelectedRelation(null);
   };
@@ -203,7 +218,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       <Map
         ref={mapRef}
         people={tree.people}
-        relationships={tree.relationships_details}
+        relationships={tree.relationships}
         parenthoods={tree.parenthoods}
         peopleHighlights={peopleHighlights}
         onPersonClick={handlePersonClick}
@@ -233,7 +248,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
       <RelationshipsList
         isOpened={isRelationsSheetOpened}
-        relationships={tree.relationships_details}
+        relationships={tree.relationships}
         people={tree.people}
         onRelationshipClick={(r) => setSelectedRelation(r)}
         onClose={() => setRelationsSheetOpened(false)}

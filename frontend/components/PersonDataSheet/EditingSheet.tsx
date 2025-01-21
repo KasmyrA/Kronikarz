@@ -16,7 +16,7 @@ import { PersonImagePicker } from "./PersonImagePicker";
 interface Props {
   person: Person;
   onClose: () => void;
-  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
   onFileAdd: (f: File) => Promise<FileInfo>;
   onFileDelete: (f: FileInfo) => Promise<void>;
@@ -27,17 +27,17 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
   const [jobs, addJob, updateJob, deleteJob] = useKeyedState(person.jobs);
   const [sex, setSex] = useState(person.sex);
-  const [birth, setBirth] = useState(person.birth);
-  const [death, setDeath] = useState(person.death);
+  const [birth, setBirth] = useState(person.birth ?? { date: "", place: "" });
+  const [death, setDeath] = useState(person.death ?? { date: "", place: "" });
   const [description, setDescription] = useState(person.description);
   const [files, setFiles] = useState(person.files);
   const [image, setImage] = useState(person.image);
 
   const handleSave = async () => {
     await onSave({
-      id: person.id,
+      ...person,
       names: names.map((n) => n.value),
-      surnames: surnames.map((s) => s.value),
+      surnames: surnames.map((s) => s.value).filter((s) => s.surname.trim() !== ""),
       jobs: jobs.map((j) => j.value),
       sex,
       birth,

@@ -149,8 +149,8 @@ interface PartnerPickerProps {
 }
 
 function PartnerPickerComponent({ title, person, isPicking, startPicking, cancelPicking }: PartnerPickerProps) {
-  const image = person?.imageUrl ? 
-    <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
+  const image = person?.image ? 
+    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
   const nameSurname = !person ? "Wybierz osobę" : getNameSurname(person);

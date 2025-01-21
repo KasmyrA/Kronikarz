@@ -21,7 +21,7 @@ export default function TreeList() {
   useEffect(() => {
     const fetchTrees = async () => {
       const user = await getCurrentUser();
-      if (!user) {
+      if (!user || !("id" in user)) {
         router.replace('/');
         return;
       }

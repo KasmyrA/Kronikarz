@@ -16,7 +16,7 @@ import { Header } from "@/components/Header";
 export default function Auth() {
   const router = useRouter();
   useEffect(() => {
-    getCurrentUser().then((user) => !!user && router.replace('/tree'));
+    getCurrentUser().then((user) => !!user && ("id" in user) && router.replace('/tree'));
   }, [router])
 
   return (

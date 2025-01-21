@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@/components/ui/card";
-import { Position, TreePerson } from "@/lib/treeInterfaces";
+import { TreePerson } from "@/lib/treeInterfaces";
 import { cn, getNameSurname } from "@/lib/utils";
 import { User } from "lucide-react";
 import { CSSProperties, useRef, useState } from "react";
@@ -11,7 +11,7 @@ interface Props {
   person: TreePerson;
   highlight: string | undefined;
   onDragStart: () => void;
-  onDrop: (p: Position) => void;
+  onDrop: (x: number, y: number) => void;
   onClick: () => void;
 }
 
@@ -29,12 +29,12 @@ export function PersonCard({ scale, person, highlight, onDrop, onClick, onDragSt
       onClick()
       return
     }
-    onDrop({ x: d.x, y: d.y })
+    onDrop(d.x, d.y);
     setIsDragged(false);
   }
 
-  const personImage = person.imageUrl ? 
-    <img src={person.imageUrl} alt="Person image" className="size-full object-cover"/> :
+  const personImage = person.image ? 
+    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
     <User className="w-full h-full" />;
 
   const birthDeathDate = (person.birthDate || person.deathDate) &&
@@ -52,7 +52,7 @@ export function PersonCard({ scale, person, highlight, onDrop, onClick, onDragSt
     <Draggable
       onDrag={handleDrag}
       onStop={handleStop}
-      defaultPosition={person.position}
+      defaultPosition={{ x: person.x, y: person.y }}
       nodeRef={cardRef}
       scale={scale}
       bounds="parent"

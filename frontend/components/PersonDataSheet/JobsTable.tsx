@@ -16,13 +16,13 @@ interface Props {
 }
 
 export function JobsTable({ jobs, addJob, updateJob, deleteJob }: Props) {
-  const handleAddNewJob = () => addJob({ name: "", place: "", from: "", untill: "" });
+  const handleAddNewJob = () => addJob({ name: "", place: "", from_date: "", untill_date: "" });
 
   const jobsInputs = jobs.map((job) => {
     const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => updateJob(job.key, { ...job.value, name: e.target.value });
     const handlePlaceChange = (e: ChangeEvent<HTMLInputElement>) => updateJob(job.key, { ...job.value, place: e.target.value });
-    const handleFromDateChange = (from: string) => updateJob(job.key, { ...job.value, from });
-    const handleUntillDateChange = (untill: string) => updateJob(job.key, { ...job.value, untill });
+    const handleFromDateChange = (from: string) => updateJob(job.key, { ...job.value, from_date: from });
+    const handleUntillDateChange = (untill: string) => updateJob(job.key, { ...job.value, untill_date: untill });
     const handleDelete = () => deleteJob(job.key);
 
     return (
@@ -36,9 +36,9 @@ export function JobsTable({ jobs, addJob, updateJob, deleteJob }: Props) {
 
         <TableCell>
           <Label>Rozpoczęcie pracy</Label>
-          <DateInput date={job.value.from} onDateChange={handleFromDateChange} />
+          <DateInput date={job.value.from_date} onDateChange={handleFromDateChange} />
           <Label className="block mt-4">Zakończenie pracy</Label>
-          <DateInput date={job.value.untill} onDateChange={handleUntillDateChange} />
+          <DateInput date={job.value.untill_date} onDateChange={handleUntillDateChange} />
         </TableCell>
 
         <TableCell className="w-10">

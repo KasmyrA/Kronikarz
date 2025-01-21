@@ -50,7 +50,7 @@ export function PersonDataSheet({ person, ...callbacks }: Props) {
 interface OpenedSheetProps {
   person: Person;
   onClose: () => void;
-  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
   onFileAdd: (f: File) => Promise<FileInfo>;
   onFileDelete: (f: FileInfo) => Promise<void>;

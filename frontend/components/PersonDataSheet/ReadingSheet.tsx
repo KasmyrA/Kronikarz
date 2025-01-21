@@ -122,7 +122,7 @@ function jobsSection(jobs: Job[]) {
     return null;
   }
 
-  const jobsInputs = jobs.map(({ name, place, from, untill }, index) => {
+  const jobsInputs = jobs.map(({ name, place, from_date: from, untill_date: untill }, index) => {
     return (
       <TableRow key={index}>
         <TableCell>

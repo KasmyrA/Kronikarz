@@ -24,3 +24,10 @@ export async function getTree(id: number): Promise<Tree | undefined> {
   const resp = await authFetch(`${serverAddress}/trees/${id}/`, "GET");
   return await resp?.json();
 }
+
+export async function updateTree(tree: Tree): Promise<Tree | undefined> {
+  const headers = new Headers()
+  headers.append("Content-Type", "application/json");
+  const resp = await authFetch(`${serverAddress}/trees/`, "POST", tree, headers);
+  return await resp?.json();
+}
