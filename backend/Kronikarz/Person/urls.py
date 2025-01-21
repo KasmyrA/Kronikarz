@@ -21,9 +21,13 @@ urlpatterns = [
     path('events/', views.events_list),
     path('events/<int:id>/', views.event_detail),
 
-    # FileInfo
-    path('files/', views.files_list),
-    path('files/<int:id>/', views.file_detail),
+    # File
+    path('files/', views.FileView.as_view()),
+    path('files/<int:id>/', views.FileView.as_view()),
+
+    # Image
+    path('images/', views.ImageView.as_view()),
+    path('images/<int:id>/', views.ImageView.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

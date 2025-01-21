@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
-from .models import Person, EventInLife, Surname, Job, File
+from .models import Person, EventInLife, Surname, Job, File, Image
 
 class EventInLifeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,13 +25,22 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = '__all__'
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = '__all__'
+
 
 class PersonSerializer(serializers.ModelSerializer):
     birth = EventInLifeSerializer()
     death = EventInLifeSerializer(required=False)
     surnames = SurnameSerializer(many=True)
     jobs = JobSerializer(many=True, required=False)
-    files = FileSerializer(many=True, required=False)
+    files = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=File.objects.all(), required=False
+    )
+    files_details = FileSerializer(source='files', many=True, read_only=True)
+    image_details = ImageSerializer(source='image', read_only=True)
 
     class Meta:
         model = Person
@@ -43,16 +52,17 @@ class PersonSerializer(serializers.ModelSerializer):
         death_data = validated_data.pop('death', None)
         surnames_data = validated_data.pop('surnames', [])
         jobs_data = validated_data.pop('jobs', [])
-        files_data = validated_data.pop('files', [])
+        files = validated_data.pop('files', [])
+        image = validated_data.pop('image', None)
 
         birth = EventInLife.objects.create(**birth_data)
         death = EventInLife.objects.create(**death_data) if death_data else None
 
-        person = Person.objects.create(birth=birth, death=death, **validated_data)
+        person = Person.objects.create(birth=birth, death=death, image=image, **validated_data)
 
         self._create_nested_objects(person, 'surnames', Surname, surnames_data)
         self._create_nested_objects(person, 'jobs', Job, jobs_data)
-        self._create_nested_objects(person, 'files', File, files_data)
+        person.files.set(files)
 
         return person
 
@@ -81,9 +91,13 @@ class PersonSerializer(serializers.ModelSerializer):
         if jobs_data is not None:
             self._update_nested_objects(instance, 'jobs', Job, jobs_data)
 
-        files_data = validated_data.pop('files', None)
-        if files_data is not None:
-            self._update_nested_objects(instance, 'files', File, files_data)
+        files = validated_data.pop('files', None)
+        if files is not None:
+            instance.files.set(files)
+
+        image = validated_data.pop('image', None)
+        if image is not None:
+            instance.image = image
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -91,16 +105,6 @@ class PersonSerializer(serializers.ModelSerializer):
 
         return instance
     
-    def delete(self, *args, **kwargs):
-        if self.birth:
-            self.birth.delete()
-        if self.death:
-            self.death.delete()
-        self.surnames.all().delete()
-        self.jobs.all().delete()
-        self.files.all().delete()
-        
-        super().delete(*args, **kwargs)
 
     def _create_nested_objects(self, parent_instance, related_name, model_class, data_list):
         related_manager = getattr(parent_instance, related_name)
