@@ -6,7 +6,6 @@ urlpatterns = [
     # Relationship
     path('', views.relationships_list),
     path('<int:id>/', views.relationship_detail),
-    path('user/<int:uid>/', views.relationships_by_uid),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

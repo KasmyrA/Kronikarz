@@ -6,7 +6,6 @@ urlpatterns = [
     # Parenthood
     path('', views.parenthoods_list),
     path('<int:id>/', views.parenthood_detail),
-    path('user/<int:uid>/', views.parenthoods_by_uid),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

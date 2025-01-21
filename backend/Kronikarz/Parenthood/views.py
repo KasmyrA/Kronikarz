@@ -45,14 +45,3 @@ def parenthood_detail(request, id, format=None):
     elif request.method == 'DELETE':
         parenthood.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def parenthoods_by_uid(request, uid, format=None):
-    parenthoods = Parenthood.objects.filter(uid=uid)
-    if not parenthoods.exists():
-        return Response({'error': 'No parenthoods found with the provided UID'}, status=status.HTTP_404_NOT_FOUND)
-    
-    serializer = ParenthoodSerializer(parenthoods, many=True)
-    return Response(serializer.data)    

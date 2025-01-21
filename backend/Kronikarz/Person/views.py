@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 # Person
 
 @api_view(['GET', 'POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def persons_list(request, format=None):
 
     if request.method == 'GET':
@@ -27,7 +27,7 @@ def persons_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])   
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def person_detail(request, id, format=None):
     try:
         person = Person.objects.get(pk=id)
@@ -47,16 +47,6 @@ def person_detail(request, id, format=None):
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def persons_by_uid(request, uid, format=None):
-    persons = Person.objects.filter(uid=uid)
-    if not persons.exists():
-        return Response({'error': 'No persons found with the provided UID'}, status=status.HTTP_404_NOT_FOUND)
-    
-    serializer = PersonSerializer(persons, many=True)
-    return Response(serializer.data)    
 
 # Surname
 
