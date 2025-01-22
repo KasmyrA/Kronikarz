@@ -170,12 +170,14 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleRelationshipEditorSave = async (rel: Relationship) => {
     if (selectedRelation === "new") {
-      const newRelationData = await createRelationship(rel);
-      tree.relationships.push(newRelationData);
+      const newRelationData = await createRelationship(rel, tree.id);
+      if (newRelationData)  tree.relationships.push(newRelationData);
     } else {
-      await updateRelationship(rel);
-      const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
-      tree.relationships[updatedRelationIndex] = rel;
+      const newRelationData = await updateRelationship(rel);
+      if (newRelationData) {
+        const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
+        tree.relationships[updatedRelationIndex] = rel;
+      }
     }
     setTree({ ...tree });
     setSelectedRelation(null);

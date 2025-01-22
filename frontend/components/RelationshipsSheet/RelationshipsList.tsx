@@ -8,6 +8,7 @@ import { getNameSurname, relationshipKindToString } from "@/lib/utils";
 import { Plus, User } from "lucide-react";
 import { Relationship } from "@/lib/relaionshipInterfaces";
 import { Card } from "../ui/card";
+import { serverAddress } from "@/lib/authActions";
 
 interface Props {
   isOpened: boolean;
@@ -71,7 +72,7 @@ interface PartnerImage {
 
 function PartnerImage({ person }: PartnerImage) {
   const image = person.image ? 
-    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
+    <img src={`${serverAddress}${person.image.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
   return (

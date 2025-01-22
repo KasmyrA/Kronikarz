@@ -17,10 +17,10 @@ export function RelationshipConnection({ relationship: rel, people, draggedPerso
   const partner2 = people.find((p) => p.id === rel.partner2)!;
 
   const clickmargin = 25;
-  const posX = Math.min(partner1.position.x, partner2.position.x) - clickmargin;
-  const posY = Math.min(partner1.position.y, partner2.position.y) - clickmargin;
-  const width = Math.abs(partner1.position.x - partner2.position.x) + clickmargin + relationshipLineDistance;
-  const height = Math.abs(partner1.position.y - partner2.position.y) + clickmargin + relationshipLineDistance;
+  const posX = Math.min(partner1.x, partner2.x) - clickmargin;
+  const posY = Math.min(partner1.y, partner2.y) - clickmargin;
+  const width = Math.abs(partner1.x - partner2.x) + clickmargin + relationshipLineDistance;
+  const height = Math.abs(partner1.y - partner2.y) + clickmargin + relationshipLineDistance;
   
   const viewBox = `${posX + clickmargin / 2} ${posY + clickmargin / 2} ${width} ${height}`;
   const opacity = (rel.partner1 === draggedPerson || rel.partner2 === draggedPerson) ? 0 : 1;
@@ -35,8 +35,8 @@ export function RelationshipConnection({ relationship: rel, people, draggedPerso
     height
   };
 
-  const midX = (partner1.position.x + partner2.position.x) / 2;
-  const conLineY = Math.max(partner1.position.y, partner2.position.y) + relationshipLineDistance;
+  const midX = (partner1.x + partner2.x) / 2;
+  const conLineY = Math.max(partner1.y, partner2.y) + relationshipLineDistance;
 
   const relSymbol = rel.kind === RelationshipKind.SEPARATION ?
     <>
@@ -53,13 +53,13 @@ export function RelationshipConnection({ relationship: rel, people, draggedPerso
   return (
     <svg viewBox={viewBox} style={style} className='rel-connection' xmlns="http://www.w3.org/2000/svg">
       {/* Click margin lines */}
-      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner1.position.x} y1={partner1.position.y} x2={partner1.position.x} y2={conLineY} />
-      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner1.position.x} y1={conLineY} x2={partner2.position.x} y2={conLineY} />
-      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner2.position.x} y1={conLineY} x2={partner2.position.x} y2={partner2.position.y} />
+      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner1.x} y1={partner1.y} x2={partner1.x} y2={conLineY} />
+      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner1.x} y1={conLineY} x2={partner2.x} y2={conLineY} />
+      <line className='rel-margin' strokeWidth={clickmargin} onClick={onClick} x1={partner2.x} y1={conLineY} x2={partner2.x} y2={partner2.y} />
       {/* Visible lines */}
-      <line className='rel-line' x1={partner1.position.x} y1={partner1.position.y} x2={partner1.position.x} y2={conLineY} />
-      <line className='rel-line' x1={partner1.position.x} y1={conLineY} x2={partner2.position.x} y2={conLineY} />
-      <line className='rel-line' x1={partner2.position.x} y1={conLineY} x2={partner2.position.x} y2={partner2.position.y} />
+      <line className='rel-line' x1={partner1.x} y1={partner1.y} x2={partner1.x} y2={conLineY} />
+      <line className='rel-line' x1={partner1.x} y1={conLineY} x2={partner2.x} y2={conLineY} />
+      <line className='rel-line' x1={partner2.x} y1={conLineY} x2={partner2.x} y2={partner2.y} />
       {relSymbol}
     </svg>
   );
