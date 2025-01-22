@@ -3,6 +3,8 @@ export interface Relationship {
   partner1: number;
   partner2: number;
   kind: RelationshipKind;
+  from_date: string | null;
+  untill_date: string | null;
 }
 
 export enum RelationshipKind {

@@ -11,6 +11,7 @@ import { TreePerson } from "@/lib/treeInterfaces";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { getNameSurname, relationshipKindToString } from "@/lib/utils";
 import { serverAddress } from "@/lib/authActions";
+import { DateInput } from "../PersonDataSheet/DateInput";
 
 export interface PartnerPicker {
   pickPartner: (personId: number) => void;
@@ -36,7 +37,7 @@ export function RelationshipEditor({ relationshipId, people, partnerPicker, setP
       setRelationship(null);
     }
     else if (relationshipId === "new") {
-      setRelationship({ id: -1, partner1: -1, partner2: -1, kind: ("" as RelationshipKind) });
+      setRelationship({ id: -1, partner1: -1, partner2: -1, kind: ("" as RelationshipKind), from_date: "", untill_date: "" });
     }
     else {
       getRelationship(relationshipId).then((rel) => setRelationship(rel!))
@@ -94,34 +95,52 @@ function LoadedRelationship({ relationship, people, partnerPicker, setPartnerPic
   return (
     <>
       <ScrollArea className="flex-1 p-6" type="auto">
-        <PartnerPickerComponent 
-          title="Pierwszy partner"
-          person={partner1}
-          isPicking={partnerPicker?.partnerNumber === 1}
-          cancelPicking={() => setPartnerPicker(null)}
-          startPicking={() => setPartnerPicker({
-            partnerNumber: 1,
-            forbiddenPartnerIds,
-            pickPartner: (id) => { setRelationship({...relationship, partner1: id}); setPartnerPicker(null) }
-          })}
-        />
+        <div className="p-1">
+          <PartnerPickerComponent 
+            title="Pierwszy partner"
+            person={partner1}
+            isPicking={partnerPicker?.partnerNumber === 1}
+            cancelPicking={() => setPartnerPicker(null)}
+            startPicking={() => setPartnerPicker({
+              partnerNumber: 1,
+              forbiddenPartnerIds,
+              pickPartner: (id) => { setRelationship({...relationship, partner1: id}); setPartnerPicker(null) }
+            })}
+          />
 
-        <PartnerPickerComponent 
-          title="Drugi partner"
-          person={partner2}
-          isPicking={partnerPicker?.partnerNumber === 2}
-          cancelPicking={() => setPartnerPicker(null)}
-          startPicking={() => setPartnerPicker({
-            partnerNumber: 2,
-            forbiddenPartnerIds,
-            pickPartner: (id) => { setRelationship({...relationship, partner2: id}); setPartnerPicker(null) }
-          })}
-        />
+          <PartnerPickerComponent 
+            title="Drugi partner"
+            person={partner2}
+            isPicking={partnerPicker?.partnerNumber === 2}
+            cancelPicking={() => setPartnerPicker(null)}
+            startPicking={() => setPartnerPicker({
+              partnerNumber: 2,
+              forbiddenPartnerIds,
+              pickPartner: (id) => { setRelationship({...relationship, partner2: id}); setPartnerPicker(null) }
+            })}
+          />
 
-        <RelationshipKindPicker
-          kind={relationship.kind}
-          setKind={(kind) => setRelationship({...relationship, kind})}
-        />
+          <h3 className="text-2xl font-semibold tracking-tight text-center mt-5 mb-4">
+            Data początku związku
+          </h3>
+          <DateInput
+            date={relationship.from_date ?? ""}
+            onDateChange={(date) => setRelationship({...relationship, from_date: date})}
+          />
+
+          <h3 className="text-2xl font-semibold tracking-tight text-center mt-5 mb-4">
+            Data końca związku
+          </h3>
+          <DateInput
+            date={relationship.untill_date ?? ""}
+            onDateChange={(date) => setRelationship({...relationship, untill_date: date})}
+          />
+
+          <RelationshipKindPicker
+            kind={relationship.kind}
+            setKind={(kind) => setRelationship({...relationship, kind})}
+          />
+        </div>
 
         <ScrollBar orientation="vertical" />
       </ScrollArea>
