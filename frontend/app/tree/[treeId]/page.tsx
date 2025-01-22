@@ -1,12 +1,12 @@
 "use client";
-import { Position, Tree, TreePerson } from '@/lib/treeInterfaces';
+import { Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
-import { addFileToPerson, createPerson, deleteFileFromPerson, deletePerson, getTreePerson, updatePerson, updatePersonPosition } from '@/lib/personActions';
+import { addFileToPerson, createPerson, deleteFile, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
 
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
@@ -35,13 +35,18 @@ export default function Page({ params: { treeId } }: Props) {
   useEffect(() => {
     const loadTree = async () => {
       const user = await getCurrentUser();
-      if (!user) {
+      if (!user || !("id" in user)) {
         router.replace('/');
         return;
       }
 
-      const t = await getTree(+treeId);
-      setTree(t)
+      const tree = await getTree(+treeId);
+      if (!tree) {
+        router.replace('/tree');
+        return
+      }
+
+      setTree(tree);
     }
     loadTree();
     
@@ -88,23 +93,26 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     {};
 
   const handleAddPerson = async () => {
-    const newPersonPosition = mapRef.current!.getViewMiddlePosition();
-    const newPerson = await createPerson(newPersonPosition);
-    tree.people.push(newPerson);
-    setTree({...tree});
+    const { x, y } = mapRef.current!.getViewMiddlePosition();
+    const newPerson = await createPerson(x, y, tree.id);
+    if (newPerson) {
+      tree.people.push(personToTreePerson(newPerson));
+      setTree({...tree});
+    }
   }
 
   const handlePersonDataSheetClose = () => {
     setSelectedPerson(null);
   };
 
-  const handlePersonDataSheetSave = async (pers: Omit<Person, "files">) => {
-    await updatePerson(pers);
-    const newPersonData = await getTreePerson(pers.id);
-    const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
-    tree.people[updatedPersonIndex] = newPersonData!;
-    setTree({...tree});
-    setSelectedPerson(null);
+  const handlePersonDataSheetSave = async (pers: Person) => {
+    const newPersonData = await updatePerson(pers);
+    if (newPersonData) {
+      const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
+      tree.people[updatedPersonIndex] = personToTreePerson(newPersonData);
+      setTree({...tree});
+      setSelectedPerson(null);
+    }
   };
 
   const handlePersonDataSheetDelete = async () => {
@@ -123,13 +131,15 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonDataSheetFileDelete = async (f: FileInfo) => {
+    const resp = await deleteFile(f.id);
+    if (!resp?.ok)  return false
     const { id } = selectedPerson!;
-    await deleteFileFromPerson(id, f.id);
     const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    if (tree.people[updatedPersonIndex].imageUrl === f.url) {
-      tree.people[updatedPersonIndex].imageUrl = null;
+    if (tree.people[updatedPersonIndex].image?.id === f.id) {
+      tree.people[updatedPersonIndex].image = null;
     }
     setTree({...tree});
+    return true;
   };
 
   const handlePersonClick = (person: TreePerson) => {
@@ -142,10 +152,16 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     }
   };
 
-  const handlePersonDrop = (position: Position, person: TreePerson) => {
-    person.position = position;
+  const handlePersonDrop = async (person: TreePerson) => {
+    const personData = await getPerson(person.id);
+    if (!personData)  return;
+    personData.x = person.x;
+    personData.y = person.y;
+    const newPersonData = await updatePerson(personData);
+    if (!newPersonData)  return;
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === person.id);
+    tree.people[updatedPersonIndex] = personToTreePerson(newPersonData);
     setTree({...tree});
-    updatePersonPosition(person.id, position);
   }
 
   const handleRelationshipEditorClose = () => {

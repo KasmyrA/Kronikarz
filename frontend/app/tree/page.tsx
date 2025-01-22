@@ -2,217 +2,121 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardFooter, CardTitle, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/authActions";
 import { Header } from "@/components/Header";
+import { Tree } from "@/lib/treeInterfaces";
+import { addTree, deleteTree, getTreeList } from "@/lib/treeActions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
-interface Tree {
-    id: number;
-    name: string;
-    description?: string;
-    imageUrl?: string; // Pole dla zdjęcia, teraz opcjonalne
-}
-
-// Add this utility function at the top level
-const getErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) return error.message
-    return String(error)
-}
 
 export default function TreeList() {
-    const [trees, setTrees] = useState<Tree[]>([])
-    const [name, setName] = useState<string>("")
-    const [description, setDescription] = useState<string | undefined>(undefined)
-    const [imageUrl, setImageUrl] = useState<string>("") // Zmienna dla URL zdjęcia
-    const [error, setError] = useState<string>("")
-    const [editingTreeId, setEditingTreeId] = useState<number | null>(null) // ID drzewa, które jest edytowane
-    const [loading, setLoading] = useState(true)
-    const router = useRouter();
+  const [trees, setTrees] = useState<Tree[] | undefined>(undefined);
+  const router = useRouter();
 
-    useEffect(() => {
-        const fetchTrees = async () => {
-            const user = await getCurrentUser();
-            if (!user) {
-                router.replace('/');
-                return;
-            }
+  useEffect(() => {
+    const fetchTrees = async () => {
+      const user = await getCurrentUser();
+      if (!user || !("id" in user)) {
+        router.replace('/');
+        return;
+      }
 
-            setLoading(true)
-            try {
-                const response = await fetch('/api/trees')
-                if (!response.ok) {
-                    throw new Error('Network response was not ok')
-                }
-                const data = await response.json()
-                setTrees(data)
-            } catch (error: unknown) {
-                setError("Błąd podczas ładowania drzew: " + getErrorMessage(error))
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchTrees()
-    }, [router])
-
-    const addTree = async () => {
-        if (!name) {
-            setError("Nazwa jest  wymagana.")
-            return
-        }
-
-        const newTree = { name, description}
-        try {
-            const response = await fetch('/api/trees', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newTree),
-            })
-
-            if (!response.ok) {
-                throw new Error('Nie udało się dodać drzewa, baza dancych zwróciła błąd.')
-            }
-
-            const addedTree = await response.json()
-            setTrees([...trees, addedTree])
-            resetForm()
-        } catch (error: unknown) {
-            setError("Błąd podczas dodawania drzewa: " + getErrorMessage(error))
-        }
+      const t = await getTreeList();
+      setTrees(t);
     }
+    fetchTrees()
+  }, [router])
 
-    const updateTree = async () => {
-        if (!editingTreeId || !name) {
-            setError("Nazwa jest wymagana.")
-            return
-        }
+  if (trees) {
+    return <LoadedTreeList trees={trees} setTrees={setTrees} />
+  } else {
+    return <div className='flex-1 flex items-center justify-center'><Loader2 className="size-16 animate-spin" /></div>
+  }
+}
 
-        try {
-            await fetch(`/api/trees/${editingTreeId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, description })
-            })
+interface LoadedTreeListProps {
+  trees: Tree[];
+  setTrees: (t: Tree[]) => void;
+}
 
-            const updatedTrees = trees.map(tree => tree.id === editingTreeId ? { ...tree, name, description } : tree)
-            setTrees(updatedTrees)
-            resetForm()
-        } catch (error: unknown) {
-            setError("Błąd podczas aktualizacji drzewa: " + getErrorMessage(error))
-        }
-    }
-
-    const startEditing = (tree: Tree) => {
-        setEditingTreeId(tree.id)
-        setName(tree.name)
-        setDescription(tree.description)
-        setImageUrl(tree.imageUrl || '')
-    }
-
-    const deleteTree = async (id: number) => {
-        try {
-            await fetch(`/api/trees/${id}`, { method: 'DELETE' })
-            const updatedTrees = trees.filter(tree => tree.id !== id)
-            setTrees(updatedTrees)
-        } catch (error: unknown) {
-            setError("Błąd podczas usunięcia drzewa: " + getErrorMessage(error))
-        }
-    }
-
-    const resetForm = () => {
-        setName('')
-        setDescription(undefined)
-        setImageUrl('')
-        setEditingTreeId(null)
+function LoadedTreeList({ trees, setTrees }: LoadedTreeListProps) {
+  const treeCards = trees.map((tree) => {
+    const handleTreeDelete = async () => {
+      const resp = await deleteTree(tree.id);
+      if (resp?.ok) {
+        setTrees(trees.filter((t) => t.id !== tree.id));
+      }
     }
 
     return (
-        <>
-            <Header isLoggedIn={true} />
-            <div className="p-8 max-w-7xl mx-auto">
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
-                        <span className="block sm:inline">{error}</span>
-                    </div>
-                )}
-                
-                <Card className="mb-8">
-                    <CardContent className="p-6">
-                        <div className="space-y-4">
-                            <input
-                                type="text"
-                                placeholder="Nazwa drzewa"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <textarea
-                                placeholder="Opis drzewa"
-                                value={description || ''}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows={3}
-                            />
-                            {editingTreeId ? (
-                                <button onClick={updateTree} 
-                                    className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
-                                    Zaktualizuj drzewo
-                                </button>
-                            ) : (
-                                <button onClick={addTree} 
-                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors duration-200">
-                                    Dodaj drzewo
-                                </button>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+      <Card key={tree.id} className="min-h-52 h-min hover:shadow-lg transition-shadow duration-200">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">{tree.name}</CardTitle>
+        </CardHeader>
 
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {trees.map(tree => (
-                            <Card key={tree.id} className="hover:shadow-lg transition-shadow duration-200">
-                                <CardHeader>
-                                    <CardTitle className="text-xl font-bold">{tree.name}</CardTitle>
-                                    <CardDescription className="text-gray-600">{tree.description}</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {tree.imageUrl && (
-                                        <div className="relative h-48 mb-4">
-                                            <img 
-                                                src={tree.imageUrl} 
-                                                alt={tree.name} 
-                                                className="object-cover w-full h-full rounded-md"
-                                            />
-                                        </div>
-                                    )}
-                                </CardContent>
-                                <CardFooter className="flex justify-end space-x-2">
-                                    <button 
-                                        onClick={() => startEditing(tree)} 
-                                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                        Edytuj
-                                    </button>
-                                    <button 
-                                        onClick={() => deleteTree(tree.id)} 
-                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                                        Usuń
-                                    </button>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </>
+        <CardContent>
+          <p className="my-2">Drzewo posiada {tree.people.length} osób</p>
+        </CardContent>
+
+        <CardFooter className="flex justify-end space-x-2">
+          <Button variant="destructive" onClick={handleTreeDelete}>
+            Usuń
+          </Button>
+          <Button>
+            <Link href={`/tree/${tree.id}`}>Edytuj</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     )
+  })
+
+  const handleTreeAdd = async (treeName: string) => {
+    const newTree = await addTree(treeName);
+    if (newTree) {
+      setTrees([newTree, ...trees])
+    };
+  }
+
+  return (
+    <>
+      <Header isLoggedIn={true} />
+      <div className="flex-1 p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
+        <NewTreeCard onAddClick={handleTreeAdd} />
+        {treeCards}
+      </div>
+    </>
+  )
+}
+
+interface NewTreeCardProps {
+  onAddClick: (treeName: string) => void;
+}
+
+function NewTreeCard({ onAddClick }: NewTreeCardProps) {
+  const [name, setName] = useState<string>("")
+
+  return (
+    <Card className="min-h-52 h-min hover:shadow-lg transition-shadow duration-200">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">
+          Dodaj nowe drzewo
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <Input placeholder="Podaj nazwę drzewa" value={name} onChange={(e) => setName(e.target.value)} />
+      </CardContent>
+
+      <CardFooter className="flex justify-end space-x-2">
+        <Button onClick={() => {onAddClick(name); setName("")}} disabled={name.length === 0}>
+          Dodaj
+        </Button>
+      </CardFooter>
+    </Card>
+  )
 }

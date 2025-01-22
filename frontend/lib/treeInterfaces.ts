@@ -1,8 +1,10 @@
 import { Parenthood } from "./parenthoodInterfaces";
+import { FileInfo } from "./personInterfaces";
 import { Relationship } from "./relaionshipInterfaces"
 
 export interface Tree {
   id: number;
+  uid: number;
   name: string;
   people: TreePerson[];
   relationships: Relationship[];
@@ -14,13 +16,9 @@ export interface TreePerson {
   name: string | null;
   surname: string | null;
   sex: "F" | "M" | null;
-  imageUrl: string | null;
+  image: FileInfo | null;
   birthDate: string;
   deathDate: string;
-  position: Position;
-}
-
-export interface Position {
   x: number;
-  y: number
+  y: number;
 }

@@ -1,11 +1,11 @@
 import { User } from "./userInterfaces";
 
-const serverAddress = "http://127.0.0.1:8000";
+export const serverAddress = "http://127.0.0.1:8000";
 const refreshTokenKey = "refreshToken";
 const accessTokenKey = "accessToken";
 
-async function authFetch(url: string, method: string, body?: object, headers = new Headers()) {
-  const bodyString = body ? JSON.stringify(body) : undefined;
+export async function authFetch(url: string, method: string, body?: any, headers = new Headers(), stringifyBody = true) {
+  const bodyString = body && stringifyBody ? JSON.stringify(body) : body;
   const accessToken = localStorage.getItem(accessTokenKey)
   headers.append("Authorization", `Bearer ${accessToken}`);
   if (accessToken) {
@@ -70,16 +70,26 @@ export async function login(username: string, password: string) {
 }
 
 export async function getCurrentUser() {
+  const userId = getCurrentUserId();
+
+  if (userId === null || userId === undefined) {
+    return null;
+  }
+
+  return await getUser(userId);
+}
+
+export function getCurrentUserId(): number | null | undefined {
   const refreshToken = localStorage.getItem(refreshTokenKey);
   if (!refreshToken) {
     return null;
   }
 
-  const { user_id } = JSON.parse(atob(refreshToken.split('.')[1]));
-  return await getUser(user_id);
+  const tokenData = JSON.parse(atob(refreshToken.split('.')[1]));
+  return tokenData.user_id;
 }
 
-export async function getUser(id: string) {
+export async function getUser(id: number) {
   const resp = await authFetch(`${serverAddress}/users/${id}/`, "GET")
   const user: User | null = await resp?.json();
   return user;

@@ -7,6 +7,7 @@ import { User } from "lucide-react";
 import { Card } from "../ui/card";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { PersonFilesList } from "./PersonFilesList";
+import { serverAddress } from "@/lib/authActions";
 
 interface ReadingSheetProps {
   person: Person;
@@ -14,18 +15,17 @@ interface ReadingSheetProps {
   goToEditingSheet: () => void;
 } 
 
-export function ReadingSheet({ person: { files, image, names, surnames, sex, birth, death, description, jobs }, onClose, goToEditingSheet }: ReadingSheetProps) {
-  const imageFile = files.find((f) => f.id === image);
-  const personImageElement = imageFile ? 
-    <img src={imageFile.url} alt="Person image" className="size-full object-cover"/> :
+export function ReadingSheet({ person: { files_details, image_details, names, surnames, sex, birth, death, description, jobs }, onClose, goToEditingSheet }: ReadingSheetProps) {
+  const personImageElement = image_details ?
+    <img src={`${serverAddress}${image_details.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
   const nameSurname = (names.length || surnames.length) ? `${names.join(' ')} ${surnames[0]?.surname ?? ' '}`
     : sex === "F" ? "Nieznana"
     : "Nieznany";
 
-  const birthText = formatEvent(birth);
-  const deathText = formatEvent(death);
+  const birthText = formatEvent(birth ?? { date: "", place: "" });
+  const deathText = formatEvent(death ?? { date: "", place: "" });
 
   return (
     <>
@@ -61,7 +61,7 @@ export function ReadingSheet({ person: { files, image, names, surnames, sex, bir
 
           {surnamesSection(surnames)}
           {jobsSection(jobs)}
-          <PersonFilesList files={files} />
+          <PersonFilesList files={files_details} />
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
@@ -122,7 +122,7 @@ function jobsSection(jobs: Job[]) {
     return null;
   }
 
-  const jobsInputs = jobs.map(({ name, place, from, untill }, index) => {
+  const jobsInputs = jobs.map(({ name, place, from_date: from, untill_date: untill }, index) => {
     return (
       <TableRow key={index}>
         <TableCell>

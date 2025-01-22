@@ -16,10 +16,10 @@ import { PersonImagePicker } from "./PersonImagePicker";
 interface Props {
   person: Person;
   onClose: () => void;
-  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
-  onFileAdd: (f: File) => Promise<FileInfo>;
-  onFileDelete: (f: FileInfo) => Promise<void>;
+  onFileAdd: (f: File) => Promise<FileInfo | undefined>;
+  onFileDelete: (f: FileInfo) => Promise<boolean>;
 }
 
 export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onFileDelete }: Props) {
@@ -27,23 +27,24 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
   const [surnames, addSurname, updateSurname, deleteSurname] = useKeyedState(person.surnames);
   const [jobs, addJob, updateJob, deleteJob] = useKeyedState(person.jobs);
   const [sex, setSex] = useState(person.sex);
-  const [birth, setBirth] = useState(person.birth);
-  const [death, setDeath] = useState(person.death);
+  const [birth, setBirth] = useState(person.birth ?? { date: "", place: "" });
+  const [death, setDeath] = useState(person.death ?? { date: "", place: "" });
   const [description, setDescription] = useState(person.description);
-  const [files, setFiles] = useState(person.files);
-  const [image, setImage] = useState(person.image);
+  const [files, setFiles] = useState(person.files_details);
+  const [image, setImage] = useState(person.image_details);
 
   const handleSave = async () => {
     await onSave({
-      id: person.id,
+      ...person,
       names: names.map((n) => n.value),
-      surnames: surnames.map((s) => s.value),
-      jobs: jobs.map((j) => j.value),
+      surnames: surnames.map((s) => s.value).filter((s) => s.surname.trim() !== ""),
+      jobs: jobs.map((j) => j.value).filter((j) => j.name.trim() !== ""),
       sex,
       birth,
       death,
       description,
-      image
+      files: files.map((f) => f.id),
+      image: image?.id ?? null,
     });
   }
 
@@ -51,14 +52,15 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
 
   const handleFileAdd = async (f: File) => {
     const fileInfo = await onFileAdd(f);
-    setFiles([...files, fileInfo]);
+    if (fileInfo) setFiles([...files, fileInfo]);
     return fileInfo;
   };
 
   const handleFileDelete = async (file: FileInfo) => {
-    await onFileDelete(file);
+    const ok = await onFileDelete(file);
+    if (!ok)  return
     setFiles(files.filter(f => f.id !== file.id));
-    if (image === file.id)  setImage(null);
+    if (image?.id === file.id)  setImage(null);
   }
 
   return (

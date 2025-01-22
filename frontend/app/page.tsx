@@ -10,7 +10,7 @@ import { getCurrentUser } from "@/lib/authActions";
 export default function Home() {
   const router = useRouter();
   useEffect(() => {
-    getCurrentUser().then((user) => !!user && router.replace('/tree'));
+    getCurrentUser().then((user) => !!user && ("id" in user) && router.replace('/tree'));
   }, [router])
 
   return (

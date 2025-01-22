@@ -6,11 +6,12 @@ import { Button } from "../ui/button";
 import { ChangeEventHandler, useRef } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { isImageFile } from "@/lib/utils";
+import { serverAddress } from "@/lib/authActions";
 
 interface Props {
   files: FileInfo[];
-  image?: number | null;
-  onFileAdd?: (f: File) => Promise<FileInfo>;
+  image?: FileInfo | null;
+  onFileAdd?: (f: File) => Promise<FileInfo | undefined>;
   onFileDelete?: (f: FileInfo) => Promise<void>;
 }
 
@@ -18,30 +19,31 @@ export function PersonFilesList({ files, image, onFileAdd, onFileDelete }: Props
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const fileCards = files.map((file) => {
-    const fileImage = isImageFile(file.name) ? 
-      <img src={file.url} alt="File image" className="size-full object-cover"/> :
+    const fileImage = isImageFile(file.file) ? 
+      <img src={`${serverAddress}${file.file}`} alt="File image" className="size-full object-cover"/> :
       <FileIcon className="size-10" />;
 
     const handleDeleteFile = () => onFileDelete && onFileDelete(file);
+    const fileName = file.file.split('/').at(-1);
 
     return (
       <DropdownMenu key={file.id}>
         <DropdownMenuTrigger asChild>
-          <Button title={file.name} variant="outline" className="w-32 h-40 p-4 flex-col justify-between">
+          <Button title={fileName} variant="outline" className="w-32 h-40 p-4 flex-col justify-between">
             <div className="w-full aspect-square overflow-hidden flex items-center justify-center">
               { fileImage }
             </div>
             <h4 className="text-sm text-muted-foreground text-center w-full text-ellipsis overflow-hidden">
-              { file.name }
+              { fileName }
             </h4>
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent>
-          <DropdownMenuLabel>{file.name}</DropdownMenuLabel>
+          <DropdownMenuLabel>{fileName}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <a href={file.url} download={file.name}>
+            <a href={`${serverAddress}${file.file}`} download={fileName} target="_blank">
               <DropdownMenuItem>
                 <Download />
                 Pobierz
@@ -49,7 +51,7 @@ export function PersonFilesList({ files, image, onFileAdd, onFileDelete }: Props
             </a>
             {onFileDelete && <DropdownMenuItem onClick={handleDeleteFile}>
               <Trash className="text-destructive" />
-              <span className="text-destructive">Usuń { image === file.id && "(usunie również zdjęcie profilowe)" }</span>
+              <span className="text-destructive">Usuń { image?.id === file.id && "(usunie również zdjęcie profilowe)" }</span>
             </DropdownMenuItem>}
           </DropdownMenuGroup>
         </DropdownMenuContent>

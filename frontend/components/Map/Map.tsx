@@ -3,12 +3,12 @@ import './Map.css'
 import { CSSProperties, forwardRef, useEffect, useImperativeHandle, useReducer, useRef, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import { limitValue, onNextResize, scrollToMiddle } from '@/lib/utils';
-import { Position, TreePerson } from '@/lib/treeInterfaces';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Relationship, RelationshipKind } from '@/lib/relaionshipInterfaces';
 import { Parenthood } from '@/lib/parenthoodInterfaces';
 import { RelationshipConnection } from '@/components/Map/RelationshipConnection/RelationshipConnection';
 import { ParenthoodConnection } from '@/components/Map/ParenthoodConnection/ParenthoodConnection';
+import { TreePerson } from '@/lib/treeInterfaces';
 
 const scaleStep = 0.05;
 const scaleMin = 0.5;
@@ -22,19 +22,19 @@ interface Props {
   parenthoods: Parenthood[];
   peopleHighlights: HighlightData;
   onPersonClick: (p: TreePerson) => void;
-  onPersonDrop: (pos: Position, pers: TreePerson) => void;
+  onPersonDrop: (pers: TreePerson) => void;
   onRelationshipClick: (r: number) => void
   onParenthoodClick: (p: number) => void
 }
 
 export interface MapHandle {
-  getViewMiddlePosition: () => Position;
+  getViewMiddlePosition: () => { x: number, y: number };
 }
 
 export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, parenthoods, onPersonClick, onPersonDrop, onRelationshipClick, onParenthoodClick }, ref) {
   const [mapSize, setMapSize] = useState({
-    width: Math.max(...people.map(p => Math.abs(p.position.x)), 0),
-    height: Math.max(...people.map(p => Math.abs(p.position.y)), 0)
+    width: Math.max(...people.map(p => Math.abs(p.x)), 0),
+    height: Math.max(...people.map(p => Math.abs(p.y)), 0)
   });
   const [scale, setScale] = useReducer((oldScale: number, getNewScale: (old: number) => number) => {
     return limitValue(getNewScale(oldScale), scaleMin, scaleMax);
@@ -72,7 +72,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
 
   useImperativeHandle(ref, () => {
     return {
-      getViewMiddlePosition: (): Position => {
+      getViewMiddlePosition: () => {
         const map = mapRef.current!;
         const mapContainer = getMapContainer();
         const mapSize = map.getBoundingClientRect();
@@ -107,13 +107,15 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
   const peopleCards = people.map((person) => {
     const handleClick = () => onPersonClick(person);
     const handleDragStart = () => setDraggedPerson(person.id);
-    const handleDrop = (position: Position) => {
-      onPersonDrop(position, person);
+    const handleDrop = (x: number, y: number) => {
+      person.x = x;
+      person.y = y;
+      onPersonDrop(person);
       setDraggedPerson(null);
 
       // Increase size of map if needed
-      const positionX = Math.abs(position.x);
-      const positionY = Math.abs(position.y)
+      const positionX = Math.abs(x);
+      const positionY = Math.abs(y)
       if (mapSize.width > positionX && mapSize.height > positionY) {
         return
       }
@@ -163,6 +165,7 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
     .map((p) => {
       const pseudoRel: Relationship = {
         id: -1,
+        uid: -1,
         kind: RelationshipKind.UNFORMAL,
         partner1: p.mother,
         partner2: p.father
