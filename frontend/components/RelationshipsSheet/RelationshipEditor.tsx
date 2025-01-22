@@ -10,6 +10,7 @@ import { Card } from "../ui/card";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { getNameSurname, relationshipKindToString } from "@/lib/utils";
+import { serverAddress } from "@/lib/authActions";
 
 export interface PartnerPicker {
   pickPartner: (personId: number) => void;
@@ -150,7 +151,7 @@ interface PartnerPickerProps {
 
 function PartnerPickerComponent({ title, person, isPicking, startPicking, cancelPicking }: PartnerPickerProps) {
   const image = person?.image ? 
-    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
+    <img src={`${serverAddress}${person.image.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
   const nameSurname = !person ? "Wybierz osobę" : getNameSurname(person);

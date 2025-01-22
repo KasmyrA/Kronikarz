@@ -165,7 +165,6 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
     .map((p) => {
       const pseudoRel: Relationship = {
         id: -1,
-        uid: -1,
         kind: RelationshipKind.UNFORMAL,
         partner1: p.mother,
         partner2: p.father
