@@ -3,7 +3,7 @@ import { Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree, updateTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Baby, Heart, Loader2, Menu, UserPlus } from 'lucide-react';
+import { Baby, BookOpen, Heart, Loader2, Menu, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFile, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
@@ -244,6 +244,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onRelationshipClick={(r) => !isAnySheetOpened && setSelectedRelation(r)}
         onParenthoodClick={(p) => !isAnySheetOpened && setSelectedParenthood(p)}
       />
+
+      <div className="absolute left-8 bottom-8 flex items-center justify-center space-x-2 pointer-events-none">
+        <BookOpen className="size-8" />
+        <span className="text-4xl font-semibold tracking-tight">
+          Kronikarz
+        </span>
+      </div>
 
       <Button onClick={() => setIsMenuOpened(true)} variant="outline" size="icon" className='absolute left-8 top-8'>
         <Menu className="h-4 w-4" />
