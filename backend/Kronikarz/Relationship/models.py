@@ -26,6 +26,8 @@ class Relationship(models.Model):
         max_length=20,
         choices=RELATIONSHIP_KIND_CHOICES
     )
+    from_date = models.CharField(max_length=255, null=True, blank=True)
+    untill_date = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_kind_display()} between {self.partner1} and {self.partner2}"

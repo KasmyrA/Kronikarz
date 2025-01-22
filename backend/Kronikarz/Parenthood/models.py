@@ -11,14 +11,14 @@ class Parenthood(models.Model):
     tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='parenthoods')
     mother = models.ForeignKey(
         'Person.Person', 
-        on_delete=models.SET_NULL, 
+        on_delete=models.CASCADE, 
         related_name='mother_parenthoods',
         null=True, 
         blank=True
     )
     father = models.ForeignKey(
         'Person.Person', 
-        on_delete=models.SET_NULL, 
+        on_delete=models.CASCADE, 
         related_name='father_parenthoods',
         null=True, 
         blank=True
@@ -37,14 +37,14 @@ class Parenthood(models.Model):
 
     adoption_mother = models.ForeignKey(
         'Person.Person', 
-        on_delete=models.SET_NULL, 
+        on_delete=models.CASCADE, 
         related_name='adoption_mother_parenthoods',
         null=True, 
         blank=True
     )
     adoption_father = models.ForeignKey(
         'Person.Person', 
-        on_delete=models.SET_NULL, 
+        on_delete=models.CASCADE, 
         related_name='adoption_father_parenthoods',
         null=True, 
         blank=True
