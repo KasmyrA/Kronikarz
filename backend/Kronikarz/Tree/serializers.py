@@ -5,7 +5,7 @@ from Parenthood.models import Parenthood
 from .models import Tree
 from Parenthood.serializers import ParenthoodSerializer
 from Relationship.serializers import RelationshipSerializer
-from Person.serializers import PersonSerializer, ImageSerializer
+from Person.serializers import PersonSerializer, ImageSerializer, FileSerializer
 
 
 class TreePersonSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class TreePersonSerializer(serializers.ModelSerializer):
     deathDate = serializers.CharField(source='death.date', allow_null=True)
     name = serializers.SerializerMethodField()
     surname = serializers.SerializerMethodField()
-    image = ImageSerializer(required=False, allow_null=True)
+    image = FileSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Person

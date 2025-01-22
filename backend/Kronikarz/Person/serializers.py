@@ -40,7 +40,7 @@ class PersonSerializer(serializers.ModelSerializer):
         many=True, queryset=File.objects.all(), required=False
     )
     files_details = FileSerializer(source='files', many=True, read_only=True)
-    image_details = ImageSerializer(source='image', read_only=True)
+    image_details = FileSerializer(source='image', read_only=True)
 
     class Meta:
         model = Person
