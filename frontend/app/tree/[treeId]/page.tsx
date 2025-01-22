@@ -3,7 +3,7 @@ import { Tree, TreePerson } from '@/lib/treeInterfaces';
 import { getTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
-import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
+import { Baby, Heart, Loader2, Menu, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
 import { addFileToPerson, createPerson, deleteFile, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
@@ -21,6 +21,7 @@ import { createParenthood, deleteParenthood, updateParenthood } from '@/lib/pare
 import { FileInfo, Person } from '@/lib/personInterfaces';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/lib/authActions';
+import { MenuSheet } from '@/components/MenuSheet';
 
 interface Props {
   params: {
@@ -65,6 +66,7 @@ interface LoadedPageProps {
 }
 
 function LoadedPage({ tree, setTree }: LoadedPageProps) {
+  const [isMenuOpened, setIsMenuOpened] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<TreePerson | null>(null);
   const [selectedRelation, setSelectedRelation] = useState<number | "new" | null>(null);
   const [isRelationsSheetOpened, setRelationsSheetOpened] = useState(false);
@@ -235,6 +237,10 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onParenthoodClick={(p) => !isAnySheetOpened && setSelectedParenthood(p)}
       />
 
+      <Button onClick={() => setIsMenuOpened(true)} variant="outline" size="icon" className='absolute left-8 top-8'>
+        <Menu className="h-4 w-4" />
+      </Button>
+
       <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8'>
         <Baby className="h-4 w-4" />
       </Button>
@@ -244,6 +250,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       <Button onClick={handleAddPerson} disabled={isAnySheetOpened} size="icon" className='absolute right-8 bottom-8'>
         <UserPlus className="h-4 w-4" />
       </Button>
+      
+      <MenuSheet treeName={tree.name} isOpened={isMenuOpened} close={() => setIsMenuOpened(false)} />
 
       <PersonDataSheet
         person={selectedPerson}
