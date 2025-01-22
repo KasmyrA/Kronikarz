@@ -27,12 +27,15 @@ class Surname(models.Model):
 
 class Job(models.Model):
     name = models.CharField(max_length=255)
-    place = models.CharField(max_length=255)
-    from_date = models.CharField(max_length=255)
+    place = models.CharField(max_length=255, null=True, blank=True)
+    from_date = models.CharField(max_length=255, null=True, blank=True)
     untill_date = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} at {self.place}"
+        if self.place:
+            return f"{self.name} at {self.place}"
+        else:
+            return f"{self.name}"
 
 
 # File
@@ -91,7 +94,7 @@ def delete_image_on_model_delete(sender, instance, **kwargs):
 class Person(models.Model):
     tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='people')
     names = models.JSONField()
-    image = models.OneToOneField(Image, on_delete=models.SET_NULL, null=True, blank=True)
+    image = models.OneToOneField(File, on_delete=models.SET_NULL, null=True, blank=True, related_name="image")
     description = models.TextField(null=True, blank=True)
     sex = models.CharField(max_length=1, choices=[('F', 'Female'), ('M', 'Male')], null=True, blank=True)
     birth = models.OneToOneField(EventInLife, related_name='birth', on_delete=models.SET_NULL, null=True)
