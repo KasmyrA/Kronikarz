@@ -1,6 +1,6 @@
 "use client";
 import { Tree, TreePerson } from '@/lib/treeInterfaces';
-import { getTree } from '@/lib/treeActions';
+import { getTree, updateTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Baby, Heart, Loader2, Menu, UserPlus } from 'lucide-react';
@@ -22,6 +22,7 @@ import { FileInfo, Person } from '@/lib/personInterfaces';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/lib/authActions';
 import { MenuSheet } from '@/components/MenuSheet';
+import { TreeNameEditor } from '@/components/TreeNameEditor';
 
 interface Props {
   params: {
@@ -223,6 +224,13 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setSelectedParenthood(null);
   };
 
+  const handleTreeNameChange = async (treeName: string) => {
+    if (treeName === "")  return
+    const updatedTree = await updateTree(tree.id, treeName);
+    if (!updatedTree) return
+    setTree({ ...tree, name: treeName });
+  }
+
   return (
     <>
       <Map
@@ -240,6 +248,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
       <Button onClick={() => setIsMenuOpened(true)} variant="outline" size="icon" className='absolute left-8 top-8'>
         <Menu className="h-4 w-4" />
       </Button>
+
+      <TreeNameEditor treeName={tree.name} onNameChange={handleTreeNameChange}/>
 
       <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8'>
         <Baby className="h-4 w-4" />

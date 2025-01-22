@@ -25,9 +25,10 @@ export async function getTree(id: number): Promise<Tree | undefined> {
   return await resp?.json();
 }
 
-export async function updateTree(tree: Tree): Promise<Tree | undefined> {
+export async function updateTree(treeId: number, name: string): Promise<Tree | undefined> {
   const headers = new Headers()
   headers.append("Content-Type", "application/json");
-  const resp = await authFetch(`${serverAddress}/trees/`, "POST", tree, headers);
+  const uid = getCurrentUserId();
+  const resp = await authFetch(`${serverAddress}/trees/${treeId}/`, "PUT", { uid, name }, headers);
   return await resp?.json();
 }
