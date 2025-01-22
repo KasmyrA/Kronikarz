@@ -38,7 +38,7 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
       ...person,
       names: names.map((n) => n.value),
       surnames: surnames.map((s) => s.value).filter((s) => s.surname.trim() !== ""),
-      jobs: jobs.map((j) => j.value),
+      jobs: jobs.map((j) => j.value).filter((j) => j.name.trim() !== ""),
       sex,
       birth,
       death,
