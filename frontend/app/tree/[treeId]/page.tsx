@@ -117,7 +117,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handlePersonDataSheetDelete = async () => {
     const { id } = selectedPerson!;
-    await deletePerson(id);
+    const resp = await deletePerson(id);
+    if (!resp?.ok)  return
     tree.people = tree.people.filter((p) => p.id !== id);
     tree.relationships = tree.relationships.filter((r) => r.partner1 !== id && r.partner2 !== id);
     tree.parenthoods = tree.parenthoods.filter((p) => p.child !== id && p.father !== id && p.mother !== id);
@@ -184,7 +185,8 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handleRelationshipEditorDelete = async () => {
-    await deleteRelationship(selectedRelation as number);
+    const resp = await deleteRelationship(selectedRelation as number);
+    if (!resp?.ok)  return
     const updatedRelationIndex = tree.relationships.findIndex((r) => r.id === selectedRelation!);
     tree.relationships.splice(updatedRelationIndex, 1);
     setTree({ ...tree });
@@ -197,19 +199,22 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
 
   const handleParenthoodEditorSave = async (parenthood: Parenthood) => {
     if (selectedParenthood === "new") {
-      const newParenthoodData = await createParenthood(parenthood);
+      const newParenthoodData = await createParenthood(parenthood, tree.id);
+      if (!newParenthoodData)  return
       tree.parenthoods.push(newParenthoodData);
     } else {
-      await updateParenthood(parenthood);
+      const newParenthoodData = await updateParenthood(parenthood);
+      if (!newParenthoodData)  return
       const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedParenthood!);
-      tree.parenthoods[updatedParenthoodIndex] = parenthood;
+      tree.parenthoods[updatedParenthoodIndex] = newParenthoodData;
     }
     setTree({ ...tree });
     setSelectedParenthood(null);
   };
 
   const handleParenthoodEditorDelete = async () => {
-    await deleteParenthood(selectedParenthood as number);
+    const resp = await deleteParenthood(selectedParenthood as number);
+    if (!resp?.ok)  return
     const updatedParenthoodIndex = tree.parenthoods.findIndex((r) => r.id === selectedParenthood!);
     tree.parenthoods.splice(updatedParenthoodIndex, 1);
     setTree({ ...tree });

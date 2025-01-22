@@ -10,6 +10,7 @@ import { Card } from "../ui/card";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { getNameSurname, parenthoodTypeToString } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { serverAddress } from "@/lib/authActions";
 
 export interface ParentPicker {
   pickParent: (personId: number) => void;
@@ -105,9 +106,6 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, mother: id}); setParentPicker(null) }
           })}
-          pickParent={parentPicker?.pickParent}
-          people={people}
-          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParentPickerComponent 
@@ -120,9 +118,6 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, father: id}); setParentPicker(null) }
           })}
-          pickParent={parentPicker?.pickParent}
-          people={people}
-          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParentPickerComponent 
@@ -135,9 +130,6 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
             forbiddenParentIds,
             pickParent: (id) => { setParenthood({...parenthood, child: id}); setParentPicker(null) }
           })}
-          pickParent={parentPicker?.pickParent}
-          people={people}
-          forbiddenParentIds={forbiddenParentIds}
         />
 
         <ParenthoodTypePicker
@@ -169,14 +161,11 @@ interface ParentPickerProps {
   isPicking: boolean;
   startPicking: () => void;
   cancelPicking: () => void;
-  pickParent?: (id: number) => void;
-  people: TreePerson[];
-  forbiddenParentIds: number[];
 }
 
-function ParentPickerComponent({ title, person, isPicking, startPicking, cancelPicking, pickParent, people, forbiddenParentIds }: ParentPickerProps) {
+function ParentPickerComponent({ title, person, isPicking, startPicking, cancelPicking }: ParentPickerProps) {
   const image = person?.image ? 
-    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
+    <img src={`${serverAddress}${person.image.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
   const nameSurname = !person ? "Wybierz osobę" : getNameSurname(person);
@@ -197,15 +186,6 @@ function ParentPickerComponent({ title, person, isPicking, startPicking, cancelP
         {nameSurname}
       </h3>
       <Button onClick={onClick} variant={variant} className="w-full">{buttonText}</Button>
-      {isPicking && pickParent && (
-        <div className="mt-4">
-          {people.filter(p => !forbiddenParentIds.includes(p.id)).map(p => (
-            <Button key={p.id} onClick={() => pickParent(p.id)} className="w-full mb-2">
-              {getNameSurname(p)}
-            </Button>
-          ))}
-        </div>
-      )}
     </>
   )
 }
