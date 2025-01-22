@@ -8,7 +8,7 @@ export function personToTreePerson(p: Person): TreePerson {
     name: p.names[0] ?? null,
     surname: p.surnames[0]?.surname ?? null,
     sex: p.sex,
-    image: p.files.find(f => f.id === p.image)?.url ?? null,
+    image: p.image_details,
     birthDate: p.birth?.date ?? "",
     deathDate: p.death?.date ?? "",
     x: p.x,
@@ -53,39 +53,19 @@ export async function deletePerson(id: number) {
   return await authFetch(`${serverAddress}/persons/${id}/`, "DELETE");
 }
 
-export function addFileToPerson(id: number, file: File): Promise<FileInfo> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      toBase64(file)
-        .then((fileUrl) => {
-          const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-          const i = people.findIndex(p => p.id === id);
-          const newFile: FileInfo = {
-            id: getUniqueId(people),
-            name: file.name,
-            url: fileUrl
-          };
-          people[i].files.push(newFile);
-          localStorage.setItem('people', JSON.stringify(people));
-          resolve(newFile);
-        });
-    }, 1000);
-  });
+export async function addFileToPerson(id: number, file: File): Promise<FileInfo | undefined> {
+  const person = await getPerson(id);
+  if (!person) return undefined;
+  const formData = new FormData();
+  formData.append('file', file);
+  const resp = await authFetch(`${serverAddress}/persons/files/`, 'POST', formData, new Headers(), false);
+  const fileInfo: FileInfo | undefined = await resp?.json();
+  if (!fileInfo) return undefined;
+  person.files.push(fileInfo.id);
+  await updatePerson(person);
+  return fileInfo
 }
 
-export function deleteFileFromPerson(id: number, fileId: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const people: PersonWithPosition[] = JSON.parse(localStorage.getItem('people') ?? "[]");
-      const personIndex = people.findIndex(p => p.id === id);
-      if (personIndex === -1) return;
-      const fileIndex = people[personIndex].files.findIndex(f => f.id === fileId);
-      people[personIndex].files.splice(fileIndex, 1);
-      if (people[personIndex].image === fileId) {
-        people[personIndex].image = null;
-      }
-      localStorage.setItem('people', JSON.stringify(people));
-      resolve();
-    }, 1000);
-  });
+export async function deleteFile(fileId: number) {
+  return await authFetch(`${serverAddress}/persons/files/${fileId}/`, "DELETE");
 }

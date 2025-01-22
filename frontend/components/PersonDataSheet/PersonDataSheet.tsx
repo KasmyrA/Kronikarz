@@ -12,10 +12,10 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 interface Props {
   person: TreePerson | null;
   onClose: () => void;
-  onSave: (p: Omit<Person, "files">) => Promise<void>;
+  onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
-  onFileAdd: (f: File) => Promise<FileInfo>;
-  onFileDelete: (f: FileInfo) => Promise<void>;
+  onFileAdd: (f: File) => Promise<FileInfo | undefined>;
+  onFileDelete: (f: FileInfo) => Promise<boolean>;
 }
 
 export function PersonDataSheet({ person, ...callbacks }: Props) {
@@ -52,8 +52,8 @@ interface OpenedSheetProps {
   onClose: () => void;
   onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
-  onFileAdd: (f: File) => Promise<FileInfo>;
-  onFileDelete: (f: FileInfo) => Promise<void>;
+  onFileAdd: (f: File) => Promise<FileInfo | undefined>;
+  onFileDelete: (f: FileInfo) => Promise<boolean>;
 }
 
 function OpenedSheet(props: OpenedSheetProps) {

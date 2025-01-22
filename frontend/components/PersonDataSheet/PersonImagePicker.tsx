@@ -7,42 +7,45 @@ import { isImageFile } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
 import { ChangeEventHandler, useRef } from "react";
+import { serverAddress } from "@/lib/authActions";
 
 interface Props {
-  image: number | null;
+  image: FileInfo | null;
   files: FileInfo[];
-  setImage: (image: number | null) => void;
-  onFileAdd: (f: File) => Promise<FileInfo>;
+  setImage: (image: FileInfo | null) => void;
+  onFileAdd: (f: File) => Promise<FileInfo | undefined>;
 }
 
 export function PersonImagePicker({ image, files, setImage, onFileAdd }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const imageFile = files.find((f) => f.id === image);
-  const personImage = imageFile ? 
-    <img src={imageFile.url} alt="Person image" className="size-full object-cover"/> :
+  const personImage = image ? 
+    <img src={`${serverAddress}${image.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="size-full" />;
 
-  const avaliableImages = files.filter(f => isImageFile(f.name)).map(f => {
+  const avaliableImages = files.filter(f => isImageFile(f.file)).map(f => {
+    const fileName = f.file.split('/').at(-1);
     return (
       <SelectItem key={f.id} value={f.id.toString()}>
         <div className="flex items-center">
-          <img src={f.url} alt="" className="size-7 aspect-square object-cover mr-3" />
-          <span className="text-ellipsis overflow-hidden">{f.name}</span>
+          <img src={`${serverAddress}${f.file}`} alt="" className="size-7 aspect-square object-cover mr-3" />
+          <span className="text-ellipsis overflow-hidden">{fileName}</span>
         </div>
       </SelectItem>
     )
   })
 
   const handleValueChange = (value: string) => {
-    setImage(JSON.parse(value));
+    const imageId : number | null = JSON.parse(value);
+    const image = files.find((f) => f.id === imageId) ?? null;
+    setImage(image);
   }
 
   const handleAddFile: ChangeEventHandler<HTMLInputElement> = async (e) => {
     if (!e.target.files?.length) return;
 
     const newFile = await onFileAdd(e.target.files[0]);
-    setImage(newFile.id);
+    if (newFile) setImage(newFile);
   };
 
   return (
@@ -61,7 +64,7 @@ export function PersonImagePicker({ image, files, setImage, onFileAdd }: Props) 
           </TableRow>
           <TableRow>
             <TableCell>
-              <Select onValueChange={handleValueChange} value={JSON.stringify(image)}>
+              <Select onValueChange={handleValueChange} value={JSON.stringify(image?.id ?? null)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>

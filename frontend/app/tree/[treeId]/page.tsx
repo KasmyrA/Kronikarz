@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Baby, Heart, Loader2, UserPlus } from 'lucide-react';
 import { PersonDataSheet } from '@/components/PersonDataSheet/PersonDataSheet';
 import { Button } from '@/components/ui/button';
-import { addFileToPerson, createPerson, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
+import { addFileToPerson, createPerson, deleteFile, deletePerson, getPerson, personToTreePerson, updatePerson } from '@/lib/personActions';
 
 import { Relationship } from '@/lib/relaionshipInterfaces';
 import { RelationshipsList } from '@/components/RelationshipsSheet/RelationshipsList';
@@ -106,7 +106,6 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonDataSheetSave = async (pers: Person) => {
-    console.log(pers)
     const newPersonData = await updatePerson(pers);
     if (newPersonData) {
       const updatedPersonIndex = tree.people.findIndex((p) => p.id === pers.id);
@@ -132,13 +131,15 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
   };
 
   const handlePersonDataSheetFileDelete = async (f: FileInfo) => {
-    // const { id } = selectedPerson!;
-    // await deleteFileFromPerson(id, f.id);
-    // const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
-    // if (tree.people[updatedPersonIndex].imageUrl === f.url) {
-    //   tree.people[updatedPersonIndex].imageUrl = null;
-    // }
-    // setTree({...tree});
+    const resp = await deleteFile(f.id);
+    if (!resp?.ok)  return false
+    const { id } = selectedPerson!;
+    const updatedPersonIndex = tree.people.findIndex((p) => p.id === id);
+    if (tree.people[updatedPersonIndex].image?.id === f.id) {
+      tree.people[updatedPersonIndex].image = null;
+    }
+    setTree({...tree});
+    return true;
   };
 
   const handlePersonClick = (person: TreePerson) => {

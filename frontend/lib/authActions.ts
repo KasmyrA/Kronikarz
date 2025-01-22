@@ -4,8 +4,8 @@ export const serverAddress = "http://127.0.0.1:8000";
 const refreshTokenKey = "refreshToken";
 const accessTokenKey = "accessToken";
 
-export async function authFetch(url: string, method: string, body?: object, headers = new Headers()) {
-  const bodyString = body ? JSON.stringify(body) : undefined;
+export async function authFetch(url: string, method: string, body?: any, headers = new Headers(), stringifyBody = true) {
+  const bodyString = body && stringifyBody ? JSON.stringify(body) : body;
   const accessToken = localStorage.getItem(accessTokenKey)
   headers.append("Authorization", `Bearer ${accessToken}`);
   if (accessToken) {

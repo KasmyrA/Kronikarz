@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Card } from "@/components/ui/card";
+import { serverAddress } from "@/lib/authActions";
 import { TreePerson } from "@/lib/treeInterfaces";
 import { cn, getNameSurname } from "@/lib/utils";
 import { User } from "lucide-react";
@@ -34,7 +35,7 @@ export function PersonCard({ scale, person, highlight, onDrop, onClick, onDragSt
   }
 
   const personImage = person.image ? 
-    <img src={person.image} alt="Person image" className="size-full object-cover"/> :
+    <img src={`${serverAddress}${person.image.file}`} alt="Person image" className="size-full object-cover"/> :
     <User className="w-full h-full" />;
 
   const birthDeathDate = (person.birthDate || person.deathDate) &&

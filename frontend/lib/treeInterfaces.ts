@@ -1,4 +1,5 @@
 import { Parenthood } from "./parenthoodInterfaces";
+import { FileInfo } from "./personInterfaces";
 import { Relationship } from "./relaionshipInterfaces"
 
 export interface Tree {
@@ -15,7 +16,7 @@ export interface TreePerson {
   name: string | null;
   surname: string | null;
   sex: "F" | "M" | null;
-  image: string | null;
+  image: FileInfo | null;
   birthDate: string;
   deathDate: string;
   x: number;

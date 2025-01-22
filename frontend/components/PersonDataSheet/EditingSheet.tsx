@@ -18,8 +18,8 @@ interface Props {
   onClose: () => void;
   onSave: (p: Person) => Promise<void>;
   onDelete: () => void;
-  onFileAdd: (f: File) => Promise<FileInfo>;
-  onFileDelete: (f: FileInfo) => Promise<void>;
+  onFileAdd: (f: File) => Promise<FileInfo | undefined>;
+  onFileDelete: (f: FileInfo) => Promise<boolean>;
 }
 
 export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onFileDelete }: Props) {
@@ -30,8 +30,8 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
   const [birth, setBirth] = useState(person.birth ?? { date: "", place: "" });
   const [death, setDeath] = useState(person.death ?? { date: "", place: "" });
   const [description, setDescription] = useState(person.description);
-  const [files, setFiles] = useState(person.files);
-  const [image, setImage] = useState(person.image);
+  const [files, setFiles] = useState(person.files_details);
+  const [image, setImage] = useState(person.image_details);
 
   const handleSave = async () => {
     await onSave({
@@ -43,7 +43,8 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
       birth,
       death,
       description,
-      image
+      files: files.map((f) => f.id),
+      image: image?.id ?? null,
     });
   }
 
@@ -51,14 +52,15 @@ export function EditingSheet({ person, onClose, onSave, onDelete, onFileAdd, onF
 
   const handleFileAdd = async (f: File) => {
     const fileInfo = await onFileAdd(f);
-    setFiles([...files, fileInfo]);
+    if (fileInfo) setFiles([...files, fileInfo]);
     return fileInfo;
   };
 
   const handleFileDelete = async (file: FileInfo) => {
-    await onFileDelete(file);
+    const ok = await onFileDelete(file);
+    if (!ok)  return
     setFiles(files.filter(f => f.id !== file.id));
-    if (image === file.id)  setImage(null);
+    if (image?.id === file.id)  setImage(null);
   }
 
   return (
