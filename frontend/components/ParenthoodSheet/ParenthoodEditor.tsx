@@ -96,46 +96,48 @@ function LoadedParenthood({ parenthood, people, parentPicker, setParentPicker, s
   return (
     <>
       <ScrollArea className="flex-1 p-6" type="auto">
-        <ParentPickerComponent 
-          title="Matka"
-          person={mother}
-          isPicking={parentPicker?.parentNumber === 1}
-          cancelPicking={() => setParentPicker(null)}
-          startPicking={() => setParentPicker({
-            parentNumber: 1,
-            forbiddenParentIds,
-            pickParent: (id) => { setParenthood({...parenthood, mother: id}); setParentPicker(null) }
-          })}
-        />
+        <div className="p-1">
+          <ParentPickerComponent 
+            title="Matka"
+            person={mother}
+            isPicking={parentPicker?.parentNumber === 1}
+            cancelPicking={() => setParentPicker(null)}
+            startPicking={() => setParentPicker({
+              parentNumber: 1,
+              forbiddenParentIds,
+              pickParent: (id) => { setParenthood({...parenthood, mother: id}); setParentPicker(null) }
+            })}
+          />
 
-        <ParentPickerComponent 
-          title="Ojciec"
-          person={father}
-          isPicking={parentPicker?.parentNumber === 2}
-          cancelPicking={() => setParentPicker(null)}
-          startPicking={() => setParentPicker({
-            parentNumber: 2,
-            forbiddenParentIds,
-            pickParent: (id) => { setParenthood({...parenthood, father: id}); setParentPicker(null) }
-          })}
-        />
+          <ParentPickerComponent 
+            title="Ojciec"
+            person={father}
+            isPicking={parentPicker?.parentNumber === 2}
+            cancelPicking={() => setParentPicker(null)}
+            startPicking={() => setParentPicker({
+              parentNumber: 2,
+              forbiddenParentIds,
+              pickParent: (id) => { setParenthood({...parenthood, father: id}); setParentPicker(null) }
+            })}
+          />
 
-        <ParentPickerComponent 
-          title="Dziecko"
-          person={child}
-          isPicking={parentPicker?.parentNumber === 3}
-          cancelPicking={() => setParentPicker(null)}
-          startPicking={() => setParentPicker({
-            parentNumber: 3,
-            forbiddenParentIds,
-            pickParent: (id) => { setParenthood({...parenthood, child: id}); setParentPicker(null) }
-          })}
-        />
+          <ParentPickerComponent 
+            title="Dziecko"
+            person={child}
+            isPicking={parentPicker?.parentNumber === 3}
+            cancelPicking={() => setParentPicker(null)}
+            startPicking={() => setParentPicker({
+              parentNumber: 3,
+              forbiddenParentIds,
+              pickParent: (id) => { setParenthood({...parenthood, child: id}); setParentPicker(null) }
+            })}
+          />
 
-        <ParenthoodTypePicker
-          type={parenthood.type}
-          setType={(type) => setParenthood({...parenthood, type})}
-        />
+          <ParenthoodTypePicker
+            type={parenthood.type}
+            setType={(type) => setParenthood({...parenthood, type})}
+          />
+        </div>
 
         <ScrollBar orientation="vertical" />
       </ScrollArea>
