@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Person.models import Person
+from Person.models import Person, File
 from Relationship.models import Relationship
 from Parenthood.models import Parenthood
 from .models import Tree
@@ -90,3 +90,49 @@ class TreeSerializer(serializers.ModelSerializer):
                 Parenthood.objects.create(tree=instance, **parenthood_data)
 
         return instance
+
+
+class SaveTreeSerializer(serializers.ModelSerializer):
+    people = serializers.ListField(write_only=True)
+    relationships = serializers.ListField(write_only=True)
+    parenthoods = serializers.ListField(write_only=True)
+
+    class Meta:
+        model = Tree
+        fields = ['uid', 'id', 'name', 'people', 'relationships', 'parenthoods']
+
+    def get_people(self, obj):
+        people = obj.people.all()
+        serializer = PersonSerializer(people, many=True, context={'tree': obj})
+        return serializer.data
+
+    def get_relationships(self, obj):
+        relationships = obj.relationships.all()
+        return RelationshipSerializer(relationships, many=True).data
+
+    def create(self, validated_data):
+        people_data = validated_data.pop('people', [])
+        relationships_data = validated_data.pop('relationships', [])
+        parenthoods_data = validated_data.pop('parenthoods', [])
+        tree = Tree.objects.create(**validated_data)
+
+        person_instances = []
+        for person_data in people_data:
+            person_data['tree'] = tree.id
+            serializer = PersonSerializer(data=person_data)
+            serializer.is_valid(raise_exception=True)
+            person_instances.append(serializer.save())
+
+        for relationship_data in relationships_data:
+            relationship_data['tree'] = tree.id
+            serializer = RelationshipSerializer(data=relationship_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        for parenthood_data in parenthoods_data:
+            parenthood_data['tree'] = tree.id
+            serializer = ParenthoodSerializer(data=parenthood_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+        return tree

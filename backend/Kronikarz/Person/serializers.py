@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
 from .models import Person, EventInLife, Surname, Job, File, Image
+from Tree.models import Tree
 
 class EventInLifeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,6 +33,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    tree = serializers.PrimaryKeyRelatedField(queryset=Tree.objects.all())
     birth = EventInLifeSerializer()
     death = EventInLifeSerializer(required=False)
     surnames = SurnameSerializer(many=True)
