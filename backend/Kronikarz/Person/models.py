@@ -4,6 +4,8 @@ from Tree.models import Tree
 from django.db.models.signals import pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 import os
+from django.test import RequestFactory
+from django.urls import reverse
 
 class EventInLife(models.Model):
     date = models.CharField(max_length=255, null=True, blank=True)
@@ -91,6 +93,7 @@ def delete_image_on_model_delete(sender, instance, **kwargs):
     if instance.image and os.path.isfile(instance.image.path):
         os.remove(instance.image.path)
 
+
 class Person(models.Model):
     tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name='people')
     names = models.JSONField()
@@ -110,15 +113,20 @@ class Person(models.Model):
         surnames_str = " ".join([surname.surname for surname in self.surnames.all()])
         return f"{names_str} {surnames_str}".strip()
     
+    def delete_related_objects(self):
+        if self.birth:
+            self.birth.delete()
+        if self.death:
+            self.death.delete()
+        if self.image:
+            self.image.delete()
+        for surname in self.surnames.all():
+            surname.delete()
+        for job in self.jobs.all():
+            job.delete()
+        for file in self.files.all():
+            file.delete()
 
-@receiver(post_delete, sender=Person)
-def delete_related_objects(sender, instance, **kwargs):
-    if instance.birth:
-        instance.birth.delete()
-    if instance.death:
-        instance.death.delete()
-    instance.surnames.all().delete()
-    instance.jobs.all().delete()
-    instance.files.all().delete()
-    if instance.image:
-        instance.image.delete()
+    def delete(self, *args, **kwargs):
+        self.delete_related_objects()
+        super().delete(*args, **kwargs)
