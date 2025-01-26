@@ -45,4 +45,6 @@ To test the endpoints and generate report use the following command
 
 pytest Authorizationtest.py --junitxml=C:\test\out_report.xml
 
-the report will be generated in test folder on C: drive, if you want the report to generate to different location, edit the junitxml pathzsed
+the report will be generated in test folder on C: drive, if you want the report to generate to different location, edit the junitxml path
+
+you also need to include new files and existing objects in order to create the new person, parenthoods, relationships for the purpose of testing
