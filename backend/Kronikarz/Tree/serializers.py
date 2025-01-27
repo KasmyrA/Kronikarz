@@ -114,6 +114,29 @@ class SaveTreeSerializer(serializers.ModelSerializer):
         parenthoods = obj.parenthoods.all()
         return ParenthoodSerializer(parenthoods, many=True).data
 
+    
+class ImportTreeSerializer(serializers.ModelSerializer):
+    people = serializers.ListField(write_only=True)
+    relationships = serializers.ListField(write_only=True)
+    parenthoods = serializers.ListField(write_only=True)
+
+    class Meta:
+        model = Tree
+        fields = ['uid', 'id', 'name', 'people', 'relationships', 'parenthoods']
+
+    def get_people(self, obj):
+        people = obj.people.all()
+        serializer = PersonSerializer(people, many=True, context={'tree': obj})
+        return serializer.data
+
+    def get_relationships(self, obj):
+        relationships = obj.relationships.all()
+        return RelationshipSerializer(relationships, many=True).data
+    
+    def get_parenthoods(self, obj):
+        parenthoods = obj.parenthoods.all()
+        return ParenthoodSerializer(parenthoods, many=True).data
+
     def create(self, validated_data):
         people_data = validated_data.pop('people', [])
         relationships_data = validated_data.pop('relationships', [])

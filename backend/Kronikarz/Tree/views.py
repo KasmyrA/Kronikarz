@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse, HttpResponse
 from .models import Tree
-from .serializers import TreeSerializer, SaveTreeSerializer
+from .serializers import TreeSerializer, SaveTreeSerializer, ImportTreeSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
@@ -98,7 +98,7 @@ class ImportDataView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = SaveTreeSerializer(data=data)
+        serializer = ImportTreeSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({"success": "Data imported successfully"}, status=status.HTTP_201_CREATED)
