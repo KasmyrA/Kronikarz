@@ -25,3 +25,15 @@
 .map-scrollbar>div {
   @apply bg-muted-foreground;
 }
+
+@media print {
+  .map {
+    scale: var(--print-map-scale);
+    margin: calc(var(--print-vertical-margin) + var(--map-height) * (var(--print-map-scale) - 1) / 2) calc(var(--print-horizontal-margin) + var(--map-width) * (var(--print-map-scale) - 1) / 2);
+  }
+
+  @page {
+    margin: 0;
+    size: A4 landscape;
+  }
+}

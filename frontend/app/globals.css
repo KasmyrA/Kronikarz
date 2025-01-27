@@ -16,6 +16,12 @@ main {
   padding-bottom: 4rem; /* Adjust based on footer height */
 }
 
+@media print {
+  .hide-on-print {
+    display: none;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

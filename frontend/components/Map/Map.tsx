@@ -10,6 +10,8 @@ import { RelationshipConnection } from '@/components/Map/RelationshipConnection/
 import { ParenthoodConnection } from '@/components/Map/ParenthoodConnection/ParenthoodConnection';
 import { TreePerson } from '@/lib/treeInterfaces';
 
+const printPageWidth = 1140
+const printPageHeight = 780
 const scaleStep = 0.05;
 const scaleMin = 0.5;
 const scaleMax = 1.5;
@@ -29,6 +31,7 @@ interface Props {
 
 export interface MapHandle {
   getViewMiddlePosition: () => { x: number, y: number };
+  setPrintVariables: () => void;
 }
 
 export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHighlights, relationships, parenthoods, onPersonClick, onPersonDrop, onRelationshipClick, onParenthoodClick }, ref) {
@@ -80,9 +83,28 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
           x: (mapContainer.scrollLeft + (mapContainer.clientWidth - mapSize.width) / 2) / scale,
           y: (mapContainer.scrollTop + (mapContainer.clientHeight - mapSize.height) / 2) / scale,
         };
+      },
+
+      setPrintVariables: () => {
+        const mapElement = mapRef.current!;
+        const horizontalScale = printPageWidth / mapElement.clientWidth;
+        const verticalScale = printPageHeight / mapElement.clientHeight;
+        let scale = 0, verticalMargin = 0, horizontalMargin = 0;
+        
+        if (horizontalScale < verticalScale) {
+          scale = horizontalScale;
+          verticalMargin = (printPageHeight - mapElement.clientHeight * horizontalScale) / 2;
+        } else {
+          scale = verticalScale;
+          horizontalMargin = (printPageWidth - mapElement.clientWidth * verticalScale) / 2;
+        }
+    
+        mapElement.style.setProperty('--print-map-scale', scale.toString());
+        mapElement.style.setProperty('--print-vertical-margin', `${verticalMargin}px`);
+        mapElement.style.setProperty('--print-horizontal-margin', `${horizontalMargin}px`);
       }
     }
-  })
+  });
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Prevent dragging when clicking on person card
@@ -167,7 +189,9 @@ export const Map = forwardRef<MapHandle, Props>(function Map ({ people, peopleHi
         id: -1,
         kind: RelationshipKind.UNFORMAL,
         partner1: p.mother,
-        partner2: p.father
+        partner2: p.father,
+        from_date: "",
+        untill_date: ""
       };
       return (
         <RelationshipConnection

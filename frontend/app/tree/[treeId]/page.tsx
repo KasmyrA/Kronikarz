@@ -231,6 +231,14 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     setTree({ ...tree, name: treeName });
   }
 
+  const printPage = () => {
+    setIsMenuOpened(false);
+    setTimeout(() => {
+      mapRef.current?.setPrintVariables();
+      window.print();
+    }, 500)
+  }
+
   return (
     <>
       <Map
@@ -245,30 +253,34 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         onParenthoodClick={(p) => !isAnySheetOpened && setSelectedParenthood(p)}
       />
 
-      <div className="absolute left-8 bottom-8 flex items-center justify-center space-x-2 pointer-events-none">
+      <div className="absolute left-8 bottom-8 flex items-center justify-center space-x-2 pointer-events-none hide-on-print">
         <BookOpen className="size-8" />
         <span className="text-4xl font-semibold tracking-tight">
           Kronikarz
         </span>
       </div>
 
-      <Button onClick={() => setIsMenuOpened(true)} variant="outline" size="icon" className='absolute left-8 top-8'>
+      <Button onClick={() => setIsMenuOpened(true)} variant="outline" size="icon" className='absolute left-8 top-8 hide-on-print'>
         <Menu className="h-4 w-4" />
       </Button>
 
       <TreeNameEditor treeName={tree.name} onNameChange={handleTreeNameChange}/>
 
-      <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8'>
+      <Button onClick={() => setParenthoodSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-40 bottom-8 hide-on-print'>
         <Baby className="h-4 w-4" />
       </Button>
-      <Button onClick={() => setRelationsSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-24 bottom-8'>
+      <Button onClick={() => setRelationsSheetOpened(true)} disabled={isAnySheetOpened} size="icon" className='absolute right-24 bottom-8 hide-on-print'>
         <Heart className="h-4 w-4" />
       </Button>
-      <Button onClick={handleAddPerson} disabled={isAnySheetOpened} size="icon" className='absolute right-8 bottom-8'>
+      <Button onClick={handleAddPerson} disabled={isAnySheetOpened} size="icon" className='absolute right-8 bottom-8 hide-on-print'>
         <UserPlus className="h-4 w-4" />
       </Button>
       
-      <MenuSheet treeName={tree.name} isOpened={isMenuOpened} close={() => setIsMenuOpened(false)} />
+      <MenuSheet
+        isOpened={isMenuOpened}
+        close={() => setIsMenuOpened(false)}
+        print={printPage}
+      />
 
       <PersonDataSheet
         person={selectedPerson}

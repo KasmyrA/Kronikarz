@@ -27,7 +27,7 @@ export function TreeNameEditor({ treeName, onNameChange}: Props) {
   }
 
   return (
-    <div className='flex p-2 bg-white border-input border rounded-md absolute left-20 top-8'>
+    <div className='flex p-2 bg-white border-input border rounded-md absolute left-20 top-8 hide-on-print'>
       {isEditing ?
         <Input className='w-32 h-6' value={editedName} onChange={(e) => setEditedName(e.target.value)} /> :
         <p className='w-32 ml-1 my-[2px] text-sm'>{treeName}</p>
