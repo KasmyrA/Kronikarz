@@ -1,14 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { ChangeEventHandler, useEffect, useRef, useState } from "react"
 import { Card, CardHeader, CardFooter, CardTitle, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/authActions";
 import { Header } from "@/components/Header";
 import { Tree } from "@/lib/treeInterfaces";
-import { addTree, deleteTree, getTreeList } from "@/lib/treeActions";
+import { addTree, deleteTree, getTreeList, importTree } from "@/lib/treeActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export default function TreeList() {
       }
 
       const t = await getTreeList();
-      setTrees(t);
+      setTrees(t?.reverse());
     }
     fetchTrees()
   }, [router])
@@ -82,11 +82,19 @@ function LoadedTreeList({ trees, setTrees }: LoadedTreeListProps) {
     };
   }
 
+  const handleTreeImport = async (f: File) => {
+    await importTree(f);
+    const t = await getTreeList();
+    if (!t) return;
+    setTrees(t.reverse());
+  }
+
   return (
     <>
       <Header isLoggedIn={true} />
       <div className="flex-1 p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
         <NewTreeCard onAddClick={handleTreeAdd} />
+        <ImportTreeCard onImport={handleTreeImport} />
         {treeCards}
       </div>
     </>
@@ -115,6 +123,41 @@ function NewTreeCard({ onAddClick }: NewTreeCardProps) {
       <CardFooter className="flex justify-end space-x-2">
         <Button onClick={() => {onAddClick(name); setName("")}} disabled={name.length === 0}>
           Dodaj
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
+interface ImportTreeCardProps {
+  onImport: (f: File) => void;
+} 
+
+function ImportTreeCard({ onImport }: ImportTreeCardProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleImport: ChangeEventHandler<HTMLInputElement> = async (e) => {
+    if (!e.target.files?.length) return;
+
+    onImport(e.target.files[0])
+  };
+
+  return (
+    <Card className="min-h-52 h-min hover:shadow-lg transition-shadow duration-200">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">
+          Importuj drzewo
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <p className="my-2">Wybierz drzewo by je zaimportować</p>
+      </CardContent>
+
+      <CardFooter className="flex justify-end space-x-2">
+        <input type="file" accept="application/JSON" className="hidden" ref={inputRef} onChange={handleImport} />
+        <Button onClick={() => inputRef.current?.click()}>
+          Wybierz plik
         </Button>
       </CardFooter>
     </Card>

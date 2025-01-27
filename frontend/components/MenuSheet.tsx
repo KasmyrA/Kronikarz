@@ -10,9 +10,10 @@ interface Props {
   isOpened: boolean;
   close: () => void;
   print: () => void;
+  exportJson: () => void;
 }
 
-export function MenuSheet({ isOpened, close, print }: Props) {
+export function MenuSheet({ isOpened, close, print, exportJson }: Props) {
   return (
     <Sheet open={isOpened} onOpenChange={(o) => !o && close()}>
       <SheetContent className="flex flex-col px-0 w-96" side="left">
@@ -40,7 +41,7 @@ export function MenuSheet({ isOpened, close, print }: Props) {
             Drukuj
           </Button>
 
-          <Button variant="outline" className="w-full mb-2">
+          <Button onClick={exportJson} variant="outline" className="w-full mb-2">
             Eksportuj do pliku json
           </Button>
 

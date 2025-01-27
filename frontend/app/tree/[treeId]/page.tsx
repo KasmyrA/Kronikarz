@@ -1,6 +1,6 @@
 "use client";
 import { Tree, TreePerson } from '@/lib/treeInterfaces';
-import { getTree, updateTree } from '@/lib/treeActions';
+import { exportTree, getTree, updateTree } from '@/lib/treeActions';
 import { HighlightData, Map, MapHandle } from '../../../components/Map/Map';
 import { useEffect, useRef, useState } from 'react';
 import { Baby, BookOpen, Heart, Loader2, Menu, UserPlus } from 'lucide-react';
@@ -239,6 +239,18 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
     }, 500)
   }
 
+  const exportJson = async () => {
+    const data = await exportTree(tree.id)
+    if (!data) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(data);
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", tree.name + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
   return (
     <>
       <Map
@@ -280,6 +292,7 @@ function LoadedPage({ tree, setTree }: LoadedPageProps) {
         isOpened={isMenuOpened}
         close={() => setIsMenuOpened(false)}
         print={printPage}
+        exportJson={exportJson}
       />
 
       <PersonDataSheet

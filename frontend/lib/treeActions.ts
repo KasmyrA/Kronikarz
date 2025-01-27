@@ -32,3 +32,16 @@ export async function updateTree(treeId: number, name: string): Promise<Tree | u
   const resp = await authFetch(`${serverAddress}/trees/${treeId}/`, "PUT", { uid, name }, headers);
   return await resp?.json();
 }
+
+export async function exportTree(id: number): Promise<string | undefined> {
+  const resp = await authFetch(`${serverAddress}/trees/export/${id}/`, "GET");
+  return await resp?.text();
+}
+
+export async function importTree(file: File): Promise<Tree | undefined> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const resp = await authFetch(`${serverAddress}/trees/import/`, 'POST', formData, new Headers(), false);
+  const tree: Tree | undefined = await resp?.json();
+  return tree
+}

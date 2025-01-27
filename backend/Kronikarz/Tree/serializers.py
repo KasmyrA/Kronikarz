@@ -93,9 +93,9 @@ class TreeSerializer(serializers.ModelSerializer):
 
 
 class SaveTreeSerializer(serializers.ModelSerializer):
-    people = serializers.ListField(write_only=True)
-    relationships = serializers.ListField(write_only=True)
-    parenthoods = serializers.ListField(write_only=True)
+    people = serializers.SerializerMethodField()
+    relationships = serializers.SerializerMethodField()
+    parenthoods = serializers.SerializerMethodField()
 
     class Meta:
         model = Tree
@@ -109,6 +109,10 @@ class SaveTreeSerializer(serializers.ModelSerializer):
     def get_relationships(self, obj):
         relationships = obj.relationships.all()
         return RelationshipSerializer(relationships, many=True).data
+    
+    def get_parenthoods(self, obj):
+        parenthoods = obj.parenthoods.all()
+        return ParenthoodSerializer(parenthoods, many=True).data
 
     def create(self, validated_data):
         people_data = validated_data.pop('people', [])
