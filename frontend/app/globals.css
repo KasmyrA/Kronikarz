@@ -2,11 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  height: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #4444ff75 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  margin: 0;
+}
+
 body {
   font-family: 'Poppins', Arial, Helvetica, sans-serif;
-  background: linear-gradient(180deg, #ffffff 0%, #4444ff75 100%);
   color: #333;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -15,6 +22,8 @@ main {
   flex: 1;
   padding-bottom: 4rem; /* Adjust based on footer height */
 }
+
+
 
 @media print {
   .hide-on-print {
