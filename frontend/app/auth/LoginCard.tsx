@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { login } from "@/lib/authActions"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { ErrorMessage } from "@/components/ui/ErrorMessage"
 
 export function LoginCard() {
   const router = useRouter();
@@ -20,20 +21,35 @@ export function LoginCard() {
   const [error, setError] = useState("");
 
   const handleLoginClick = async () => {
+    setError("")
+
+    if (!username || !password) {
+      setError("Aby się zalogować, musisz podać nazwę użytkownika i hasło")
+      return
+    }
+
     try {
-      const user = await login(username, password);
-      console.log(user)
+      const user = await login(username, password)
       if (!user) {
-        setError("Nieznany błąd logowania");
+        setError("Nie udało się zalogować. Sprawdź, czy podane dane są prawidłowe")
       }
       else if (!("id" in user)) {
-        setError(JSON.stringify(user));
+        if (typeof user === 'string') {
+          if (user.includes("credentials")) {
+            setError("Nieprawidłowa nazwa użytkownika lub hasło. Spróbuj ponownie")
+          } else {
+            setError("Przepraszamy, wystąpił problem z logowaniem. Spróbuj ponownie za chwilę")
+          }
+        } else {
+          setError("Przepraszamy, coś poszło nie tak. Spróbuj ponownie później")
+        }
       }
       else {
-        router.replace("/tree");
+        router.replace("/tree")
       }
     } catch (err) {
-      setError(JSON.stringify(err));
+      console.error("Login error:", err)
+      setError("Przepraszamy, wystąpił nieoczekiwany problem. Spróbuj ponownie za chwilę")
     }
   }
 
@@ -45,13 +61,24 @@ export function LoginCard() {
       <CardContent className="space-y-2">
         <div className="space-y-1">
           <Label htmlFor="username">Nazwa użytkownika</Label>
-          <Input id="username" placeholder="Podaj nazwę użytkownika" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <Input 
+            id="username" 
+            placeholder="Podaj nazwę użytkownika" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
         <div className="space-y-1">
           <Label htmlFor="password">Hasło</Label>
-          <Input id="password" type="password" placeholder="Podaj hasło" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input 
+            id="password" 
+            type="password" 
+            placeholder="Podaj hasło" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-        <p className="text-destructive">{error}</p>
+        {error && <ErrorMessage message={error} />}
       </CardContent>
       <CardFooter>
         <Button className="w-full" onClick={handleLoginClick}>Zaloguj</Button>

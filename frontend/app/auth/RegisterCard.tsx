@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { register } from "@/lib/authActions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ErrorMessage } from "@/components/ui/ErrorMessage"
 
 export function RegisterCard() {
 	const router = useRouter();
@@ -38,65 +39,60 @@ export function RegisterCard() {
   };
 
   const handleRegisterClick = async () => {
-    setError("");
+    setError("")
 
-   
-
+    if (!email) {
+      setError("Podaj swój adres email, aby odzyskiwanie konta po zapomnieniu hasła działało")
+      return
+    }
     if (!validateEmail(email)) {
-      setError("Podany email jest nieprawidłowy");
-      return;
+      setError("Podany adres email wydaje się nieprawidłowy. Sprawdź, czy nie ma literówek")
+      return
     }
 
     if (!validateUsername(username)) {
-      setError("Nazwa użytkownika musi mieć od 3 do 20 znaków i może zawierać tylko litery, cyfry, podkreślenia i myślniki");
-      return;
+      setError("Nazwa użytkownika powinna mieć 3-20 znaków i może zawierać tylko litery i cyfry")
+      return
     }
 
-    
     if (!validatePassword(password1)) {
-      setError("Hasło musi mieć co najmniej 8 znaków i zawierać wielką literę, małą literę oraz cyfrę");
-      return;
+      setError("Hasło powinno mieć minimum 8 znaków i zawierać: wielką literę, małą literę oraz cyfrę")
+      return
     }
-	
-	if (password1 !== password2) {
-		setError("Hasła nie są jednakowe");
-		return;
-	  }
-  
 
-	if (!email || !username || !password1 || !password2) {
-		setError("Wszystkie pola muszą być wypełnione");
-		return;
-	  }
+    if (password1 !== password2) {
+      setError("Podane hasła różnią się od siebie. Upewnij się, że wpisałeś to samo hasło dwa razy")
+      return
+    }
 
     try {
-      const user = await register(email, username, password1);
+      const user = await register(email, username, password1)
       if (!user) {
-        setError("Wystąpił błąd podczas rejestracji. Spróbuj ponownie później.");
+        setError("Przepraszamy, nie udało się utworzyć konta. Spróbuj ponownie później")
       }
       else if (!("id" in user)) {
         if (typeof user === 'string') {
           if (user.includes("duplicate key")) {
             if (user.includes("username")) {
-              setError("Ta nazwa użytkownika jest już zajęta");
+              setError("Ta nazwa użytkownika jest już zajęta. Wybierz inną nazwę")
             } else if (user.includes("email")) {
-              setError("Ten email jest już zarejestrowany");
+              setError("Ten email jest już zarejestrowany. Może chcesz się zalogować?")
             } else {
-              setError("Podane dane są już zajęte");
+              setError("Podane dane są już używane przez inne konto")
             }
           } else {
-            setError(`Błąd rejestracji: ${user}`);
+            setError("Przepraszamy, wystąpił problem podczas rejestracji. Spróbuj ponownie za chwilę")
           }
         } else {
-          setError("Nieprawidłowa odpowiedź z serwera");
+          setError("Przepraszamy, coś poszło nie tak. Spróbuj ponownie później")
         }
       }
       else {
-        router.replace("/tree");
+        router.replace("/tree")
       }
     } catch (err) {
-      console.error("Registration error:", err);
-      setError("Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.");
+      console.error("Registration error:", err)
+      setError("Przepraszamy, wystąpił nieoczekiwany problem. Spróbuj ponownie za chwilę")
     }
   }
 
@@ -122,7 +118,7 @@ export function RegisterCard() {
 					<Label htmlFor="repeatPassword">Powtórz hasło</Label>
 					<Input id="repeatPassword" type="password" placeholder="Powtórz hasło" value={password2} onChange={(e) => setPassword2(e.target.value)}/>
 				</div>
-				<p className="text-destructive">{error}</p>
+				{error && <ErrorMessage message={error} />}
 			</CardContent>
 			<CardFooter>
 				<Button className="w-full" onClick={handleRegisterClick}>Zarejestruj</Button>
