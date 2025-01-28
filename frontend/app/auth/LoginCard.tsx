@@ -41,7 +41,7 @@ export function LoginCard() {
             setError("Przepraszamy, wystąpił problem z logowaniem. Spróbuj ponownie za chwilę")
           }
         } else {
-          setError("Przepraszamy, coś poszło nie tak. Spróbuj ponownie później")
+          setError("Nieprawidłowa nazwa użytkownika lub hasło. Sprawdź czy się nie pomyliłeś lub utwórz nowe kąto")
         }
       }
       else {
