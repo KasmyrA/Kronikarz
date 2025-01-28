@@ -254,3 +254,5 @@ paket-files/
 .venv/
 
 db.sqlite3
+backend/Kronikarz/db.sqlite3
+backend/Kronikarz/db.sqlite3
