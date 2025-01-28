@@ -1,11 +1,28 @@
 # Projekt na zaliczenie przedmiotu Inżynieria Oprogramowania
 
 ## Prerequisites
-- Install dependencies:
+- Install dependencies for backend:
   ```bash
-  pip install -r requirements.txt for Python
+  cd backend
+  pip install -r requirements.txt
+  ```
+- Install dependencies for frontend:
+  ```bash
+  cd frontend
+  npm ci
   ```
 
+## Run app
+- Run backend:
+  ```bash
+  cd backend/Kronikarz
+  python manage.py runserver
+  ```
+- Run frontend:
+  ```bash
+  cd frontend
+  npm run dev
+  ```
 
 ## Tests
 
