@@ -6,6 +6,9 @@ import { Header } from "@/components/Header";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/authActions";
+import Image from 'next/image';
+import drzewa from '@/public/drzewa.png';
+import widokDrzew from '@/public/zestawienie rodzicielstwa.png';
 
 export default function Home() {
   const router = useRouter();
@@ -78,11 +81,17 @@ export default function Home() {
         </CenteredCard>
       </div>
 
-      <h2 className="text-2xl font-semibold mt-12">Krótka i ładna prezentacja funkcjonalności ze screenshotami</h2>
+      <h2 className="text-2xl font-semibold mt-12">Funkcjonalność:</h2>
       <div className="flex justify-center space-x-4 mt-6">
-        <img src="/screenshots/screenshot1.png" alt="Screenshot 1" className="w-1/3 rounded-lg shadow-lg" />
-        <img src="/screenshots/screenshot2.png" alt="Screenshot 2" className="w-1/3 rounded-lg shadow-lg" />
-        <img src="/screenshots/screenshot3.png" alt="Screenshot 3" className="w-1/3 rounded-lg shadow-lg" />
+        <Image
+          src={widokDrzew}
+          alt="Przykładowe drzewa"
+          className="w-1/2 rounded-lg shadow-lg"
+          />
+        <Image 
+          src={drzewa} 
+          alt="Przykładowe zestawienie rodzicielstwa" 
+          className="w-1/2 rounded-lg shadow-lg" />
       </div>
     </main>
     <Footer />
